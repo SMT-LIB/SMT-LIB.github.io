@@ -1,2 +1,2 @@
 # website
-Sources of www.SMT-LIB.org
+This repo will contain sources of www.SMT-LIB.org
