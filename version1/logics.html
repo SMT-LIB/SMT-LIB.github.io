@@ -1,0 +1,368 @@
+<html>
+<head>
+<title>SMT-LIB Logics (Version 1)</title>
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+</head>
+
+<body class="frocos">
+
+
+<h2>SMT-LIB Logics (Version 1)</h2>
+
+<p>
+<b>Note.</b> The theories below are superseded by those defined in Version 2 of SMT-LIB.
+They are listed here for historical purposes.
+<em>Their use is deprecated.</em>
+</p>
+
+<p>
+Click on the logic's name to see its declaration in SMT-LIB format. 
+</p>
+
+<dl>
+
+<dt>
+<a href="logics/AUFLIA.smt">
+<b>
+AUFLIA:
+</b>
+</a>
+</dt>
+<dd>
+Closed linear formulas over the theory of integer arrays
+with free sort, function and predicate symbols.
+<br>
+<br>
+</dd>
+
+<dt>
+<a href="logics/AUFLIRA.smt">
+<b>
+AUFLIRA:
+</b>
+</a>
+</dt>
+<dd>
+Closed linear formulas with free function and predicate symbols 
+over a theory of arrays of arrays of integer index and real value.
+<br>
+<br>
+</dd>
+
+<dt>
+<a href="logics/AUFNIRA.smt">
+<b>
+AUFNIRA:
+</b>
+</a>
+</dt>
+<dd>
+Closed formulas with free function and predicate symbols 
+over a theory of arrays of arrays of integer index and real value.
+<br>
+<br>
+</dd>
+
+<dt>
+<a href="logics/LIA.smt">
+<b>
+LIA:
+</b>
+</a>
+</dt>
+<dd>
+Closed linear formulas over linear integer arithmetic.
+<br>
+<br>
+</dd>
+
+
+<dt>
+<a href="logics/LRA.smt">
+<b>
+LRA:
+</b>
+</a>
+</dt>
+<dd>
+Closed linear formulas in linear real arithmetic.
+<br>
+<br>
+</dd>
+
+<dt>
+<a href="logics/QF_A.smt">
+<b>
+QF_A:
+</b>
+</a>
+</dt>
+<dd>
+Closed quantifier-free formulas over the theory of arrays without extensionality.
+<br>
+<br>
+</dd>
+
+<dt>
+<a href="logics/QF_AUFBV.smt">
+<b>
+QF_AUFBV:
+</b>
+</a>
+</dt>
+<dd>
+Closed quantifier-free formulas over the theory of bitvectors and bitvector arrays with free function and predicate symbols.
+<br>
+<br>
+</dd>
+
+<dt>
+<a href="logics/QF_AUFLIA.smt">
+<b>
+QF_AUFLIA:
+</b>
+</a>
+</dt>
+<dd>
+Closed quantifier-free and linear formulas over the theory of integer arrays
+with free sort, function and predicate symbols.
+<br>
+<br>
+</dd>
+
+
+<dt>
+<a href="logics/QF_AX.smt">
+<b>
+QF_AX:
+</b>
+</a>
+</dt>
+<dd>
+Closed quantifier-free formulas over the theory of arrays with extensionality.
+<br>
+<br>
+</dd>
+
+<dt>
+<a href="logics/QF_BV.smt">
+<b>
+QF_BV:
+</b>
+</a>
+</dt>
+<dd>
+Closed quantifier-free formulas over the theory of fixed-size bitvectors.
+<br>
+<br>
+</dd>
+
+<dt>
+<a href="logics/QF_IDL.smt">
+<b>
+QF_IDL:
+</b>
+</a>
+</dt>
+<dd>
+Difference Logic over the integers.
+In essence,
+Boolean combinations of inequations of the form <i>x - y < b</i> 
+where <i>x</i> and <i>y</i> are integer variables and <i>b</i> is an integer constant.
+<br>
+<br>
+</dd>
+
+<dt>
+<a href="logics/QF_LIA.smt">
+<b>
+QF_LIA:
+</b>
+</a>
+</dt>
+<dd>
+Unquantified linear integer arithmetic.
+In essence,
+Boolean combinations of inequations between 
+linear polynomials over integer variables. 
+<br>
+<br>
+</dd>
+
+<!---
+<dt>
+<a href="logics/QF_LIRA.smt">
+<b>
+QF_LIRA:
+</b>
+</a>
+</dt>
+<dd>
+Unquantified mixed real-integer linear arithmetic.
+In essence,
+Boolean combinations of inequalities between linear polinomials over integer and real variables. 
+<br>
+<br>
+</dd>
+-->
+
+<dt>
+<a href="logics/QF_LRA.smt">
+<b>
+QF_LRA:
+</b>
+</a>
+</dt>
+<dd>
+Unquantified linear real arithmetic.
+In essence,
+Boolean combinations of inequations between linear polynomials 
+over real variables. 
+<br>
+<br>
+</dd>
+
+<dt>
+<a href="logics/QF_NIA.smt">
+<b>
+QF_NIA:
+</b>
+</a>
+</dt>
+<dd>
+Unquantified non-linear integer arithmetic.
+In essence,
+Boolean combinations of inequations between 
+polynomials over integer variables,
+with at least one non-linear polynomial.
+<br>
+<br>
+</dd>
+
+<dt>
+<a href="logics/QF_RDL.smt">
+<b>
+QF_RDL:
+</b>
+</a>
+</dt>
+<dd>
+Difference Logic over the reals.
+In essence, 
+Boolean combinations of inequations of the form <i>x - y < b</i> 
+where <i>x</i> and <i>y</i> are real variables and <i>b</i> is a rational constant.
+<br>
+<br>
+</dd>
+
+<dt>
+<a href="logics/QF_UF.smt">
+<b>
+QF_UF:
+</b>
+</a>
+</dt>
+<dd>
+Unquantified formulas built over a signature of uninterpreted sort, 
+function and predicate symbols.
+<br>
+<br>
+</dd>
+
+<dt>
+<a href="logics/QF_UFIDL.smt">
+<b>
+QF_UFIDL:
+</b>
+</a>
+</dt>
+<dd>
+Difference Logic over the integers (in essence) but with uninterpreted sort, function, and predicate symbols.
+<br>
+<br>
+</dd>
+
+<dt>
+<a href="logics/QF_UFBV.smt">
+<b>
+QF_UFBV:
+</b>
+</a>
+</dt>
+<dd>
+Unquantified formulas over bitvectors with uninterpreted function and predicate symbols.
+<br>
+<br>
+</dd>
+
+<dt>
+<a href="logics/QF_UFBV32.smt">
+<b>
+QF_UFBV[32] (now deprecated):
+</b>
+</a>
+</dt>
+<dd>
+Unquantified formulas over bit vectors of size up to 32 bits, with uninterpreted function, and predicate symbols.  This logic remains for historical purposes.  The preferred logic for current use is now one of QF_BV or QF_UFBV.
+<br>
+<br>
+</dd>
+
+<dt>
+<a href="logics/QF_UFLIA.smt">
+<b>
+QF_UFLIA:
+</b>
+</a>
+</dt>
+<dd>
+Unquantified linear integer arithmetic with uninterpreted sort, function, and predicate symbols.
+<br>
+<br>
+</dd>
+
+<dt>
+<a href="logics/QF_UFLRA.smt">
+<b>
+QF_UFLRA:
+</b>
+</a>
+</dt>
+<dd>
+Unquantified linear real arithmetic with uninterpreted sort, function, and predicate symbols.
+<br>
+<br>
+</dd>
+
+<dt>
+<a href="logics/QF_UFNRA.smt">
+<b>
+QF_UFNRA:
+</b>
+</a>
+</dt>
+<dd>
+Unquantified non-linear real arithmetic with uninterpreted sort, function, and predicate symbols.
+<br>
+<br>
+</dd>
+
+<dt>
+<a href="logics/UFNIA.smt">
+<b>
+UFNIA:
+</b>
+</a>
+</dt>
+<dd>
+Non-linear integer arithmetic with uninterpreted sort, function, and predicate symbols.
+<br>
+<br>
+</dd>
+
+
+</dl>
+
+
+</body>
+</html>

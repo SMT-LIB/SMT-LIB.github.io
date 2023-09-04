@@ -1,0 +1,579 @@
+(define-module Strings (
+  (set-info :smt-lib-version 3.0)
+  (set-info :smt-lib-release "2020-XX-XX")
+  (set-info :written-by "Pascal Fontaine and Cesare Tinelli")
+  (set-info :date "2020-07-01")
+  (set-info :last-updated "2020-07-01")
+  (set-info :update-history
+   "TODO.
+   "
+    )
+  (set-info :notes
+    "This is a theory of character strings and regular expressions over an
+     alphabet consisting of Unicode characters. It is not meant to be used in
+     isolation but in combination with Ints, the theory of integer numbers.")
+
+  (import (Core))
+  (open Core)
+
+  (set-info :notes
+    "To define some of the semantics below, we use the following mathematical
+     notation:
+
+     - The semantic interpretation of terms of type String and Lan is provided
+       by the function ⟦_⟧ used in the definition below for the builtin
+       operators.
+
+     - UC denotes the set of all integers from 0x000000 to 0xFFFFFF,
+       representing a superset of the set of all code points for Unicode
+       characters at the time of this writing. 
+
+     - UC* is the set of all words, in the sense of universal algebra, 
+       with juxtaposition denoting the concatenation operator here. 
+       Note: Character positions in a word are numbered starting at 0.
+
+     - If w is a word in UC*, |w| denotes the number of characters, i.e., 
+       elements, in w.")
+
+
+  ;------------------
+  ; External symbols
+  ;------------------
+
+  ; Int
+  (declare-type Int () :extern Ints::Int)
+
+  ; (BitVec m)
+  (declare-type BitVec ((! Int :var m :syntax ⟨int_value⟩ :restrict (> m 0)))
+   :extern FixedSizeBitVectors::BitVec)
+
+  (declare-const ⟨hexadecimal⟩
+    (-> (! Int :var m :syntax ⟨int_value⟩ :restrict (> m 0) :implicit
+         :restrict "m is 4 times the number of hexadecimal digits in the constant") 
+        (BitVec m))
+    :extern FixedSizeBitVectors::⟨hexadecimal⟩)
+
+  ;---------------
+  ; Builtin types
+  ;---------------
+
+  (declare-type String () :builtin
+    "Strings denotes the set of unbounded strings of Unicode characters.
+     Formally, ⟦String⟧ = UC* ")
+
+  (declare-type Lan () :builtin
+    "Lan denotes the set of all languages over Unicode strings.
+     Formally, ⟦Lan⟧ is the powerset of ⟦String⟧. 
+     Each element of ⟦Lan⟧ can be seen as a language with alphabet UC. 
+     Each variable-free term of type Lan denotes a regular language in ⟦Lan⟧.")
+
+  (set-info :notes
+    "There was consensus in the community that having a character type is not
+     really necessary and in fact complicates the theory. So the only way to
+     express characters is to use strings of length 1.")
+
+  ; In string fields below (which are double-quote-delimited) we cannot write
+  ; something like "abc" to denote a string constant, we must use ""abc""
+  ; instead.
+
+  (set-info :notes
+    "Because of SMT-LIB's own escaping conventions, string literals are written 
+     in quadruple quotes, as in ""abc"", in textual fields here.")
+
+  ;-----------
+  ; Constants
+  ;-----------
+
+  ; string constants for _singleton_ strings, 
+  ; i.e., strings consisting of exactly one character 
+
+  (declare-const char
+    (-> (! Int :var m :syntax ⟨int_value⟩ :implicit
+               :restrict (or (= m 4) (= m 8) (= m 12) (= m 16) (= m 20) (= m 24)))
+        (! (BitVec m) :value)
+        String)
+    :builtin
+    "For all h, (char h) denotes a string of length 1 whose only character 
+     is the Unicode character with code point n where n is the (unsigned) 
+     integer represented by h. We identify Unicode characters
+     with their code point, but expressed as a hexadecimal.
+     For instance, 
+     - (char #x2B) denotes the string ""+"" whose only character has code
+       point 0x00002B (PLUS SIGN); 
+     - (char #x27E8) denotes the string ""⟨"" whose only character has code
+       point 0x0027E8 (MATHEMATICAL LEFT ANGLE BRACKET).")
+ 
+  (set-info :notes
+    "The argument of char can have at most 6 (hexadecimal) characters
+     Ex:  (char #xA)  (char #x4E)  (char #x123)  (char #x1BC3D)
+          (char #x01BC3D)")
+
+  (set-info :notes
+    "Because of leading zeros, the same one-character string is denoted  
+     in more than one way. 
+     Example: (char #x2B), (char #x02B), (char #x002B), (char #x0002B)
+              and (char #x00002B)")
+
+  (set-info :notes
+    "The singleton string constants represent a superset of all the Unicode
+     code points (from 0x000000 to 0x10FFFF) at the time of this writing.
+
+     References:
+     - https://www.unicode.org/main.html
+     - http://www.utf8-chartable.de/
+     - https://www.compart.com/en/unicode/")
+
+  (set-info :notes
+    "Rationale for the chosen notation for singleton string constants:
+     Because of their large range, Unicode code points are typically given in
+     hexadecimal notation. Using a hexadecimal directly to denote the
+     corresponding character, however, would create an overloading problem in
+     logics that combine this theory with that of bitvectors since hexadecimals
+     denote bitvectors there.
+     Using them as indices instead avoids this problem.")
+
+  ; String constants
+  (declare-const ⟨string⟩ String
+    :restrict
+    "All double-quote-delimited string literals consisting of printable US ASCII
+     characters, i.e., those with Unicode code point from 0x000020 to 0x00007E.
+     Arbitrary Unicode characters can be represented with _escape sequences_ 
+     which can have one of the following forms 
+      \ud₃d₂d₁d₀
+      \u{d₀}
+      \u{d₁d₀}
+      \u{d₂d₁d₀}
+      \u{d₃d₂d₁d₀}
+      \u{d₄d₃d₂d₁d₀}
+      \u{d₅d₄d₃d₂d₁d₀}
+     where each dᵢ is a hexadecimal digit.
+     This is enough to allow characters from all Unicode planes at the time of 
+     this writing.
+     The restriction to printable US ASCII characters in string constants is for
+     simplicity since that set is universally supported."
+    :builtin
+    "1. The empty string constant """" is interpreted as the empty word ε of UC*.
+
+     2. Each string constant containing a single (printable) US ASCII character
+        is interpreted as the word consisting of the corresponding Unicode
+        character code point.
+      
+        Ex: ⟦""m""⟧ = ⟦(char #x6D)⟧ = 0x00006D
+            ⟦"" ""⟧ = ⟦(char #x20)⟧ = 0x000020
+
+     3. Each string constant of the form ""\ud₃d₂d₁d₀"" where each dᵢ is a
+        hexadecimal digit is interpreted as the word consisting of just the 
+        character with code point 0xd₃d₂d₁d₀
+
+        Ex: ⟦""\u003A""⟧ = ⟦(char #x3A)⟧ = 0x00003A
+
+     4. Each literal of the form ""\u{d₀}"" (resp., ""\u{d₁d₀}"", ""\u{d₂d₁d₀}"",
+        ""\u{d₃d₂d₁d₀}"", ""\u{d₄d₃d₂d₁d₀}"" or ""\u{d₅d₄d₃d₂d₁d₀}""), where each 
+        dᵢ is a hexadecimal digit, is interpreted as the word consisting 
+        of just the character with code point 0xd₀ (resp., 0xd₁d₀, 0xd₂d₁d₀, 
+        0xd₃d₂d₁d₀, 0xd₄d₃d₂d₁d₀, or 0xd₅d₄d₃d₂d₁d₀).
+
+        Ex: ⟦""\u{3A}""⟧ = ⟦(char #x3A)⟧ = 0x00003A
+
+     5. ⟦l⟧ = ⟦l₁⟧⟦l₂⟧  if l does not start with an escape sequence and can be 
+        obtained as the concatenation of a one-character string literal l₁ and
+        a non-empty string literal l₂.
+
+        Ex: ⟦""a\u02C1""⟧ = ⟦""a""⟧⟦""\u02C1""⟧ = 0x000061 0x0002C1
+            ⟦""\u2CA""⟧ = 0x00005C ⟦""u2CXA""⟧        (not an escape sequence)
+            ⟦""\u2CXA""⟧ = 0x00005C ⟦""u2CXA""⟧       (not an escape sequence)
+            ⟦""\u{ACG}A""⟧ = 0x00005C ⟦""u{ACG}A""⟧   (not an escape sequence)
+
+     6. ⟦l⟧ = ⟦l₁⟧⟦l₂⟧  if l can be obtained as the concatenation of string
+        literals l₁ and l₂ where l₁ is an escape sequence and l₂ is non-empty.
+
+        Ex: ⟦""\u02C1a""⟧ = ⟦""\u02C1""⟧⟦""a""⟧ = 0x0002C1 ⟦""a""⟧
+            ⟦""\u{2C}1a""⟧ = ⟦""\u{2C}""⟧⟦""1a""⟧ = 0x00002C ⟦""1a""⟧
+
+     Note: Character positions in a string literal are numbered starting at 0, 
+           with escape sequences treated as a single character – consistently
+           with their semantics.
+
+           Ex.: In ""a\u1234T"", character a is at position 0, the character 
+                corresponding to ""\u1234"" is at position 1, and character T is
+                at position 2.")
+
+  (set-info :notes
+    "Observe that the first form, \ud₃d₂d₁d₀, has exactly 4 hexadecimal digit, 
+     following the common use of this form in some programming languages.
+     Unicode characters outside the range covered by \ud₃d₂d₁d₀ can be
+     represented with the long forms \u{d₄d₃d₂d₁d₀} and \u{d₅d₄d₃d₂d₁d₀}.
+  
+     Also observe that programming language-specific escape sequences, such as
+     \n, \b, \r and so on, are _not_ escape sequences in this theory as they
+     are not fully standard across languages.
+
+     SMT-LIB 2.6 has one escape sequence of its own for string literals. Two
+     double quotes ("") are used to represent the double-quote character within 
+     a string literal such as the one containing this very note. That escape 
+     sequence is at the level of the SMT-LIB frontend of a solver, not at the 
+     level of this theory.")
+
+  ;---------------
+  ; String values
+  ;---------------
+  (define-syntax 
+    ; non-terminals
+    (⟨string_value⟩) 
+    ; production rules
+    ((⟨string_value⟩ ((! ⟨string⟩ :syntax-restrict 
+                                   "Same restriction as for string constants")))))
+ 
+  (define-values () String ⟨string_value⟩)
+
+
+  (set-info :notes
+    "The set of values for String and Lan could be restricted further, to remove
+     some redundancies. For instance, we could disallow leading zeros in escape
+     sequences.
+     For Lan, we could insist on some level of normalization for regular
+     expression values. These restrictions are left to future versions.")
+
+  (set-info :notes
+    "All function symbols in this theory denote *total* functions, i.e., they
+     are fully specified by the theory. This is achieved by returning _error_
+     values for inputs where the intended functions are undefined.
+     Error outputs are always outside of the range of the intended function,
+     so there is no confusion with non-error outputs.")
+
+
+  ;----------------
+  ; Core functions
+  ;----------------
+
+ ; String functions
+
+  ; Strings::++
+  ; String concatenation
+  (declare-const ++ (-> String String String) :builtin
+    " ⟦++⟧ is the word concatenation function."
+    :left-assoc)
+
+  ; Lexicographic ordering
+  (declare-const < (-> String String Bool) :builtin
+    "⟦<⟧(w₁, w₂) is true iff w₁ is smaller than w₂ in the lexicographic 
+     extension to UC* of the standard numerical < ordering over UC.
+
+     Note: The order induced by < corresponds to alphabetical order
+     for strings composed of characters from the alphabet of a western language 
+     such as English:
+     ⟦(< ""a"" ""aardvark"" ""aardwolf"" ... ""zygomorphic"" ""zygotic"")⟧ = true"
+    :chainable)
+
+  ; Functions on languages
+
+  ; String to language injection
+  (declare-const to_lan (-> String Lan) :builtin
+    "⟦to_lan⟧(w) = { w } .
+    ")
+
+  (set-info :notes
+    "Function to_lan allows one to write _symbolic regular expressions_, 
+     e.g., Lan terms with subterms like (to_lan x) where x is a variable. 
+     Such terms have more expressive power than regular expressions. This is 
+     intentional, for future developments.
+     The restriction to actual regular expressions will be imposed in a logic
+     where to_lan will be applicable to string constants only.
+    ")
+
+  ; Language membership
+  (declare-const in (-> String Lan Bool) :builtin
+    "⟦in⟧(w)(L) = true iff w ∈ L .")
+
+  ; Constant denoting the empty set of strings
+  (declare-const empty Lan :builtin
+    "⟦empty⟧ = ∅ .")
+
+  ; Constant denoting the set of all strings 
+  (declare-const univ Lan :builtin
+    "⟦univ⟧ = ⟦String⟧ = UC* .")
+
+  ; Constant denoting the set of all strings of length 1
+  (declare-const allchar Lan :builtin
+    "⟦allchar⟧ = { w ∈ UC* | |w| = 1 } .")
+      
+  ; Language concatenation
+  (declare-const ++ (-> Lan Lan Lan) :builtin
+    "⟦++⟧(L₁)(L₂) = { w₁w₂ | w₁ ∈ L₁ and w₂ ∈ L₂ } ."
+    :left-assoc)
+
+  ; Language union
+  (declare-const union (-> Lan Lan Lan) :builtin
+    "⟦union⟧(L₁)(L₂) = { w | w ∈ L₁ or w ∈ L₂ } ."
+    :left-assoc)
+
+  ; Language intersection
+  (declare-const inter (-> Lan Lan Lan) :builtin
+    "⟦inter⟧(L₁)(L₂) = { w | w ∈ L₁ and w ∈ L₂ } ."
+    :left-assoc)
+
+  ; Kleene Closure
+  (declare-const * (-> Lan Lan) :builtin
+    "⟦*⟧(L) is the smallest subset K of UC* such that
+     1. ε ∈ K
+     2. ⟦++⟧(L)(K) ⊆ K
+    ")
+
+  ;--------------------
+  ; Bridging functions
+  ;--------------------
+
+  ; String length
+  (declare-const len (-> String Int) :builtin
+    "⟦len⟧(w) = |w|  (the number of characters, i.e., elements of UC, in w).")
+
+  (set-info :notes
+    "⟦len⟧(w) is **not** the number of bytes used by some Unicode encoding, such
+     as UTF-8 – that number can be greater than the number of characters. 
+
+     ⟦len(""\u1234"")⟧ is 1 since every escape sequence denotes a single
+     character.")
+
+  ;----------------------
+  ; Additional functions
+  ;----------------------
+
+  ; Reflexive closure of lexicographic ordering
+  (define-const <= (-> String String Bool)
+    (lambda ((x String) (y String)) (or (= x y) (< x y)))
+    :chainable)
+
+  ; Substring
+  ; (substr s i n) evaluates to the longest (unscattered) substring
+  ; of s of length at most n starting at position i.
+  ; It evaluates to the empty string if n is negative or i is not in 
+  ; the interval [0,|s|-1].
+  (declare-const substr (-> String Int Int String) :builtin
+    "⟦substr⟧(w)(m)(n) is the unique word w₂ such that
+       for some words w₁ and w₃
+       - w = w₁w₂w₃ 
+         - |w₁| = m
+         - |w₂| = min(n, |w| - m)  if 0 <= m < |w| and 0 < n
+       - ⟦substr⟧(w, m, n) = ε   otherwise")
+
+  (set-info :notes
+    "The second part of this definition makes ⟦substr⟧ a total function.")
+
+  ; Singleton string containing a character at given position 
+  ; or empty string when position is out of range.
+  ; The leftmost position is 0.
+  (define-const at (-> String Int String)
+    (lambda ((x String) (n Int)) (substr x n 1)))
+
+  ; First string is a prefix of second one.
+  ; (prefixof s t) is true iff s is a prefix of t.
+  (define-const prefixof (-> String String Bool)
+    (lambda ((x String) (y String))
+      (exists ((z String)) (= x (++ y z)))))
+
+  ; First string is a suffix of second one.
+  ; (suffixof s t) is true iff s is a suffix of t.
+  (define-const suffixof (-> String String Bool)
+    (lambda ((x String) (y String))
+      (exists ((z String)) (= x (++ z y)))))
+
+  ; First string contains second one
+  ; (contains s t) iff s contains t.
+  (define-const contains (-> String String Bool)
+    (lambda ((x String) (y String))
+      (exists ((z1 String) (z2 String)) (= x (++ z1 y z2)))))
+
+  ; Index of first occurrence of second string in first one starting at 
+  ; the position specified by the third argument.
+  ; (indexof s t i), with 0 <= i <= |s| is the position of the first
+  ; occurrence of t in s at or after position i, if any. 
+  ; Otherwise, it is -1. Note that the result is i whenever i is within
+  ; the range [0, |s|] and t is empty.
+  (declare-const indexof (-> String String Int Int) :builtin 
+    "⟦indexof⟧(w)(w₂)(i) is the smallest n such that for some words w₁, w₃
+     - w = w₁w₂w₃
+     - i <= n = |w₁| if ⟦contains⟧(w)(w₂) = true and i >= 0
+     - ⟦indexof⟧(w,w₂,i) = -1  otherwise")
+
+  ; Replace
+  ; (replace s t t') is the string obtained by replacing the first
+  ; occurrence of t in s, if any, by t'. Note that if t is empty, the
+  ; result is to prepend t' to s; also, if t does not occur in s then
+  ; the result is s.
+  (declare-const replace (-> String String String String) :builtin 
+    "- ⟦replace⟧(w)(w₁)(w₂) = w          if ⟦contains⟧(w, w₁) = false
+     - ⟦replace⟧(w)(w₁)(w₂) = u₁w₂u₂
+       where u₁ is the shortest word such that w = u₁w₁u₂
+                                         if ⟦contains⟧(w, w₁) = true")
+
+  ; (replace_all s t t’) is s if t is the empty string. Otherwise, it
+  ; is the string obtained from s by replacing in one pass 
+  ; all occurrences of t in s by t’, starting with the first occurrence 
+  ; and proceeding in left-to-right order. 
+  (declare-const replace_all (-> String String String String) :builtin 
+    "- ⟦replace_all⟧(w)(w₁)(w₂) = w
+       if ⟦contains⟧(w)(w₁) = false or w₁ = ε
+     - ⟦replace_all⟧(w)(w₁)(w₂) = u₁w₂⟦replace_all⟧(u₂)(w₁)(w₂)
+       otherwise
+       where u₁ is the shortest word such that w = u₁w₁u₂")
+
+  ; (replace_lan s l t) is the string obtained by replacing the
+  ; shortest leftmost match of l in s, if any, by t.
+  ; Note that if l contains the empty string, the result is to prepend t to s.
+  (declare-const replace_lan (-> String Lan String String) :builtin 
+    "- ⟦replace_lan⟧(w)(l)(u) = w₁uw₂
+       where v is the shortest leftmost word from l in w such that w = w₁vw₂
+     - ⟦replace_lan⟧(w)(l)(u) = w
+       if no substring in w belongs to l")
+
+  ; Language difference
+  (declare-const diff (-> Lan Lan Lan) :builtin
+    "⟦diff⟧(L₁)(L₂) = L₁ \ L₂"
+    :left-assoc)
+
+  ; Language complement
+  (define-const comp (-> Lan Lan)  
+    (lambda ((l Lan)) (diff univ l)))
+
+  ; Language Kleene cross
+  ; (+ e) abbreviates ee*.
+  (define-const + (-> Lan Lan)  
+    (lambda ((l Lan)) (++ l (* l))))
+
+  ; Language option
+  ; (opt e) abbreviates e ∪ {ε}
+  (define-const opt (-> Lan Lan)
+    (lambda ((l Lan)) (union l (to_lan ""))))
+
+  ; Language range
+  ; (range s₁ s₂) is the set of all *singleton* strings s such that
+  ; (<= s₁ s s₂) provided s₁ and s₂ are singleton. Otherwise, it 
+  ; is the empty language.
+  (declare-const range (-> String String Lan) :builtin
+    "- ⟦range⟧(w₁)(w₂) = { w ∈ UC | w₁ ⪯ w ⪯ w₂ } where ⪯ = ⟦<=⟧
+       if |w₁| = |w₂| = 1
+     - ⟦range⟧(w₁)(w₂) = ∅
+       otherwise")
+
+  (set-info :notes
+    "⟦range⟧(⟦""ab""⟧, ⟦""c""⟧) = ∅
+     ⟦range⟧(⟦""a""⟧, ⟦""bc""⟧) = ∅
+     ⟦range⟧(⟦""c""⟧, ⟦""a""⟧)  = ∅")
+
+  (set-info :notes
+   "The arguments to range can be symbolic. This is intentional, 
+    as in the case of to_re .")
+
+
+  ; TODO change the order of the arguments of ^?
+
+  ; Function symbol indexed by a numeral n.
+  ; (^ n e) is the nth power of e:
+  ; - (^ 0 e) = (to_re "") 
+  ; - (^ n' e) = (++ e (^ n e))  where n' = n + 1
+  ;   (^ n Lan Lan)
+  (declare-const ^ (-> (! Int :syntax ⟨int_value⟩) Lan Lan) 
+    :builtin
+    "⟦^⟧(n)(L) = Lⁿ  where Lⁿ is defined inductively on n as follows:
+      - L⁰ = { ε } 
+      - Lⁿ⁺¹ = ⟦++⟧(L)(Lⁿ)"
+  )
+
+  ; Function symbol indexed by two numerals i and n.
+  ; - (loop i n e) = empty                        if i > n
+  ; - (loop i n e) = (^ n₁ e)                     if i = n
+  ; - (loop i n e) = (union (^ i e) ... (^ n e))  if i < n
+  (declare-const loop 
+    (-> (! Int :var i :syntax ⟨int_value⟩ :restrict (>= i 0)) 
+        (! Int :var n :syntax ⟨int_value⟩ :restrict (>= n 0))  
+        Lan Lan)
+    :builtin
+    "⟦loop⟧(i)(n)(L) = Lⁱ ∪ ... ∪ Lⁿ   if i <= n       
+     ⟦loop⟧(i)(n)(L) = ∅               otherwise")
+
+  ; (is_digit s) is true iff s consists of a single character which is 
+  ; a decimal digit, that is, a code point in the range 0x000030 ... 0x000039.
+  (define-const is_digit (-> String Bool)
+    (lambda ((s String))
+      (or (= s (char #x000030))
+        (= s (char #x000031))
+        (= s (char #x000032))
+        (= s (char #x000033))
+        (= s (char #x000034))
+        (= s (char #x000035))
+        (= s (char #x000036))
+        (= s (char #x000037))
+        (= s (char #x000038))
+        (= s (char #x000039)))))
+;     ⟦is_digit⟧(w) = true  iff |w| = 1 and 0x000030 <= w <= 0x000039
+
+  ;-----------------------------------------
+  ; Bridging functions to and from integers
+  ;-----------------------------------------
+
+  ; (to_code s) is the code point of the only character of s, 
+  ; if s is a singleton string; otherwise, it is -1. 
+  (declare-const to_code (-> String Int) :builtin
+    "- ⟦to_code⟧(w) = -1 if |w| ≠ 1
+     - ⟦to_code⟧(w) = i  otherwise, where i is such that w = (char i)
+                                    since w consists of a single code point")
+
+  ; (from_code n) is the singleton string whose only character is
+  ; code point n if n is in the range [0, 0xFFFFFF].
+  ; Otherwise, it is the empty string.
+  (declare-const from_code (-> Int String) :builtin
+    "- ⟦from_code⟧(n) = n        if 0x000000 <= n <= 0xFFFFFF 
+     - ⟦from_code⟧(n) = ε        otherwise")
+
+  ; Conversion to integers
+  ; (to_int s) with s consisting of digits (in the sense of is_digit)
+  ; evaluates to the positive integer denoted by s when seen as a number in 
+  ; base 10 (possibly with leading zeros).
+  ; It evaluates to -1 if s is empty or contains non-digits. 
+  (declare-const to_int (-> String Int) :builtin
+    "- ⟦to_int⟧(w) = -1 if w = ⟦l⟧ 
+       where l is the empty string literal or one containing anything other than
+       digits, i.e., characters with code point outside the range
+       0x000030–0x000039
+
+     - ⟦to_int⟧(w) = n if w = ⟦l⟧  
+       where l is a string literal consisting of a single digit denoting
+       number n
+
+     - ⟦to_int⟧(w) = 10*⟦to_int⟧(w₁) + ⟦to_int⟧(w₂) if 
+         - w = w₁w₂
+         - |w₁| > 0
+         - |w₂| = 1
+         - ⟦to_int⟧(w₁) >= 0
+         - ⟦to_int⟧(w₂) >= 0")
+
+  (set-info :notes
+    "to_int is made total by mapping the empty word and words with
+     non-digits to -1.
+
+     The function returns a non-negative number also for words that start
+     with (characters corresponding to) superfluous zeros, such as 
+     ⟦""0023""⟧.")
+
+  ; Conversion from integers.
+  ; (from_int n) with n non-negative is the corresponding string in
+  ; decimal notation, with no leading zeros. If n < 0, it is the empty string. 
+  (declare-const from_int (-> Int String) :builtin
+    "- ⟦from_int⟧(n) = w    if n > 0, where w is the shortest word
+                                      such that ⟦to_int⟧(w) = n
+     - ⟦from_int⟧(n) = ε    otherwise")
+
+  (set-info :notes
+    "from_int is made total by mapping negative integers to the empty word.
+
+     ⟦to_int⟧(⟦from_int⟧(n)) = n iff n is a non-negative integer.
+
+     ⟦from_int⟧(⟦to_int⟧(w)) = w iff w consists only of digits *and*
+                                     has no leading zeros.")
+
+  (set-info :notes
+    "(to_int ""00123"") evaluates to 123.
+     (from_int 123) evaluates to ""123"".
+     (to_int ""-123"") evaluates to -1, an error value, not to -123.
+     (from_int -123) evaluates to """", an error value, not to ""-123"".")
+))

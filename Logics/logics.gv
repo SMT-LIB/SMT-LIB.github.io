@@ -1,0 +1,113 @@
+/* 
+  dot -Tcmapx -Gdpi=66 -ologics.map -Tpng -Gdpi=66 -ologics.png logics.gv
+*/
+
+digraph logicsDag {
+  rankdir=LR;
+
+  //ALIA [URL="#ALIA"];
+  ALIA -> AUFLIA;
+
+  AUFLIA [URL="#AUFLIA"];
+  
+  AUFLIRA [URL="#AUFLIRA"];
+  AUFLIRA -> AUFNIRA;
+    
+  AUFNIRA [URL="#AUFNIRA"];
+  
+  //BV [URL="#BV"];  
+
+  LIA [URL="#LIA"];
+  LIA -> NIA;
+  LIA -> ALIA;
+  LIA -> AUFLIRA;
+
+  LRA [URL="#LRA"];
+  LRA -> NRA;
+  LRA -> UFLRA;
+
+  //NIA [URL="#NIA"];
+  NIA -> UFNIA
+    
+  //NRA [URL="#NRA"];
+  NRA -> AUFNIRA;
+    
+  QF_ABV [URL="#QF_ABV"];
+  QF_ABV -> QF_AUFBV;
+
+  // QF_ALIA [URL="#QF_ALIA"];
+  QF_ALIA -> ALIA
+  QF_ALIA -> QF_AUFLIA
+
+  QF_AUFBV [URL="#QF_AUFBV"];
+
+  QF_AUFLIA [URL="#QF_AUFLIA"];
+  QF_AUFLIA -> AUFLIA;
+        
+  QF_AX [URL="#QF_AX"];
+
+  QF_BV [URL="#QF_BV"];
+  QF_BV -> QF_UFBV;  
+  QF_BV -> QF_ABV;
+
+  QF_IDL [URL="#QF_IDL"];
+  QF_IDL -> QF_LIA;
+  QF_IDL -> QF_UFIDL;
+
+  QF_LIA [URL="#QF_LIA"];
+  QF_LIA -> LIA;
+  QF_LIA -> QF_ALIA;
+  QF_LIA -> QF_NIA;
+  QF_LIA -> QF_UFLIA;
+
+  QF_LRA [URL="#QF_LRA"];
+  QF_LRA -> LRA;
+  QF_LRA -> QF_NRA;
+  QF_LRA -> QF_UFNRA;
+
+  QF_NIA [URL="#QF_NIA"];
+  QF_NIA -> NIA;
+  
+  QF_NRA [URL="#QF_NRA"];
+  QF_NRA -> NRA;
+  QF_NRA -> QF_UFNRA;
+
+  QF_RDL [URL="#QF_RDL"];
+  QF_RDL -> QF_LRA;
+
+  QF_UF [URL="#QF_UF"];
+  QF_UF -> QF_UFBV;
+  QF_UF -> QF_UFIDL;
+  QF_UF -> QF_UFLRA;  
+
+  QF_UFBV [URL="#QF_UFBV"];
+  QF_UFBV -> QF_AUFBV;
+
+  QF_UFIDL [URL="#QF_UFIDL"];
+  QF_UFIDL -> QF_UFLIA;
+
+  QF_UFLIA [URL="#QF_UFLIA"];
+  QF_UFLIA -> QF_AUFLIA;
+  QF_UFLIA -> QF_UFNIA;
+  
+  QF_UFLRA [URL="#QF_UFLRA"];
+  QF_UFLRA -> UFLRA;
+  QF_UFLRA -> QF_UFNRA;
+
+  //QF_UFNIA [URL="#QF_UFNIA"];
+  QF_UFNIA -> UFNIA;
+
+  QF_UFNRA [URL="#QF_UFNRA"];
+  QF_UFNRA -> AUFNIRA;
+
+  UFLRA [URL="#UFLRA"];
+  UFLRA -> AUFLIRA;  
+  
+  UFNIA [URL="#UFNIA"];
+  UFNIA -> AUFNIRA;
+}
+
+
+
+
+

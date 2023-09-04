@@ -1,1 +1,78 @@
-This is a temporary page
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+ <!--#include virtual="head.shtml" -->
+ <body>
+  <div class="main">
+   <div class="header">
+    <div class="header_resize">
+     <div class="menu_nav">
+      <ul>
+       <li class="active"><a href="index.shtml">Home</a></li>
+       <li><a href="about.shtml">About</a></li>
+       <li><a href="news.shtml">News</a></li>
+       <li><a href="standard.shtml">Standard</a></li>
+       <li><a href="benchmarks.shtml">Benchmarks</a></li>
+       <li><a href="software.shtml">Software</a></li>
+       <li><a href="credits.shtml">Credits</a></li>
+      </ul>
+     </div>
+     <!--#include virtual="logo.shtml" -->
+    </div>
+   </div>
+   <div class="content">
+    <div class="content_resize">
+     <div class="mainbar">
+      <div class="article">
+       <p> SMT-LIB is an international initiative aimed at facilitating research and development in
+        <a href="http://en.wikipedia.org/wiki/Satisfiability_Modulo_Theories">Satisfiability Modulo Theories</a> (SMT). Since its inception in 2003, the initiative has pursued these aims by focusing on the following concrete goals.
+        <ul>
+         <li>Provide standard rigorous descriptions of background theories used in SMT systems.
+         </li>
+         <li>Develop and promote common input and output languages for
+          <a href="http://en.wikipedia.org/wiki/Satisfiability_Modulo_Theories#SMT_solvers">SMT solvers</a>.
+         </li>
+         <li>Connect developers, researchers and users of SMT, and develop a community around it.
+         </li>
+         <li>Establish and make available to the research community a large library of benchmarks for SMT solvers.
+         </li>
+         <li>Collect and promote software tools useful to the SMT community.
+         </li>
+        </ul>
+        This website provides access to the following main artifacts of the initiative.
+        <ul>
+         <li>Documents describing the SMT-LIB input/output language for SMT solvers and its semantics;
+         </li>
+         <li>Specifications of background theories and <em>logics</em>;
+         </li>
+         <li>A large library of input problems, or benchmarks, written in the SMT-LIB language.
+         </li>
+         <li>Links to SMT solvers and related tools and utilities.
+         </li>
+        </ul>
+       </p>
+      </div>
+     </div>
+     <!--#include virtual="sidebar.shtml" -->
+    </div>
+   </div>
+   
+   <!--#include virtual="bottom.shtml" -->
+   <div class="clr"></div>
+   <div class="footer">
+    <div class="footer_resize">
+     <!--#include virtual="copyright.shtml" -->
+     <ul class="fmenu">
+      <li class="active"><a href="index.shtml">Home</a></li>
+      <li><a href="about.shtml">About</a></li>
+      <li><a href="news.shtml">News</a></li>
+      <li><a href="standard.shtml">Standard</a></li>
+      <li><a href="benchmarks.shtml">Benchmarks</a></li>
+      <li><a href="software.shtml">Software</a></li>
+      <li><a href="credits.shtml">Credits</a></li>
+     </ul>
+     <div class="clr"></div>
+    </div>
+   </div>
+  </div>
+ </body>
+</html>

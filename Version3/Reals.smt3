@@ -1,0 +1,227 @@
+(define-module Reals (
+  (set-info :smt-lib-version 3.0)
+  (set-info :smt-lib-release "2020-XX-XX")
+  (set-info :written-by "Pascal Fontaine and Cesare Tinelli")
+  (set-info :date "2020-07-01")
+  (set-info :last-updated "2020-07-01")
+  (set-info :update-history
+   "TODO.
+   "
+  )
+  (set-info :notes  "Real arithmetic")
+
+  (import (Core))
+  (open Core)
+
+  ;---------------
+  ; Builtin types
+  ;---------------
+  ; Real
+  (declare-type Real () :builtin
+   "Real denotes the set of all real numbers."
+  )
+
+  ;-------------------------------
+  ; External and Bridging symbols
+  ;-------------------------------
+  ; Int
+  (declare-type Int () :extern Ints::Int)
+
+  (declare-const to_real (-> Int Real) :builtin 
+   "to_real as the standard injection of the integers into the reals.")
+
+  ;-------------------
+  ; Builtin constants
+  ;------------------- 
+  ; Decimals
+  (declare-const ⟨decimal⟩ Real :builtin
+   "Each ⟨decimal⟩ denotes the corresponding real number as usual.")
+
+  ; rational constants defined further down
+
+   ; Unary -
+  (declare-const - (-> Real Real) :builtin "Negation.")
+  ;  
+  ; +
+  (declare-const + (-> Real Real Real) :left-assoc :builtin "Addition.")
+
+  ; *
+  (declare-const * (-> Real Real Real) :left-assoc :builtin "Multiplication.")
+
+  ; <=
+  (declare-const <= (-> Real Real Bool) :chainable :builtin 
+   "Usual non-strict total ordering over the reals.")
+
+   ; is_int
+  (declare-const is_int (-> Real Bool) :builtin
+   "is_int maps whole real numbers to true and all the other reals to false.")
+
+  ;-----------------------
+  ; Axiomatized constants
+  ;----------------------- 
+
+  ; subtraction -
+  (define-const - (-> Real Real Real) (lambda ((x Real) (y Real))
+    (+ x (- y))
+   :left-assoc))
+
+  ; division /
+  (declare-const / (-> Real Real Real) :left-assoc :restrict (distinct y 0.0))
+  (assert (forall ((x Real) (y Real)) (=> (distinct y 0.0)
+    (= x (* y (/ x y))))))
+    
+  ; <
+  (define-const < (-> Real Real Bool) (lambda ((x Real) (y Real))
+    (and (<= x y) (distinct x y)))
+   :chainable)
+
+  ; >
+  (define-const > (-> Real Real Bool) (lambda ((x Real) (y Real))
+    (< y x))
+   :chainable)
+
+  ; >=
+  (define-const >= (-> Real Real Bool) (lambda ((x Real) (y Real))
+    (<= y x))
+   :chainable)
+
+  ; Summation 
+  ; we use a step different from 1 and provide it as additional input
+  (define-const-rec sum (-> Real Real (-> Real Real) Real)
+    (lambda ((a Real) (b Real) (f (-> Real Real)))
+      (ite (> a b) 
+        0.0 
+        (+ (f a) (sum (+ a 1.0) b f)))))
+
+  ; rational constants
+  (define-const / 
+    (-> (! Int :value) 
+        (! Int :var d :value :restrict (> (to_real d) 0.0))
+        Real) 
+    (lambda ((n Int) (d Int)) 
+      (/ (to_real n) (to_real d))))
+
+
+  ;-------------
+  ; Real values
+  ;-------------
+
+  ; The set of values for the sort Real consists of 
+  ;  - an abstract value for each irrational algebraic number
+  ;  - all decimals of the form n.0
+  ;  - all terms of the form (- n.0) where n is a ⟨numeral⟩ other than 0
+  ;  - all terms of the form (/ m n) or (- (/ m n)) where 
+  ;    - m is a ⟨numeral⟩ other than 0,
+  ;    - n is a ⟨numeral⟩ other than 0 and 1,
+  ;    - as integers, m and n have no common factors besides 1.
+  (define-syntax 
+    ; non-terminals
+    (⟨real_value⟩ ⟨p⟩ ⟨f⟩ ⟨m⟩ ⟨n⟩) 
+    ; production rules
+    ((⟨real_value⟩ (⟨abstract⟩ ; for irrational algebraic numbers
+                    0.0
+                    ⟨p⟩
+                    (- ⟨p⟩)
+                    ⟨f⟩
+                    (- ⟨f⟩))
+     (⟨f⟩ ((! (/ ⟨m⟩ ⟨n⟩) :syntax-restrict 
+                          "as integers, ⟨m⟩ and ⟨n⟩ have no common factors besides 1")))
+     (⟨p⟩ ((! ⟨decimal⟩ :syntax-restrict "it has the form n.0 except for 0.0")))
+     (⟨m⟩ ((! ⟨numeral⟩ :syntax-restrict "it is not 0")))
+     (⟨n⟩ ((! ⟨numeral⟩ :syntax-restrict "it is neither 0 nor 1"))))))
+
+  (define-values () Real ⟨real_value⟩)
+
+  (set-info :notes
+   "In Real values decimals are used only for whole numbers, e.g., 42.0. 
+   For all other rational numbers the fractional notation is necessary, e.g., (/ 1 2).
+   This way there is unique value for each rational."
+  )
+
+  (set-info :notes
+   "The restriction of Reals over the signature having just the symbols 
+    (0.0 Real)
+    (1.0 Real)
+    (- Real Real)
+    (+ Real Real Real) 
+    (* Real Real Real)
+    (<= Real Real Bool)
+    (<  Real Real Bool)
+    coincides with the theory of real closed fields, axiomatized by
+    the formulas below: 
+
+    - associativity of +
+      (forall ((x Real) (y Real) (z Real)) (= (+ (+ x y) z) (+ x (+ y z))))
+
+    - commutativity of +
+      (forall ((x Real) (y Real)) (= (* x y) (* y x)))
+
+    - 0.0 is the right (and by commutativity, left) unit of +
+      (forall ((x Real)) (= (+ x 0.0) x))
+
+    - right (and left) inverse wrt +
+      (forall ((x Real)) (= (+ x (- x)) 0.0))
+
+    - associativity of *
+      (forall ((x Real) (y Real) (z Real)) (= (* (* x y) z) (* x (* y z))))
+
+    - commutativity of *
+      (forall ((x Real) (y Real)) (= (* x y) (* y x)))
+
+    - 1.0 is the right (and by commutativity, left) unit of *
+      (forall ((x Real)) (= (* x 1.0) x))
+
+    - existence of right (and left) inverse wrt *
+      (forall ((x Real)) (or (= x 0) (exists (y Real) (= (* x y) 1.0))))
+
+    - left distributivity of * over +
+      (forall ((x Real) (y Real) (z Real)) (= (* x (+ y z)) (+ (* x y) (* x z))))
+
+    - right distributivity of * over +
+     (forall ((x Real) (y Real) (z Real)) (= (* (+ x y) z) (+ (* x z) (* y z))))
+
+    - non-triviality
+      (distinct 0.0 1.0)
+
+    - all positive elements have a square root
+      (forall ((x Real)) (exists ((y Real))
+        (or (= x (* y y)) (= (- x) (* y y)))))
+
+    - axiom schemas for all n > 0
+      (forall ((x_1 Real) ... (x_n Real))
+        (distinct (- 1) (+ (* x_1 x_1) (+ ... (* x_n x_n))))) 
+
+    - axiom schemas for all odd n > 0 where (^ y n) abbreviates
+      the n-fold product of y with itself
+      (forall ((x_1 Real) ... (x_n Real)) (exists ((y Real))
+        (= 0 (+ (^ y n) (+ (* x_1 (^ y n-1)) (+  ... (+ (* x_{n-1} y) x_n)))))))
+
+    - reflexivity of <=
+      (forall ((x Real)) (<= x x))
+
+    - antisymmetry of <=
+      (forall ((x Real) (y Real)) (=> (and (<= x y) (<= y x)) (= x y)))
+
+    - transitivity of <=
+      (forall ((x Real) (y Real) (z Real)) (=> (<= x y z)) (<= x z))
+
+    - totality of <=
+      (forall ((x Real) (y Real)) (or (<= x y) (<= y x)))
+    
+    - monotonicity of <= wrt +
+      (forall ((x Real) (y Real) (z Real)) (=> (<= x y) (<= (+ x z) (+ y z))))
+
+    - monotonicity of <= wrt *
+      (forall (x Real) (y Real) (z Real) 
+        (=> (and (<= x y) (<= 0 z)) (<= (* z x) (* z y))))
+
+    - definition of <
+      (forall ((x Real) (y Real)) 
+        (= (< x y) (and (<= x y) (distinct x y))))
+
+    References:
+    1) W. Hodges. Model theory. Cambridge University Press, 1993.
+    2) PlanetMath, http://planetmath.org/encyclopedia/RealClosedFields.html
+  ")
+
+))

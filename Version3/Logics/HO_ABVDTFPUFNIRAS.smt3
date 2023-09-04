@@ -1,0 +1,504 @@
+(define-module HO_ABVDTFPUFNIRAS
+ (
+  (set-info :smt-lib-version 3.0)
+  (set-info :smt-lib-release "2020-XX-XX")
+  (set-info :written-by "Pascal Fontaine and Cesare Tinelli")
+  (set-info :date "2020-07-01")
+  (set-info :last-updated "2020-07-01")
+  (set-info :update-history
+   "TODO.
+   "
+  )
+
+  (set-info :notes
+   "Closed quantifier-free formulas built over arbitrary expansions of the
+    Ints signatures with free types of order at most 1 and free constants
+    of type-order at most 1, with the following restriction:
+    - all terms of sort Int are linear, that is, have no occurrences 
+      of the constants *, div, mod, and abs.
+    Terms with _concrete_ coefficients are also allowed, that is, terms
+    of the form (* c x) where x is a free constant [arbitrary term?] and 
+    c is a term of the form n or (- n) for some numeral n
+    (as specified in theory Ints).
+   ")
+
+  (import (Core ArraysEx FixedSizeBitVectors FloatingPoint Reals UnicodeStrings))
+  (open Core)
+  (open ArraysEx)
+  (open FixedSizeBitVectors)
+  (open FloatingPoint)
+  (open Ints)
+  (open Reals)
+  (open UnicodeStrings.smt3)
+ )
+ :types (
+   Bool
+   (-> (! Type :var A) (! Type :var B) (Array A B))
+   (-> (! Int :var m :syntax ⟨pos_numeral⟩ :restrict (> m 0)) (BitVec m))
+   (-> (! Int :var eb :syntax ⟨pos_numeral⟩ :restrict (> eb 1))
+       (! Int :var sb :syntax ⟨pos_numeral⟩ :restrict (> sb 1))
+       (FloatingPoint eb sb))
+   RoundingMode	  
+   Float16
+   Float32
+   Float64
+   Float128
+   Int
+   Real
+   String
+   Lan
+  )
+
+  :consts (
+	    
+    (true Bool)
+    (false Bool)
+    (ite (-> (! Type :var A :implicit) Bool A A A))
+    (not (-> Bool Bool))
+    (= (-> (! Type :var A :implicit) A A Bool))
+    (distinct (-> (! Type :var A :implicit) A A Bool))
+    (and (-> Bool Bool Bool))
+    (or (-> Bool Bool Bool))
+    (=> (-> Bool Bool Bool))
+    (xor (-> Bool Bool Bool))
+    (forall (-> (! Type :var A :implicit) (-> A Bool) Bool))
+    (exists (-> (! Type :var A :implicit) (-> A Bool) Bool))
+    (choose (-> (! Type :var A :implicit) (-> A Bool) A))
+
+    (select (-> (! Type :var I :implicit) 
+                (! Type :var E :implicit) 
+                (Array I E) I E))
+    (store (-> (! Type :var I :implicit) 
+	       (! Type :var E :implicit) 
+	       (Array I E) I E (Array I E)))
+	    
+    (⟨numeral⟩ Int)
+    (abs (-> Int Int))
+    (+1 (-> Int Int))	    
+    (-1 (-> Int Int))	    
+    (+ (-> Int Int Int))
+    (- (-> Int Int Int))
+    (* (-> Int Int Int)) ; linear multiplication
+    (> (-> Int Int Bool))
+    (>= (-> Int Int Bool))
+    (< (-> Int Int Bool))
+    (<= (-> Int Int Bool))
+    (divisible (-> Int (! Int :syntax ⟨pos_numeral⟩) Int))
+    (mod (-> Int Int Int))
+    (sum (-> Int Int (-> Int Int) Int))
+	    
+    (⟨decimal⟩ Real)
+    (- (-> Real Real))
+    (+ (-> Real Real Real))
+    (* (-> Real Real Real))
+    (<= (-> Real Real Bool))
+    (is_int (-> Real Bool))
+    (- (-> Real Real Real))
+    (/ (-> Real Real Real))
+    (< (-> Real Real Bool))
+    (> (-> Real Real Bool))
+    (>= (-> Real Real Bool))
+    (sum (-> Real Real (-> Real Real) Real))
+    (/ (-> (! Int :value) 
+           (! Int :var d :value :restrict (> (to_real d) 0.0))
+	 Real))
+   
+    (to_int (-> Real Int))
+    (to_real (-> Int Real))
+
+    (⟨string⟩ String)
+    (char (-> (! Int :var m :syntax ⟨int_value⟩ :implicit
+               :restrict (or (= m 4) (= m 8) (= m 12) (= m 16) (= m 20) (= m 24)))
+              (! (BitVec m) :value)
+           String))
+
+    (++ (-> String String String))
+    (< (-> String String Bool))
+    (<= (-> String String Bool))
+	    
+    (to_lan (-> String Lan))
+    (in (-> String Lan Bool))
+    (empty Lan)
+    (univ Lan)	    
+    (allchar Lan)
+    (++ (-> Lan Lan Lan))
+    (union (-> Lan Lan Lan))
+    (inter (-> Lan Lan Lan))
+    (* (-> Lan Lan))
+    (len (-> String Int))
+    (substr (-> String Int Int String))
+    (at (-> String Int String))
+    (prefixof (-> String String Bool))
+    (suffixof (-> String String Bool))
+    (contains (-> String String Bool))
+    (indexof (-> String String Int Int))
+    (replace (-> String String String String))
+    (replace_all (-> String String String String))
+    (diff (-> Lan Lan Lan))
+    (comp (-> Lan Lan))
+    (+ (-> Lan Lan))
+    (opt (-> Lan Lan))
+    (range (-> String String Lan))
+    (^ (-> (! Int :syntax ⟨int_value⟩) Lan Lan))
+    (loop (-> (! Int :var i :syntax ⟨int_value⟩ :restrict (>= i 0)) 
+              (! Int :var n :syntax ⟨int_value⟩ :restrict (>= n 0))  
+              Lan Lan))
+    (is_digit (-> String Bool))
+    (to_code (-> String Int))
+    (from_code (-> Int String))
+    (to_int (-> String Int) )
+    (from_int (-> Int String))
+	    
+    (⟨hexadecimal⟩
+      (-> (! Int :var m :syntax ⟨int_value⟩ :restrict (> m 0) :implicit
+        :restrict "m is 4 times the number of hexadecimal digits in the constant") 
+        (BitVec m)))
+    (⟨binary⟩
+      (-> (! Int :var m :syntax ⟨numeral⟩ :implicit 
+        :restrict "m is the number of binary digits in the constant") 
+        (BitVec m)))
+    (to_bv (-> Boolean (BitVec 1)))
+    (concat 
+      (-> (! Int :var i :syntax ⟨numeral⟩ :implicit :restrict (> i 0)) 
+          (! Int :var j :syntax ⟨numeral⟩ :implicit :restrict (> j 0)) 
+          (! Int :var k :syntax ⟨numeral⟩ :implicit :restrict (= k (+ i j))) 
+          (BitVec i) (BitVec j)
+          (BitVec k)))
+    (extract
+      (-> (! Int :var m :syntax ⟨numeral⟩ :implicit :restrict (> m 0)) 
+          (! Int :var i :syntax ⟨numeral⟩ :restrict (< i m)) 
+          (! Int :var j :syntax ⟨numeral⟩ :restrict (<= 0 j i))
+          (! Int :var k :syntax ⟨numeral⟩ :implicit :restrict (= n (+1 (- i j))))
+          (BitVec m) (BitVec k)))
+    (repeat
+      (-> (! Int :var i :syntax ⟨numeral⟩ :restrict (> i 0)) 
+          (! Int :var m :syntax ⟨numeral⟩ :implicit :restrict (> m 0)) 
+          (! Int :var n :syntax ⟨numeral⟩ :implicit :restrict (= n (* m i))) 
+          (BitVec m) (BitVec n)))
+    (bvnot
+      (-> (! Int :var m :syntax ⟨numeral⟩ :implicit :restrict (> m 0)) 
+          (BitVec m) (BitVec m))
+    (bvand
+      (-> (! Int :var m :syntax ⟨numeral⟩ :implicit :restrict (> m 0)) 
+          (BitVec m) (BitVec m) (BitVec m))
+    (bvor
+      (-> (! Int :var m :syntax ⟨numeral⟩ :implicit :restrict (> m 0)) 
+          (BitVec m) (BitVec m) (BitVec m)) 
+    (bvnand
+      (-> (! Int :var m :syntax ⟨numeral⟩ :implicit :restrict (> m 0)) 
+          (BitVec m) (BitVec m) (BitVec m))
+    (bvnor
+      (-> (! Int :var m :syntax ⟨numeral⟩ :implicit :restrict (> m 0)) 
+          (BitVec m) (BitVec m) (BitVec m)) 
+    (bvxor
+      (-> (! Int :var m :syntax ⟨numeral⟩ :implicit :restrict (> m 0)) 
+          (BitVec m) (BitVec m) (BitVec m))
+    (bvxnor
+      (-> (! Int :var m :syntax ⟨numeral⟩ :implicit :restrict (> m 0)) 
+          (BitVec m) (BitVec m) (BitVec m)) 
+    (bvcomp
+      (-> (! Int :var m :syntax ⟨numeral⟩ :implicit :restrict (> m 0)) 
+          (BitVec m) (BitVec m) (BitVec 1))
+    (bvneg
+      (-> (! Int :var m :syntax ⟨numeral⟩ :implicit :restrict (> m 0)) 
+          (BitVec m) (BitVec m))
+    (bvadd
+      (-> (! Int :var m :syntax ⟨numeral⟩ :implicit :restrict (> m 0)) 
+          (BitVec m) (BitVec m) (BitVec m)) 
+    (bvmul
+      (-> (! Int :var m :syntax ⟨numeral⟩ :implicit :restrict (> m 0)) 
+          (BitVec m) (BitVec m) (BitVec m)) 
+    (bvudiv
+      (-> (! Int :var m :syntax ⟨numeral⟩ :implicit :restrict (> m 0)) 
+          (BitVec m) (BitVec m) (BitVec m))
+    (bvurem
+      (-> (! Int :var m :syntax ⟨numeral⟩ :implicit :restrict (> m 0)) 
+          (BitVec m) (BitVec m) (BitVec m)) 
+    (bvsub
+      (-> (! Int :var m :syntax ⟨numeral⟩ :implicit :restrict (> m 0)) 
+          (BitVec m) (BitVec m) (BitVec m))
+    (bvsdiv
+      (-> (! Int :var m :syntax ⟨numeral⟩ :implicit :restrict (> m 0)) 
+          (BitVec m) (BitVec m) (BitVec m)) 	    
+    (bvsrem
+      (-> (! Int :var m :syntax ⟨numeral⟩ :implicit :restrict (> m 0)) 
+          (BitVec m) (BitVec m) (BitVec m))
+    (bvsmod
+      (-> (! Int :var m :syntax ⟨numeral⟩ :implicit :restrict (> m 0)) 
+          (BitVec m) (BitVec m) (BitVec m))
+    (bvult
+      (-> (! Int :var m :syntax ⟨numeral⟩ :implicit :restrict (> m 0)) 
+          (BitVec m) (BitVec m) Bool) 
+    (bvule
+      (-> (! Int :var m :syntax ⟨numeral⟩ :implicit :restrict (> m 0)) 
+          (BitVec m) (BitVec m) Bool) 
+    (bvugt
+      (-> (! Int :var m :syntax ⟨numeral⟩ :implicit :restrict (> m 0)) 
+          (BitVec m) (BitVec m) Bool) 
+    (bvuge
+      (-> (! Int :var m :syntax ⟨numeral⟩ :implicit :restrict (> m 0)) 
+          (BitVec m) (BitVec m) Bool) 
+    (bvslt
+      (-> (! Int :var m :syntax ⟨numeral⟩ :implicit :restrict (> m 0)) 
+          (BitVec m) (BitVec m) Bool)
+    (bvsle
+      (-> (! Int :var m :syntax ⟨numeral⟩ :implicit :restrict (> m 0)) 
+          (BitVec m) (BitVec m) Bool)
+    (bvsgt
+      (-> (! Int :var m :syntax ⟨numeral⟩ :implicit :restrict (> m 0)) 
+          (BitVec m) (BitVec m) Bool)
+    (bvsge
+      (-> (! Int :var m :syntax ⟨numeral⟩ :implicit :restrict (> m 0)) 
+          (BitVec m) (BitVec m) Bool)
+    (bvshl
+      (-> (! Int :var m :syntax ⟨numeral⟩ :implicit :restrict (> m 0)) 
+          (BitVec m) (BitVec m) (BitVec m))
+    (bvlshr
+      (-> (! Int :var m :syntax ⟨numeral⟩ :implicit :restrict (> m 0)) 
+          (BitVec m) (BitVec m) (BitVec m))
+	    
+    (zero_extend
+      (-> (! Int :var i :syntax ⟨numeral⟩ :restrict (> i 0)) 
+          (! Int :var m :syntax ⟨numeral⟩ :implicit :restrict (> m 0)) 
+          (! Int :var n :syntax ⟨numeral⟩ :implicit :restrict (= n (+ m i))) 
+          (BitVec m) (BitVec n))
+    (sign_extend
+      (-> (! Int :var i :syntax ⟨numeral⟩ :restrict (> i 0)) 
+          (! Int :var m :syntax ⟨numeral⟩ :implicit :restrict (> m 0)) 
+          (! Int :var n :syntax ⟨numeral⟩ :implicit :restrict (= n (+ m i))) 
+          (BitVec m) (BitVec n))
+    (rotate_left
+      (-> (! Int :var i :syntax ⟨numeral⟩ :restrict (> i 0)) 
+          (! Int :var m :syntax ⟨numeral⟩ :implicit :restrict (> m 0)) 
+          (BitVec m) (BitVec m))
+    (rotate_right
+      (-> (! Int :var i :syntax ⟨numeral⟩ :restrict (> i 0)) 
+          (! Int :var m :syntax ⟨numeral⟩ :implicit :restrict (> m 0)) 
+          (BitVec m) (BitVec m))	    
+    (pop_count
+      (-> (! Int :var m :syntax ⟨numeral⟩ :implicit :restrict (> m 0)) 
+          (BitVec m) (BitVec m))
+    (reduce_and
+      (-> (! Int :var m :syntax ⟨numeral⟩ :implicit :restrict (> m 0)) 
+          (BitVec m) (BitVec 1))
+    (reduce_or
+      (-> (! Int :var m :syntax ⟨numeral⟩ :implicit :restrict (> m 0)) 
+          (BitVec m) (BitVec 1))
+    (reduce_xor
+      (-> (! Int :var m :syntax ⟨numeral⟩ :implicit :restrict (> m 0)) 
+          (BitVec m) (BitVec 1))
+    (bvite
+      (-> (! Int :var m :syntax ⟨numeral⟩ :implicit :restrict (> m 0)) 
+          (BitVec 1) (BitVec m) (BitVec m) (BitVec m))
+    (bv1ult
+      (-> (! Int :var m :syntax ⟨numeral⟩ :implicit :restrict (> m 0)) 
+          (BitVec m) (BitVec m) (BitVec 1))
+	    
+    (roundNearestTiesToEven RoundingMode)
+    (roundNearestTiesToAway RoundingMode)
+    (roundTowardPositive RoundingMode)
+    (roundTowardNegative RoundingMode)
+    (roundTowardZero RoundingMode)
+    (fp
+      (-> (! Int :var eb :syntax ⟨numeral⟩ :implicit :restrict (> eb 1))
+          (! Int :var  i :syntax ⟨numeral⟩ :implicit :restrict (> i 1))
+          (! Int :var sb :syntax ⟨numeral⟩ :implicit :restrict (= sb (+1 i)))
+          (BitVec 1) (BitVec eb) (BitVec i)
+          (FloatingPoint eb sb)))
+    (+oo
+      (-> (! Int :var eb :syntax ⟨numeral⟩ :restrict (> eb 1))
+          (! Int :var sb :syntax ⟨numeral⟩ :restrict (> sb 1))
+          (FloatingPoint eb sb)))
+    (-oo
+      (-> (! Int :var eb :syntax ⟨numeral⟩ :restrict (> eb 1))
+          (! Int :var sb :syntax ⟨numeral⟩ :restrict (> sb 1))
+          (FloatingPoint eb sb)))
+    (+zero
+      (-> (! Int :var eb :syntax ⟨numeral⟩ :restrict (> eb 1))
+          (! Int :var sb :syntax ⟨numeral⟩ :restrict (> sb 1))
+          (FloatingPoint eb sb)))
+    (-zero
+      (-> (! Int :var eb :syntax ⟨numeral⟩ :restrict (> eb 1))
+          (! Int :var sb :syntax ⟨numeral⟩ :restrict (> sb 1))
+          (FloatingPoint eb sb)))
+    (NaN
+      (-> (! Int :var eb :syntax ⟨numeral⟩ :restrict (> eb 1))
+          (! Int :var sb :syntax ⟨numeral⟩ :restrict (> sb 1))
+          (FloatingPoint eb sb)))
+    (abs
+      (-> (! Int :var eb :syntax ⟨numeral⟩ :implicit :restrict (> eb 1))
+          (! Int :var sb :syntax ⟨numeral⟩ :implicit :restrict (> sb 1))
+          (FloatingPoint eb sb) (FloatingPoint eb sb)))
+    (neg
+      (-> (! Int :var eb :syntax ⟨numeral⟩ :implicit :restrict (> eb 1))
+          (! Int :var sb :syntax ⟨numeral⟩ :implicit :restrict (> sb 1))
+          (FloatingPoint eb sb) (FloatingPoint eb sb)))
+    (add
+      (-> (! Int :var eb :syntax ⟨numeral⟩ :implicit :restrict (> eb 1))
+          (! Int :var sb :syntax ⟨numeral⟩ :implicit :restrict (> sb 1))
+          RoundingMode (FloatingPoint eb sb) (FloatingPoint eb sb) 
+          (FloatingPoint eb sb)))
+    (sub
+      (-> (! Int :var eb :syntax ⟨numeral⟩ :implicit :restrict (> eb 1))
+          (! Int :var sb :syntax ⟨numeral⟩ :implicit :restrict (> sb 1))
+          RoundingMode (FloatingPoint eb sb) (FloatingPoint eb sb) 
+          (FloatingPoint eb sb)))
+    (mul
+      (-> (! Int :var eb :syntax ⟨numeral⟩ :implicit :restrict (> eb 1))
+          (! Int :var sb :syntax ⟨numeral⟩ :implicit :restrict (> sb 1))
+          RoundingMode (FloatingPoint eb sb) (FloatingPoint eb sb) 
+          (FloatingPoint eb sb)))
+    (div
+      (-> (! Int :var eb :syntax ⟨numeral⟩ :implicit :restrict (> eb 1))
+          (! Int :var sb :syntax ⟨numeral⟩ :implicit :restrict (> sb 1))
+          RoundingMode (FloatingPoint eb sb) (FloatingPoint eb sb) 
+          (FloatingPoint eb sb)))
+    (fma
+      (-> (! Int :var eb :syntax ⟨numeral⟩ :implicit :restrict (> eb 1))
+          (! Int :var sb :syntax ⟨numeral⟩ :implicit :restrict (> sb 1))
+          RoundingMode (FloatingPoint eb sb) (FloatingPoint eb sb) (FloatingPoint eb sb) 
+          (FloatingPoint eb sb)))
+    (sqrt
+      (-> (! Int :var eb :syntax ⟨numeral⟩ :implicit :restrict (> eb 1))
+          (! Int :var sb :syntax ⟨numeral⟩ :implicit :restrict (> sb 1))
+          RoundingMode (FloatingPoint eb sb) 
+          (FloatingPoint eb sb)))
+    (rem
+      (-> (! Int :var eb :syntax ⟨numeral⟩ :implicit :restrict (> eb 1))
+          (! Int :var sb :syntax ⟨numeral⟩ :implicit :restrict (> sb 1))
+          (FloatingPoint eb sb) (FloatingPoint eb sb) 
+          (FloatingPoint eb sb)))
+    (roundToIntegral
+      (-> (! Int :var eb :syntax ⟨numeral⟩ :implicit :restrict (> eb 1))
+          (! Int :var sb :syntax ⟨numeral⟩ :implicit :restrict (> sb 1))
+          RoundingMode (FloatingPoint eb sb) 
+          (FloatingPoint eb sb)))
+    (min
+      (-> (! Int :var eb :syntax ⟨numeral⟩ :implicit :restrict (> eb 1))
+          (! Int :var sb :syntax ⟨numeral⟩ :implicit :restrict (> sb 1))
+          (FloatingPoint eb sb) (FloatingPoint eb sb) 
+          (FloatingPoint eb sb)))
+    (max
+      (-> (! Int :var eb :syntax ⟨numeral⟩ :implicit :restrict (> eb 1))
+          (! Int :var sb :syntax ⟨numeral⟩ :implicit :restrict (> sb 1))
+          (FloatingPoint eb sb) (FloatingPoint eb sb) 
+          (FloatingPoint eb sb)))
+    (leq
+      (-> (! Int :var eb :syntax ⟨numeral⟩ :implicit :restrict (> eb 1))
+          (! Int :var sb :syntax ⟨numeral⟩ :implicit :restrict (> sb 1))
+          (FloatingPoint eb sb) (FloatingPoint eb sb) 
+          Bool))
+    (lt
+      (-> (! Int :var eb :syntax ⟨numeral⟩ :implicit :restrict (> eb 1))
+          (! Int :var sb :syntax ⟨numeral⟩ :implicit :restrict (> sb 1))
+          (FloatingPoint eb sb) (FloatingPoint eb sb) 
+          Bool))
+    (geq
+      (-> (! Int :var eb :syntax ⟨numeral⟩ :implicit :restrict (> eb 1))
+          (! Int :var sb :syntax ⟨numeral⟩ :implicit :restrict (> sb 1))
+          (FloatingPoint eb sb) (FloatingPoint eb sb) 
+          Bool))
+    (gt
+      (-> (! Int :var eb :syntax ⟨numeral⟩ :implicit :restrict (> eb 1))
+          (! Int :var sb :syntax ⟨numeral⟩ :implicit :restrict (> sb 1))
+          (FloatingPoint eb sb) (FloatingPoint eb sb) 
+          Bool))
+    (eq
+      (-> (! Int :var eb :syntax ⟨numeral⟩ :implicit :restrict (> eb 1))
+          (! Int :var sb :syntax ⟨numeral⟩ :implicit :restrict (> sb 1))
+          (FloatingPoint eb sb) (FloatingPoint eb sb) 
+          Bool))
+    (isNormal
+      (-> (! Int :var eb :syntax ⟨numeral⟩ :implicit :restrict (> eb 1))
+          (! Int :var sb :syntax ⟨numeral⟩ :implicit :restrict (> sb 1))
+          (FloatingPoint eb sb)
+          Bool))
+    (isSubnormal
+      (-> (! Int :var eb :syntax ⟨numeral⟩ :implicit :restrict (> eb 1))
+          (! Int :var sb :syntax ⟨numeral⟩ :implicit :restrict (> sb 1))
+          (FloatingPoint eb sb)
+          Bool))
+    (isZero
+      (-> (! Int :var eb :syntax ⟨numeral⟩ :implicit :restrict (> eb 1))
+          (! Int :var sb :syntax ⟨numeral⟩ :implicit :restrict (> sb 1))
+          (FloatingPoint eb sb)
+          Bool))
+    (isInfinite
+      (-> (! Int :var eb :syntax ⟨numeral⟩ :implicit :restrict (> eb 1))
+          (! Int :var sb :syntax ⟨numeral⟩ :implicit :restrict (> sb 1))
+          (FloatingPoint eb sb)
+          Bool))
+    (isNaN
+      (-> (! Int :var eb :syntax ⟨numeral⟩ :implicit :restrict (> eb 1))
+          (! Int :var sb :syntax ⟨numeral⟩ :implicit :restrict (> sb 1))
+          (FloatingPoint eb sb)
+          Bool))
+    (isNegative
+      (-> (! Int :var eb :syntax ⟨numeral⟩ :implicit :restrict (> eb 1))
+          (! Int :var sb :syntax ⟨numeral⟩ :implicit :restrict (> sb 1))
+          (FloatingPoint eb sb)
+          Bool))
+    (isPositive
+      (-> (! Int :var eb :syntax ⟨numeral⟩ :implicit :restrict (> eb 1))
+          (! Int :var sb :syntax ⟨numeral⟩ :implicit :restrict (> sb 1))
+          (FloatingPoint eb sb)
+          Bool))
+    (to_fp
+      (-> (! Int :var eb :syntax ⟨numeral⟩ :restrict (> eb 1))
+          (! Int :var sb :syntax ⟨numeral⟩ :restrict (> sb 1))
+          (! Int :var m :syntax ⟨numeral⟩ :implicit :restrict (= m (+ sb eb)))
+          (BitVec m)
+          (FloatingPoint eb sb)))
+    (to_fp
+      (-> (! Int :var mb :syntax ⟨numeral⟩ :implicit :restrict (> mb 1))
+          (! Int :var nb :syntax ⟨numeral⟩ :implicit :restrict (> nb 1))
+          (! Int :var eb :syntax ⟨numeral⟩ :restrict (> eb 1))
+          (! Int :var sb :syntax ⟨numeral⟩ :restrict (> sb 1))
+          RoundingMode
+          (FloatingPoint mb nb)
+          (FloatingPoint eb sb)))
+    (to_fp
+      (-> (! Int :var eb :syntax ⟨numeral⟩ :restrict (> eb 1))
+          (! Int :var sb :syntax ⟨numeral⟩ :restrict (> sb 1))
+          RoundingMode
+          Real
+          (FloatingPoint eb sb)))
+    (to_fp
+      (-> (! Int :var eb :syntax ⟨numeral⟩ :restrict (> eb 1))
+          (! Int :var sb :syntax ⟨numeral⟩ :restrict (> sb 1))
+          (! Int :var m :syntax ⟨numeral⟩ :implicit :restrict (> m 0))
+          RoundingMode
+          (BitVec m)
+          (FloatingPoint eb sb)))
+    (to_fp_unsigned
+      (-> (! Int :var eb :syntax ⟨numeral⟩ :restrict (> eb 1))
+          (! Int :var sb :syntax ⟨numeral⟩ :restrict (> sb 1))
+          (! Int :var m :syntax ⟨numeral⟩ :implicit :restrict (> m 0))
+          RoundingMode
+          (BitVec m)
+          (FloatingPoint eb sb)))
+    (to_ubv
+      (-> (! Int :var eb :syntax ⟨numeral⟩ :implicit :restrict (> eb 1))
+          (! Int :var sb :syntax ⟨numeral⟩ :implicit :restrict (> sb 1))
+          (! Int :var m :syntax ⟨numeral⟩ :restrict (> m 0))
+          RoundingMode
+          (FloatingPoint eb sb)
+          (BitVec m)))
+    (to_sbv
+      (-> (! Int :var eb :syntax ⟨numeral⟩ :implicit :restrict (> eb 1))
+          (! Int :var sb :syntax ⟨numeral⟩ :implicit :restrict (> sb 1))
+          (! Int :var m :syntax ⟨numeral⟩ :restrict (> m 0))
+          RoundingMode
+          (FloatingPoint eb sb)
+          (BitVec m)))
+    (to_real
+      (-> (! Int :var eb :syntax ⟨numeral⟩ :implicit :restrict (> eb 1))
+          (! Int :var sb :syntax ⟨numeral⟩ :implicit :restrict (> sb 1))
+          (FloatingPoint eb sb)
+          Real))
+
+  )
+
+)
+
+

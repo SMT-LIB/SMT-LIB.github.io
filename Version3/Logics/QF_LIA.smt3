@@ -1,0 +1,57 @@
+(define-module QF_LIA
+ (
+  (set-info :smt-lib-version 3.0)
+  (set-info :smt-lib-release "2020-XX-XX")
+  (set-info :written-by "Pascal Fontaine and Cesare Tinelli")
+  (set-info :date "2020-07-01")
+  (set-info :last-updated "2020-07-01")
+  (set-info :update-history
+   "TODO.
+   "
+  )
+
+  (set-info :notes
+   "Closed quantifier-free and choice-free formulas built over an arbitrary 
+    expansion of the Ints signature with free nullary constants, 
+    but whose terms of type Int are all linear, that is, have no occurrences 
+    of the constants div, mod, and abs.
+    Multiplication terms with _concrete_ coefficients are allowed, that is, terms
+    of the form (* c x) or (* x c) where x is a free constant [arbitrary term?] and 
+    c is a term of the form n or (- n) for some numeral n
+    (as specified in theory Ints).
+   ")
+
+  (import (Core Ints))
+  (open Core)
+  (open Ints)
+ )
+
+ :types (Bool Int)
+
+ :consts (
+    (true Bool)
+    (false Bool)
+    (ite (-> (! Type :var A :implicit) Bool A A A))
+    (not (-> Bool Bool))
+    (= (-> (! Type :var A :implicit) A A Bool))
+    (distinct (-> (! Type :var A :implicit) A A Bool))
+    (and (-> Bool Bool Bool))
+    (or (-> Bool Bool Bool))
+    (=> (-> Bool Bool Bool))
+    (xor (-> Bool Bool Bool))
+    (⟨numeral⟩ Int)
+    (+ (-> Int Int Int))
+    (- (-> Int Int Int))
+    (* (-> (! Int :syntax ⟨int_value⟩) (! Int :syntax ⟨symbol⟩) Int)) ; linear multiplication
+    (* (-> (! Int :syntax ⟨symbol⟩) (! Int :syntax ⟨int_value⟩) Int)) ; linear multiplication
+    (> (-> Int Int Bool))
+    (>= (-> Int Int Bool))
+    (< (-> Int Int Bool))
+    (<= (-> Int Int Bool))
+  )
+
+ :FOL
+ :no-new-types
+ :no-new-functions
+)
+

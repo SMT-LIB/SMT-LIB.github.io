@@ -1,0 +1,212 @@
+; Core SMT-LIB theory
+
+(define-module Core ( 
+  (set-info :smt-lib-version 3.0)
+  (set-info :smt-lib-release "2020-XX-XX")
+  (set-info :written-by "Pascal Fontaine and Cesare Tinelli")
+  (set-info :date "2020-04-24")
+  (set-info :last-updated "2020-04-24")
+  (set-info :update-history
+   "TODO.
+   "
+  )
+
+  ;---------------
+  ; Builtin types
+  ;--------------- 
+  ; Booleans
+  (declare-type Bool () :builtin
+   "The (binary) set {true, false}")
+
+  ; Could be defined as a datatype in alternative
+
+  ;-------------------
+  ; Builtin constants
+  ;------------------- 
+   ; Equality  
+  (declare-const = (-> (! Type :var A :implicit) 
+                       A A Bool)
+   :chainable 
+   :builtin 
+   "= denotes the identity function, which returns true iff 
+    its two arguments are identical.")
+
+  ;-----------------------
+  ; Axiomatized constants
+  ;----------------------- 
+  ; true, false
+  (define-const true Bool)
+  (declare-const false Bool)
+  ; ite
+  (declare-const ite 
+    (-> (! Type :var A :implicit) 
+           Bool A A A))
+  ; ite is if-then-else
+  (assert (forall ((A Type)) (= (ite true) (lambda ((x A) (y A)) x))))
+  (assert (forall ((A Type)) (= (ite false) (lambda ((x A) (y A)) y))))
+  ; true and false are distinct
+  (assert (= (= true false) false))
+
+  ;-------------------
+  ; Defined constants
+  ;------------------- 
+  ; not
+  (define-const not (-> Bool Bool) 
+    (lambda ((b Bool)) (ite b false true)))
+  ; distinct
+  (define-const distinct (-> (! Type :var A :implicit) A A Bool) 
+    (lambda ((A Type :implicit) (x A) (y A)) (not (= x y))) :pairwise)
+  ; or
+  (define-const or (-> Bool Bool Bool) 
+    (lambda ((b1 Bool) (b2 Bool)) (ite b1 true b2)) :left-assoc)
+  ; and
+  (define-const and (-> Bool Bool Bool) 
+    (lambda ((b1 Bool) (b2 Bool)) (ite b1 b2 false)) :left-assoc)
+  ; implies
+  (define-const => (-> Bool Bool Bool) 
+    (lambda ((b1 Bool) (b2 Bool)) (ite b1 b2 true)) :right-assoc)
+  ; xor
+  (define-const xor (-> Bool Bool Bool) 
+    (lambda ((b1 Bool) (b2 Bool)) (distinct b1 b2)) :left-assoc)
+  ; forall
+  (define-const forall 
+    (-> (! Type :var A :implicit)
+        (-> A Bool) Bool)
+    (lambda ((A Type :implicit) (P (-> A Bool)))
+      (= P (lambda ((x A)) true))))
+  ; Note: This forall quantifies only over individuals, not over types.
+  ;       A forall quantifier over types is provided as a primitive binder.
+
+  (set-info :notation 
+   "(forall ((x τ)) φ) abbreviates 
+    (forall (lambda ((x₁ τ₁)) φ))
+  
+    (forall ((x₁ τ₁) ⋅⋅⋅ (xᵢ τᵢ)) φ) abbreviates 
+    (forall ((x₁ τ₁)) ⋅⋅⋅ (forall ((xᵢ τᵢ)) φ))
+
+    (forall ((τ₁ Type) ⋅⋅⋅ (τⱼ Type) (x₁ τ₁) ⋅⋅⋅ (xᵢ τᵢ)) φ) abbreviates 
+    (forall ((τ₁ Type) ⋅⋅⋅ (τⱼ Type))
+      (forall ((x₁ τ₁)) ⋅⋅⋅ (forall ((xᵢ τᵢ)) φ)))
+   ")
+  ; exists
+  (define-const exists 
+    (-> (! Type :var A :implicit) 
+        (-> A Bool) Bool) 
+    (lambda ((A Type :implicit) (P (-> A Bool)))
+      (distinct P (lambda ((x A)) false))))
+  ;
+  (set-info :notation 
+   "(exists ((x τ)) φ) abbreviates 
+    (exists (lambda ((x₁ τ₁)) φ))
+
+    (exists ((x₁ τ₁) ⋅⋅⋅ (xᵢ τᵢ)) φ) abbreviates 
+    (exists ((x₁ τ₁)) ⋅⋅⋅ (exists ((xᵢ τᵢ)) φ))
+   ")
+
+  ; Hilbert's choice (ε)
+  (declare-const choose 
+    (-> (! Type :var A :implicit)
+        (-> A Bool) A))
+  ;
+  ; choose is axiomatically defined  
+  (assert (forall ((A Type) (P (-> A Bool))) 
+    (= (exists P) (P (choose P)))))
+  ;
+  (set-info :notation 
+   "(choose (x τ) φ)  abbreviates  (choose (lambda ((x τ)) φ))
+   ")
+
+  ;-------------
+  ; Bool values
+  ;-------------
+  ; The set of values of type Bool is {true, false}.
+  (define-syntax (⟨bool_value⟩)
+    ; production rules
+    ((⟨bool_value⟩ (true false))))
+
+  (define-values Bool ⟨bool_value⟩)
+
+  ; compose
+  (define-fun compose
+   ((A Type :implicit)
+    (B Type :implicit)
+    (C Type :implicit)
+    (f (-> B C))
+    (g (-> A B))
+   )
+   (-> A C)
+   (lambda ((a A)) (f (g a)))
+   :note 
+    "compose is not declared left-associative on purpose otherwise
+     there would be ambiguity between (compose f g h) where f g and h 
+     are functions to be composed and (compose f g a) where a is 
+     the input of g."
+ )
+
+; ; pipe
+;   (define-const pipe
+;     (-> (! Type :var A :implicit)
+;         (! Type :var B :implicit)
+;         A (-> A B) B)
+;     (lambda ((A Type) (B Type) (a A) (f (-> A B)))
+;       (f a))
+;     :left-assoc  ; this is actually problematic without type inference:
+;     ; (pipe a f g) = (pipe (pipe a f) g)      ((pipe a f) g)
+;     ; (pipe a f g) = (pipe (pipe a f) g) 
+;     )
+
+
+; identity
+  (define-const iden
+    (-> (! Type :var A :implicit) A A)
+    (lambda ((A Type) (a A)) a))
+
+  ;apply
+  (define-const apply
+    (-> (! Type :var A :implicit)
+        (! Type :var B :implicit)
+        (-> A B) A B)
+    (lambda ((A Type) (B Type) (f (-> A B))) f)
+    :left-assoc ; (apply g a b) = (apply (apply g a) b) 
+  )
+
+ 
+
+  ;-----------------------
+  ; Abstract value syntax
+  ;-----------------------
+  (define-syntax 
+    ; non-terminals
+    ( ⟨abstract_value⟩ ⟨bool_value⟩ )
+    ; production rules
+    ( (⟨bool_value⟩ (true false))
+      (⟨abstract_value⟩ ((! ⟨symbol⟩ :restrict "starts with @")))))
+
+  (define-values () Bool ⟨bool_value⟩)
+
+
+  ;-------------------
+  ; Import Attributes
+  ;-------------------
+
+     ; FOL
+  (set-info :FOL
+   "The import attribute :FOL restricts Core
+      to the first-order applicative fragment:
+      - no lambdas
+      - no partial applications: 
+        the first argument of an application can only be a constant
+      - all arguments of an application have a type of order 0
+      - can only declare or define constants whose type has order <= 1
+      - can use forall, exists, and choose only in their
+        abbreviated form.
+   ")
+
+  (set-info :no-new-types 
+   "The import attribute :no-new-types disallows the use  
+    of the declare-type command.")
+
+  (set-info :no-new-functions 
+   "The import attribute :no-new-functions disallows the declaration 
+    of constants of arrow type.")
+))

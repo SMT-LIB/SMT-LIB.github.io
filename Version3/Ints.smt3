@@ -1,0 +1,152 @@
+(define-module Ints (
+  (set-info :smt-lib-version 3.0)
+  (set-info :smt-lib-release "2020-XX-XX")
+  (set-info :written-by "Pascal Fontaine and Cesare Tinelli")
+  (set-info :date "2020-05-01")
+  (set-info :last-updated "2020-05-01")
+  (set-info :update-history
+   "TODO.
+   "
+  )
+  (set-info :notes 
+   "Integer arithmetic")
+ 
+  (import (Core))
+  (open Core)
+
+  ;---------------
+  ; Builtin types
+  ;--------------- 
+  ; Int
+  (declare-type Int () :builtin 
+  "Int denotes the set of all integer numbers.")
+
+  ;-------------------
+  ; Builtin constants
+  ;------------------- 
+  ; 0, 1, 2, ...
+  (declare-const ⟨numeral⟩ Int :builtin 
+   "Each numeral denotes the corresponding integer as usual.") 
+  ; successor
+  (declare-const +1 (-> Int Int) :builtin
+   "+1 denotes the integer successor function")
+  ; predecessor
+  (declare-const -1 (-> Int Int) :builtin
+   "-1 denotes the integer predecessor function")
+  ; <
+  (declare-const < (-> Int Int Bool) :builtin
+   "< denotes the standard strict total ordering over the integers."
+   :chainable)
+  ;
+
+  ;-----------------------------------
+  ; Axiomatized and defined constants
+  ;----------------------------------- 
+
+  ; <=
+  (define-const <= (-> Int Int Bool) (lambda ((x Int) (y Int)) 
+    (or (= x y) (< x y)))
+   :chainable)
+  ; >
+  (define-const > (-> Int Int Bool) (lambda ((x Int) (y Int))
+    (< y x))
+   :chainable)
+  ; >=
+  (define-const >= (-> Int Int Bool) (lambda ((x Int) (y Int))
+    (or (= x y) (> x y)))
+   :chainable)
+  ; unary -
+  (define-const-rec - (-> Int Int) (lambda ((x Int))
+    (ite (= x 0) 0
+      (ite (< x 0) (+1 (- (+1 x))) 
+        (-1 (- (-1 x)))))))
+  ; +
+  (define-const-rec + (-> Int Int Int) (lambda ((x Int) (y Int)) 
+    (ite (= y 0) x 
+      (ite (< y 0) (-1 (+ x (+1 y))) 
+        (+1 (+ x (-1 y))))))
+   :left-assoc)
+  ; binary -
+  (define-const - (-> Int Int Int) (lambda ((x Int) (y Int)) 
+    (+ x (- y)))
+   :left-assoc
+   :no-partial ; this constant cannot be applied partially 
+   )
+  ; * 
+  (define-const-rec * (-> Int Int Int) (lambda ((x Int) (y Int)) 
+    (ite (= y 0) 0
+      (ite (< y 0) (- (* x (- y))) 
+        (+ x (* x (-1 y))))))
+   :left-assoc)
+  ; abs
+  (define-const abs (-> Int Int) (lambda ((x Int))
+    (ite (>= x 0) x (- x))))
+  ; div 
+  (declare-const div (-> Int (! Int :var n :restrict (distinct n 0)) Int) 
+   :left-assoc)
+  ; mod
+  (declare-const mod (-> Int Int Int))
+  ; div/mod axiom
+  (assert (forall ((m Int) (n Int)) (=> (distinct n 0)
+    (let ((q (div m n)) (r (mod m n)))
+      (and (= m (+ (* n q) r))
+           (<= 0 r (-1 (abs n))))))))
+      
+  ; divisible by constant n
+  (define-const divisible (-> Int (! Int :var n :restrict (> n 0)) Bool)
+    (lambda ((m Int) (n Int)) (= (mod m n) 0)))
+
+
+  (set-info :notes
+   "The axiomatization of div and mod is based on [1].
+   
+    Regardless of the sign of m, 
+    - when n is positive, (div m n) is the floor of the rational number m/n;
+    - when n is negative, (div m n) is the ceiling of m/n.
+
+    This contrasts with alternative but less robust definitions of div and mod
+    where (div m n) is 
+    - always the integer part of m/n (rounding towards 0), or 
+    - always the floor of x/y (rounding towards -infinity).
+
+    [1] Boute, Raymond T. (April 1992). 
+        The Euclidean definition of the functions div and mod. 
+        ACM Transactions on Programming Languages and Systems (TOPLAS) 
+        ACM Press. 14 (2): 127 - 144. doi:10.1145/128861.128862.
+   ")
+
+  ; summation
+  (define-const-rec sum (-> Int Int (-> Int Int) Int)
+    (lambda ((a Int) (b Int) (f (-> Int Int)))
+      (ite (> a b) 
+        0 
+        (+ (f a) (sum (+1 a) b f)))))
+
+  ;-------- 
+  ; Values
+  ;--------
+  ; The set of values for type Int consists of 
+  ;  - all numerals,
+  ;  - all terms of the form (- n) where n is a numeral other than 0.
+  (define-syntax 
+    ; non-terminals
+    (⟨int_value⟩ ⟨pos_numeral⟩) 
+    ; production rules
+    ((⟨int_value⟩ (⟨numeral⟩
+                   (- ⟨pos_numeral⟩)))
+     (⟨pos_numeral⟩ ((! ⟨numeral⟩ :syntax-restrict "other than 0")))))
+
+  (define-values () Int ⟨int_value⟩)
+
+
+  ;-------------------------------
+  ; External and Bridging symbols
+  ;-------------------------------
+  ; Real
+  (declare-type Real () :extern Reals::Real)
+
+  (declare-const to_int (-> Real Int) :builtin 
+   "to_int denotes the function that maps each real number r 
+    to its integer part, that is, to the largest integer n 
+    that satisfies (<= (to_real n) r).")
+))

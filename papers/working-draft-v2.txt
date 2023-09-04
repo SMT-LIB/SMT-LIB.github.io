@@ -1,0 +1,915 @@
+
+                SMT-LIB Logic and Language Version 2
+                            Working Draft
+
+                            Cesare Tinelli
+
+                             24 July 2009
+
+===========
+0. Prologue
+===========
+
+This document describes the proposed Version 2 of the SMT-LIB logic and input language. It assumes previous familiarity with Version 1.2.
+A more complete and self-contained document will be issued later.
+
+The document is based on discussions within the SMT-LOGIC work group created specifically for this purpose, and from additional feedback from other people. The work group consists of Clark Barrett, Sylvain Conchon, Bruno Dutertre, Jim Grundy, Leonardo de Moura, Albert Oliveras, Aaron Stump, and Cesare Tinelli.
+External feedback was provided by Sava Krstic and Philipp Ruemmer.
+
+
+Legend: 
+- Text enclosed in (*  *) describes the motivations for new 
+  or modified features in Version 2 with respect to Version 1.2.
+- All examples of the new language are in the new concrete syntax.
+- The meta syntax _some text_ and *some text* is used in this
+  document as a substitute for the italics and the bold font,
+  respectively.
+
+====================
+1. Underlying Logic
+====================
+
+The underlying logic of this new version of the SMT-LIB language is basically the same as before: classical many-sorted logic.
+The main differences are:
+
+1) Sorts are denoted by (first-order) sort *terms* built with sort symbols of arity >= 0.
+
+-----------------------------------------------------------------
+Ex:
+- sort symbols of arity 0: Int, Index, Elem
+- sort symbols of arity 1: List, Set
+- sort symbols of arity 2: Array
+
+- Sort Terms:
+  Int, Index, Elem, (Array Index Elem), (Set (Array Index Elem))
+-----------------------------------------------------------------
+
+(* This change is motivated by our goal to introduce some form of parametric types into the logic, which will be done through the use of schematic theory declarations (see later). *)
+
+2) We drop the distinction between terms and formulas but we introduce a distinguished Bool sort, always interpreted as the Booleans, for what were formulas before.
+
+(* The reason for this change is that it allows us to considerably simplify the syntax of the language without introducing any substantial complications for SMT-solver writers (at least as far as ground formulas are concerned). *)
+
+
+==================
+2. Abstract syntax
+==================
+
+2.1 Terms
+
+The new abstract syntax for terms is captured by the rules below. 
+Parentheses are meta-symbols used for grouping, As usual, the unary suffix meta-symbols * and + indicate zero, resp. one, or more repetitions.
+
+Similarly to the current version, the rules are very liberal since further restrictions are imposed orthogonally by an associated type system.
+
+[Annotations]   alpha ::= a = v   (v is intentionally left unspecified)
+
+[Sort symbols]  q ::= as before, but now with an associated
+                      arity >= 0
+[Sort terms]    s ::= q s*
+
+[Special constants]  c ::= includes rationals and numerals (see later)
+[Variables]	        x ::= as before
+[Fun. Symbols]  	    f ::= as before 
+
+[Terms]         u ::= x | c
+                        |  f t*
+                        |  f^s t*
+                        |  let (x = t)+ in t
+                        |  exists (x:s)+ t | forall (x:s)+ t
+[Annot. Terms]  t ::= u alpha*
+
+Main differences with the previous abstract syntax:
+
+- sorts are now denoted by (ground) first-order terms;
+- the syntactical category of predicate symbols is gone: predicate symbols become function symbols with a Boolean return sort;
+- the syntactical category of formulas is gone, formulas are now Boolean terms;
+- there is a single let construct, with one or more (parallel) bindings;
+- the Boolean connectives, ite, distinct, and = are all demoted from connectives of the language to theory function symbols (see later);
+- generalized overloading of function symbols is now allowed;
+- within a term, a function symbol f can be given a sort qualifier, with the expression f^s (see later).
+
+
+2.2 Type system
+
+For convenience the words "type" and "sort" will be used interchangeably here. The new type system is similar to the current one except for the addition of type rules for sort terms (which simply check that a sort symbol is applied to the correct number of arguments), it has a lot less rules, thanks to the simplifications above.
+
+Note that despite having now sort symbols of non-zero arity, the logic remains first-order. In particular, contrary to higher-order typed logics, it does not have a distinguished binary sort symbol ->, say, such that the sort term (-> s_1 s_2) denotes, in every model, the set of total functions between (the denotations of) the sorts s_1 and s_2.
+Of course, we can model total functions as a data type in this proposed version (we already do that in Version 1.2 in the theory of arrays with extensionality). But that is done at the level of an individual theory, not at the level of the logic itself.
+
+Also, the logic remains many-sorted and keeps the same model theoretic semantics as in the previous version. A sort term, such as (Array Real Real), denotes a (single) domain (i.e., a non-empty set of individuals) the same way as a sort symbols do in Version 1.2.
+This is in contrast with logic with parametric types, which allow also type variables. There, a type with variables, such as (Array alpha beta) where alpha, beta are type variables, denotes a family of domains.
+
+A more substantial change to the type system is that the language now allows polymorphic function symbols, with polymorphism being both of the "ad-hoc" kind (aka, overloading) and of the "parametric" kind. 
+
+In the first kind, a function symbol can have two entirely different ranks, even with different arity, e.g., 
+  - : Real Real       and 
+  - : Real Real Real 
+for arithmetic minus. 
+
+In the second kind, the arity is the same and all the different ranks have the "same shape", e.g.,
+  select : (Array s1 s2) s1 s2 
+for any sort terms s1 and s2. 
+
+Note that this is an informal distinction. Strictly speaking, all polymorphism---even the second kind---is ad-hoc because the logic does not have parametric types.
+
+The important point is that, with this sort of generalized overloading, the type system is not deterministic anymore: a term may have more than one sort.
+Moreover, even when it does have a single sort, type inference (as opposed to simpler type checking) may be necessary to compute that sort. Explicit type qualifiers for function symbols, as in f^s, have been introduced as a simple way to resolve the non-determinism. 
+
+Using type qualifiers, it is still possible to compute deterministically the type of any term bottom-up during parsing as it is with Version 1.2. Figuring out which function symbols to qualify explicitly is quite simple because the only troublesome cases are those of overloaded function symbols with same input sorts and different output sort, as in 
+
+  f : s_1 ... s_n s   and 
+  f : s_1 ... s_n s'
+
+with n >= 0 and s, s' distinct. Let's call such function symbols "ambiguous".
+
+In a term of the form (f t_1 ... t_n) with f ambiguous, and only in those, f needs to be annotated with its intended returned type. For instance, if the return type is meant to be s, the term must be written as (f^s t_1 ... t_n).
+
+We will then enforce the following policy for SMT-LIB benchmarks: 
+
+     Every ambiguous function symbol occurring in a benchmark 
+     formula must be annotated with a type qualifier.
+
+(As for occurrences of ambiguous symbols in a theory definition, see the section on schematic theories.)
+
+A concrete example of such situations comes from logics of lists where the empty list constant symbol 'nil' has two or more types, say, 
+   (List A), (List B), ... 
+The policy prescribes that every occurrence of nil in a formula must be accompanied by a type qualifier. In the concrete syntax, described later, instead of just nil we must have instead 
+   (as nil (List A)), (as nil (List B)), ...
+
+
+2.3 Constant declarations
+
+Many theories have (in effect) some large, even infinite, set of constant symbols all of the same type: the integer theory uses all the numerals (0, 1, 2, ...); the real theory uses all the decimals (0.0, 0.1, ...); some theories of strings use all the quotes-enclosed strings ("", "abc", ...).
+We identify a few such sets and treat them specially.
+At the abstract syntax level we have:
+
+  n ::= all numerals (as before)
+  r ::= all rationals (as before)
+  h ::= all hexadecimals (new)
+  b ::= all binaries (new)
+  w ::= all strings (new)
+
+The set of all special constants (which, are distinct from other function symbols) is then:
+
+  c := n | r | h | b | w
+
+We associate a special symbol to each of these *sets*:
+
+  N   for all numerals
+  R   for all rationals
+  H   for all hexadecimals
+  B   for all binaries
+  W   for all strings
+
+Each of these symbols can now be used in a function symbol declaration to declare all the constants symbols in the corresponding set at once.
+Before, function symbol declarations were defined by:
+
+  D_f ::= f s+ alpha*
+       | n s alpha*
+       | r s alpha* 
+
+Now the rules are:
+
+  C ::= N | R | H | B | W
+
+  D_f ::= f s+ alpha*
+       | c s alpha*
+       | C s alpha* 
+
+These rule allow one to declare individual constants (such as 0), or whole sets of them (such all the numerals) at once.
+The use of the special symbols C, however, is limited only to theory declarations. In other words, they cannot be used in an :extrafuns field of a benchmark.
+
+(* The rationale for the extra symbols is that they introduce more flexibility and convenience when declaring certain theories. The reason for not allowing them in :extrafuns declarations is to avoid unnecessarily complicating the parsing and processing of such declarations given that a single benchmark uses only finitely-many symbols anyway. *)
+
+
+2.4 Global Function Symbol Definitions
+
+In addition to local symbol definitions, provided by the let construct, we now have global definitions within a theory declaration or a benchmark.
+Contrary to let, which defines only constants/variables, global definitions can define function symbols too.
+So we add another possibility to a function symbol declaration:
+
+  D_f ::= ...
+       | f (x:s)* t alpha*
+
+where (x:s)* names the function's inputs and specifies their sort, and t is a term not containing f whose free variables are among the input variables. 
+
+The effect of a global definition
+
+   f x_1:s_1 ... x_n:s_n t                            (1)
+
+(with n >= 0 and t of some sort s) in a theory declaration or a benchmark is the same as declaring f to have rank (s_1 ... s_n s) and adding the axiom
+
+   forall x_1:s_1 ... x_n:s_n  (f x_1 ... x_n) = t    (2)
+
+in the :definition attribute (for theories) or the :assumption attribute (for benchmarks).
+
+(* Global definitions are added for convenience and efficiency, since terms like (f t_1 ... t_n) in a formula can be treated as macro applications. That is easier for a solver to do than to process the quantified assumption (2) above.
+
+Another important advantage of function definitions in a benchmark is that they have global scope within the benchmark, so they can be used, for instance, to define constant terms that can appear in both an assumption and the main formula of the benchmark. Note that the 'let' construct cannot be used for that because it has local scope within an :assumption or :formula attribute.
+*)
+
+
+2.5 Sort Declarations and definitions
+
+Sort declarations within a theory declaration or a benchmark now need to specify the arity of the sort symbol:
+
+[Sort Declaration]   D_s ::= q n
+
+Similarly to global function definitions, complex sort expressions can be given for convenience a short name with global scope in a theory or benchmark declaration. A short name q for a sort term s does not define a new type, it is just a synonym of s and could be expanded to s everywhere.
+For example, one can declare, say, MyList as a synonym of (List (Set Real)).
+
+A sort declaration is now
+
+[Sort Declaration]   D_s ::= q n
+                          |  q s
+
+where s is a sort term. In a declaration of the form (q s), the sort symbol q has arity 0 and is just a synonym for s. As a side restriction, s should not be expansible to a sort term containing q---in other words, the definition of a sort synonym cannot be circular. 
+
+
+==================
+3. Concrete syntax
+==================
+
+The new concrete language is now included in the following subset of Common Lisp S-expressions:
+
+  <numeral> ::= 0 | a non-empty sequence of digits not starting with 0
+
+  <rational> ::= <numeral>.0*<numeral>
+
+  <hex> ::= a non empty sequence of digits and the letters
+            from a to f, capitalized or not
+
+  <hexadecimal> ::= #h<hex>
+------------------------------
+Ex: #h0  #hA04  #h01Ab #h61ff
+------------------------------
+
+  <bin> ::= a non-empty sequence of 0s and 1s
+  <binary> ::= #b<bin>
+------------------------------
+Ex: #b0  #b001 #b101011
+------------------------------
+
+  <string> ::=  ASCII character string in double quotes
+                with C-style escaped characters: \", \n, ...
+
+  <spec_constant> ::= <numeral> | <rational>
+                   | <hexadecimal> | <binary> | <string>
+
+  <symbol> ::= any non-empty sequence of letters, digits and the 
+               characters + - / * = ~ ? ! . _ $ % & ^ < > @ :
+               that does not start with a digit
+            |  any sequence of printable ASCII characters that starts
+               and ends with | and does not otherwise contain |
+----------------------------------------------------------------
+Ex.
+ +  <=  x plus ** $ <sas  <adf>  :::   abc77 *$s&6  .kkk  .8 
+
+|this is a single symbol|
+
+||
+
+|af klj^*(0asfsfe2(&*)&(#^$>>>?"']]984|
+----------------------------------------------------------------
+
+  <S-expression> ::= <spec_constant> | <symbol> | ( <S-expression>* )
+
+
+Main differences with the current syntax:
+
+a) Overall, the concrete grammar is simpler.
+(* This was done mostly to allow simpler parsers and so lower the barrier to entry. *)
+
+b) We have a special syntax (but not semantics!) for hexadecimal constants and bitstring constants. Parsing is kept simple by the reserved use of # for starting such constants and a one-letter qualifier (h and b).
+
+c) The language generated by the concrete syntax is a subset of S-expressions; in, particular, the problematic use of the symbols [ ] { } in Version 1.2 is gone.
+(* This way, benchmarks can be processed by tools that understand S-expressions. *)
+
+d) The value of a user-defined attribute is an arbitrary S-expression---as opposed to an arbitrary sequence of characters in enclosed in { }.
+
+e) A variable's name is any simple identifier, as opposed to just one starting with ? or $.
+(* This is for flexibility, given that this extension does not really complicate parsing. And note that variables starting with ? or $ are still allowed. *)
+
+f) Indexed identifiers in mixfix notation, such as foo[3:4], are not allowed as symbols anymore but become expressions like (ind foo 3 4), where 'ind' is a new keyword.
+(* This is for consistency with the decision of using S-expressions as the only kind of expressions.
+
+The concrete syntax 
+  ( ind <simple_identifier> <index>+ ) 
+instead of, say, just
+  ( <simple_identifier> <index>+ )
+is motivated by the need to avoid ambiguity with function applications
+  ( <fun_symbol> <term>+ ) .
+*)
+ 
+g) Multi-arity function symbols are not allowed indiscriminately anymore. Every function symbol has a fixed arity, or a finite number of fixed arities in case of overloading. 
+For instance, 'and' and '=' now take exactly two arguments. 
+Expressions like (f x1 x2 x3 x4) with f is binary are still allowed, but only as syntactic sugar, provided that an annotation is added in this regard in the symbol's declaration.
+The following, mutually exclusive, annotations are now reserved for this purpose:
+
+  :left_assoc,  :right_assoc  and  :chainable.
+
+A function symbol f can be declared as
+
+i)   :left_assoc if it has rank of the form  (s1 s2 s1)
+ii)  :right_assoc if it has rank of the form (s1 s2 s2)
+iii) :chainable if it has rank of the form (s s Bool)
+
+Then (f t_1 ... t_n) is syntactic sugar respectively for:
+
+i)   (f ... (f (f t_1 t_2) t_3) ... t_n)
+ii)  (f t_1 (f t_2 ... (f t_{n-1} t_n) ...)
+iii) (and (f t_1 t_2) ... (f t_{n-1} t_n))  
+     [with 'and' itself assumed to be declared as :left_assoc]
+
+For example, we can have declarations like
+
+  (+ Real Real Real :left_assoc)
+  (cons E (List E) (List E) :right_assoc)
+  (and Bool Bool Bool :left_assoc)
+  (= A A Bool :chainable) 
+  (< Real Real Bool :chainable)
+
+For simplicity of parsing, the mechanism above is limited only to  
+theory symbols. User-defined symbols are not allowed to have a  
+multiarity syntax.
+
+(* The reason for this chance is that multiarity function symbols complicate parsing even if they allow for flatter expressions. Also, with Version 1.2 there as been much confusion about a number of operators op of rank (Bool Bool Bool) on whether (op x1 x2 x3) meant (op (op x1 x2) x3) or (and (op x1 x2) (op x2 x3)).
+The proposed syntax addresses both problems. The first because it limits the number of multiarity operators to just theory symbols. The second because now the distinction between the two interpretations of a multiarity operator is made explicit.
+
+Eliminating multi-arity operators from the logic (if not from the concrete syntax) has also another advantage. It greatly simplifies the definition of proof systems for SMT.
+*)
+
+For convenience and backward compatibility, the predefined symbol 'distinct' as well is allowed to have more than two arguments.
+The meaning of (distinct t_1 ... t_n) is the same as in Version 1.2: the conjunction of (distinct t_i t_j) for all 1 <= i < j <= n.
+The only difference is that now 'distinct' is officially just a binary symbol and (distinct t_1 ... t_n) is defined as syntactic sugar for the conjunction above.
+
+h) Symbols with an arbitrary sequence of characters delimited by vertical bars are new. They are inspired by Common Lisp (see http://www.cs.cmu.edu/Groups/AI/html/cltl/clm/node27.html#SECTION00630000000000000000) and were used in the granddad (grandmom?) of all SMT solvers, Simplify.
+
+(* Their main motivation is to be used as values of user-defined annotations, which in Version 1.2 were restricted to arbitrary text delimited by curly braces. *)
+
+i) The syntax for annotations within terms has changed. It used to be of the form
+
+  (<const> <annotation>+)   or
+  (<fun_symbol> <an_term>+ <annotation>)
+
+where <an_term> is an annotated term.
+
+(* That syntax made parsing unnecessary complicated because some look-ahead could be needed to distinguish between the two cases above. *)
+
+The new syntax for adding annotations to terms is now 
+
+  ( annot <term> <annotation>+ )
+
+where 'annot' is a new keyword. 
+
+(* This should eliminate the parsing problems above while allowing the same level of flexibility as before (that is, terms and subterms can be freely annotated). *)
+
+(* Ignoring a user-defined annotation, for those systems that to do not make use of it, should be also easy, the only complication being that now the value of an annotation is an arbitrary S-expression, which means that a small subparser for S-expressions is needed to know when such a value begins and ends. [Admittedly, that is more complicated than what we have in Version 1.2, where the value of a user-defined attribute is any text enclosed in curly braces.]
+*)
+
+
+3.1 Terms
+
+Rules:
+
+  <index> ::= <numeral>
+
+  <identifier> ::= <symbol> | ( ind <symbol> <index>+ )
+
+  <sort_term> ::= <identifier> | ( <identifier> <sort_term>+ )
+--------------------------------------------------------
+Ex:  Int              (List (Array Int Real))   
+     (ind BitVec 3)   (Set (ind Bitvec 3))  
+     ((ind FixedSizeList 4) Real)
+--------------------------------------------------------
+
+  <attribute> ::= :<symbol>
+-----------------------------------
+Ex:  :date  :a2  :foo-bar  :<  :56
+-----------------------------------
+
+  <annotation> ::= <attribute> | <attribute> <S-expression>  
+                   where <S-expression> does not start with ':'
+---------------------------------------------------------
+Ex:   :assoc      
+      :status unsat
+      :my_attribute (humpty dumpty)
+      :authors "Jack and Jill"
+---------------------------------------------------------
+
+  <var> ::= <symbol>
+
+  <fun_symbol> ::= <identifier>
+                |  (as <identifier> <sort_term>)
+----------------------------------------------------------
+NOTE: (as <identifier> <sort_term>) corresponds to the 
+      abstract syntax expression f^s
+----------------------------------------------------------
+---------------------------------------------------------
+Ex:   +   <=  foo
+      (as nil (List Int))
+      (as + (Int Int Int))
+----------------------------------------------------------
+
+  <quant_symbol> ::= forall | exists
+
+  <sorted_var> ::= ( <var> <sort_term> )
+-------------------------------------------------------------------
+Ex:   (x Int)     (?a (Array Int (ind BitVec 4)))
+-------------------------------------------------------------------
+
+  <binding> ::= ( <var> <term> )
+-----------------------------------------
+Ex:   (x (+ y 4))
+-----------------------------------------
+
+  <term> ::= <var> | <spec_constant> | <fun_symbol>
+          | ( <fun_symbol> <term>+ )
+          | ( let ( <binding>+ ) <term> )
+          | ( <quant_symbol> ( <sorted_var>+ ) <term> )
+          | ( annot <term> <annotation>+ )
+----------------------------------------------------
+Ex:   (forall ((x (List Int)) (y (List Int)))
+        (append x y) =
+          (ite (= x (as nil (List Int)))
+             y
+             (let ((x.h (head x)) (x.t (tail x)))
+               (insert x.h (append x.t y)))))
+----------------------------------------------------
+
+Note that the concrete syntax for quantifier formulas:
+
+  ( <quant_symbol> ( <sorted_var>+ ) <term> )
+
+now encloses the list of quantified variables into parentheses.
+(* This change too is to simplify parsing. *)
+
+
+3.2 Sort Declarations
+
+Having introduced sort symbols of non-zero arity, sort declarations in a benchmark now look like this:
+
+  <sort_symb_decl> ::= ( <sort_symbol> <numeral> <annotation>*)
+                    |  ( <sort_symbol> <sort_term> <annotation>*)
+-----------------------------------------------------
+Ex: (Int 0)     ((ind BitVec 3) 0)
+    (List 1)    ((ind FixedLengthList 1) 1)
+    (Array 2)
+    (MyList (List (Array Int Real))) 
+-----------------------------------------------------
+
+
+3.3 Function Symbol Definitions
+
+Global definitions of function symbols are added as an option in function declarations (last option below):
+
+  <meta_spec_constant> ::= NUMERAL | RATIONAL | HEXADECIMAL | BINARY | STRING
+
+  <fun_symb_decl> ::= ( <spec_constant> <sort> <annotation>* )
+----------------------------------------------------------------------
+Ex: (0 Int)   (1.0 Real)  ("" String)
+----------------------------------------------------------------------
+
+    | ( <meta_spec_constant> <sort> <annotation>* )
+----------------------------------------------------------------------
+Ex: (NUMERAL Int)   (RATIONAL Real)  (STRING String)
+----------------------------------------------------------------------
+
+    | ( <fun_symbol> <sort>+ <annotation>* )
+----------------------------------------------------------------------
+Ex: (a Int)
+    (+ Int Int Int :left_assoc)
+    (store (Array I E) I E (Array I E))
+    ((ind extract 4 1) (ind BitVec 10) (ind BitVec 4))
+----------------------------------------------------------------------
+
+    | ( <fun_symbol> ( <sorted_var>* ) <term> <annotation>* )
+----------------------------------------------------------------------
+Ex: (a () (* 3 b))
+    (f ((x Real) (y Real)) (> x (+ y y)))
+----------------------------------------------------------------------
+
+
+3.4 Benchmarks
+
+The concrete syntax of benchmarks is essentially unchanged, except for the disappearance of the :extrapreds attribute and for the following new restrictions for the :extrasort and :extrafun attributes.
+
+1) none of the declared symbols can be indexed,
+
+2) none of the declared symbols can overload an already declared symbol (including theory symbols from the benchmarks logic).
+
+(* The rationale for the first restriction is that indexed identifiers are used in SMT-LIB to denote infinite families of theory symbols (as in the bitvector logics). The number of user-declared symbols in a benchmark is always finite, so using index identifiers is pointless, and it needlessly complicates the parsing of logics that do not have indexed theory symbols. (It is hard to justify the need for a user to declare an indexed identifier like (ind f 3) as opposed to, say, f_3.)
+
+The rationale for the second restriction is similar, considering that we do not allow parametric sorts in benchmarks (more on this later), which makes it impossible for a user to declare a polymorphic function. The only possible overloading then would be ad-hoc overloading (as in using +, say, for string concatenation). But such overloading is hardly necessary.
+*)
+
+-------------------------------
+Complete grammar for benchmarks
+-------------------------------
+
+<numeral> ::= 0 | a non-empty sequence of digits not starting with 0
+
+<rational> ::= <numeral>.0*<numeral>
+
+<hex> ::= a non empty sequence of digits and the letters
+          from a to f, capitalized or not
+
+<hexadecimal> ::= #h<hex>
+
+<bin> ::= a non-empty sequence of 0s and 1s
+
+<binary> ::= #b<bin>
+
+<string> ::=  ASCII character string in double quotes
+              with C-style escaped characters: \", \n, ...
+
+<spec_constant> ::= <numeral> | <rational>
+                 | <hexadecimal> | <binary> | <string>
+
+<symbol> ::= any sequence of letters, digits and the characters
+             + - / * = ~ ? ! . _ $ % & ^ < > @ :
+             that does not start with a digit
+            |  any sequence of printable ASCII characters that starts
+               and ends with | and does not otherwise contain |
+
+<S-expression> ::= <spec_constant> | <symbol> | ( <S-expression>* )
+
+<attribute> ::= :<symbol>
+
+<annotation> ::= <attribute> | <attribute> <S-expression>  
+	where <S-expression> does not start with ':'
+
+<index> ::= <numeral>
+
+<identifier> ::= <symbol> | ( ind <symbol> <index>+ )
+
+<sort_term> ::= <identifier> | ( <identifier> <sort_term>+ )
+
+<fun_symbol> ::= <identifier>
+              |  (as <identifier> <sort_term>)
+
+<quant_symbol> ::= forall | exists
+
+<var> ::= <symbol>
+
+<sorted_var> ::= ( <var> <sort_term> )
+
+<binding> ::= ( <var> <term> )
+
+<term> ::= <var> | <spec_constant> | <fun_symbol>
+        | ( <fun_symbol> <term>+ )
+        | ( let ( <binding>+ ) <term> )
+        | ( <quant_symbol> ( <sorted_var>+ ) <term> )
+        | ( annot <term> <annotation>+ )
+
+<sort_symb_decl> ::= ( <sort_symbol> <numeral> <annotation>*)
+                  |  ( <sort_symbol> <sort_term> <annotation>*)
+
+<meta_spec_constant> ::= NUMERAL | RATIONAL | HEXADECIMAL | BINARY | STRING
+
+<fun_symb_decl> ::= ( <spec_constant> <sort> <annotation>* )
+     | ( <meta_spec_constant> <sort> <annotation>* )
+     | ( <fun_symbol > <sort>+ <annotation>* )
+     | ( <fun_symbol> ( <sorted_var>* ) <term> <annotation>* )
+
+<status> ::= sat | unsat | unknown
+
+<bench_name> ::= <letter><symbol>
+
+<logic_name> ::= <letter><symbol>
+
+<family_name> ::= <letter><symbol>
+
+<bench_attribute> ::= :logic <logic_name>
+                   |  :family <family_name>
+                   |  :assumption <term>
+                   |  :formula <term>
+                   |  :status <status>
+                   |  :extrasorts ( <sort_sym_decl>+ )
+                   |  :extrafuns ( <fun_sym_decl>+ )
+                   |  :notes <string>
+                   |  <annotation>
+
+<benchmark> ::= (benchmark <bench_name> <bench_attribute>+ )
+
+
+=============================
+4 Theory declaration schemas
+=============================
+
+Version 2 adds some support for parametric types. The chosen approach is middle-ground between full support at the level of the logic itself, as done for instance in the logic of the HOL prover, and a meta-level solution via parametric theory specifications, as done for instance in the logic of the PVS prover.
+
+We now replace theory declarations with _theory declaration schemas_. These are like theory declarations except that they may contain _function symbol declaration schemas_. The latter are in turn like function symbol declarations except that they can use _sort parameters_, locally scoped sort symbols of 0 arity. A new binder called 'par' is used for to bind sort parameters.
+
+--------------------------------------------------------------------
+Ex:
+
+(theory Arrays
+ :sorts ((Array 2))
+ :funs ((par (X Y)                 ; a function declaration schema
+         (select (Array X Y) X Y)) ; with sort parameters X and Y
+        (par (X Y)
+         (store (Array X Y) X Y (Array X Y)))
+        ...
+       )
+ ...
+)
+
+(theory ListsWithLength
+ :sorts ((List 1) (Int 0))
+ :funs ((par (X)
+         (nil (List X)))
+        (par (X)
+         (cons X (List X) (List X)))
+        (par (X)
+         (head (List X) X))
+        (par (X)
+         (length (List X) Int))
+       )
+ ...
+)
+--------------------------------------------------------------------
+
+A declaration schema like the two above is not a theory declaration in the sense of Version 1.2 of SMT-LIB. Instead, it is a *class* of theory declarations, each of which is an _instance_ of the schema. 
+
+An instance of a theory declaration schema is obtained by providing a, possibly empty, set Q of sort symbols.
+
+(* Actually, in general we may need to instantiate a theory declaration schema also with a set of free functions symbols, which get added to the signature of the theory instance and are "uninterpreted".
+We overlook this aspect in this draft for simplicity, but it will be treated properly in the final document.
+*)
+
+The sorts of the instance theory consist of the set S of all (ground) sort terms over Q union R, where R is the set of sort symbols declared in the schema itself. Note that the set S is non-empty because, as discussed later, R will always contain the 0-arity sort symbol Bool.
+
+In concrete, instantiating the schematic theory declaration ListsWithLength above with Q = {}, we get a theory (declaration) ListsWithLength[Q] whose sorts are 
+  Bool, Int, 
+  (List Bool), (List Int), 
+  (List (List Bool)), (List (List Int)), ...
+
+Instantiating the schematic theory declaration Arrays above with Q = {Int/0, Real/0, List/1} (where the number after the sort symbol denotes its arity), we get a theory Arrays[Q] with a set S of sorts defined inductively as follows:
+ 
+- Int, Real, Bool are in S
+- for all s in S, (List s) is in S
+- for all s1, s2 in S, (Array s1 s2) is in S
+
+From the set S, each function declaration schema for a function symbol f introduces in the instance theory a family of function symbols, all called f and whose rank is obtained from the schematic one by instantiating the sort parameters with sorts from S.
+For instance, the theory Arrays[Q] above has all the (concrete) function symbols
+  (select (Array Int Int) Int Int),
+  (select (Array Int Real) Int Real),
+  ...,
+that is, all symbols with name 'select' and rank of the form
+((Array s1 s2) s1 s2) for all sorts s1, s2 of Arrays[Q]. 
+
+The input set Q of sort symbols determining an instance theory is specified by a logic declaration as explained in Sec. 5.
+
+(* The advantage defining instances of theory declaration schemas as done above is that we can get, with one instantiation of the schema, a *single* theory with arbitrarily nested sorts ---e.g., The theory of all nested lists (List Int), (List (List Int)), ..., as opposed to the theory of just flat lists of integers. This is convenient in applications coming from software verification, where verification conditions can contain arbitrarily nested data types. But it is also crucial in providing a simple and powerful mechanism for theory combination, as explained later.
+*)
+
+NOTE: For some applications, the instantiation mechanism above will definitely over-generate. For instance, with it is not possible to obtain from ListsWithLength an instance theory that contains (List Int) as the only list sort, without the nested list sorts.
+This however is not a problem, either in theory or in practice. Since a benchmark can refer only to ground sorts (sort parameters are not allowed in it), any sorts that are in the theory but not in the benchmark can be, for all purposes, simply ignored.
+Moreover, the sublogic mechanism of SMT-LIB allows one to specify a sublogic with a smaller set of sorts than those present in the sublogic's theory.
+
+The :definition field of a theory declaration schema is now used to define, in English, for every possible instance theory, the interpretation of its sorts and function symbols. 
+This definition will be typically (although in principle not necessarily) _uniform_ in some sense wrt the set of all possible sorts. For example, for the ListsWithLength theory declaration schema the definition may go like this: 
+
+"The sort Int is interpreted as the sort of integer numbers. For any sort s and any interpretation of s (as a non-empty set), the interpretation of (List s) is the set of all finite lists with elements from s; the interpretation of 'length' is the function that maps each list l over s to its number of elements. ..."
+
+(* Extending the SMT-LIB underlying logic to a logic with type variables and parametric types (as, say, in the logic of the HOL prover) has been advocated by some people, including myself, but questioned by others on the grounds that it unnecessarily complicates the construction of SMT solvers, because of the need to parse and reason about formulas with polymorphic terms and type quantifiers.
+The approach adopted here looks for the time being like a good compromise between expressibility of the SMT-LIB format and complexity of its underlying logic.
+The main advantage of this approach is that the semantics of the logic and, as a consequence, its associated inference apparatus remains essentially the same as in Version 1.2. The only difference is again that sorts are now named by ground terms such as (Array Int Real) instead of constants such as IntRealArray, say.
+The main limitation is that users cannot define (new) polymorphic function symbols in a benchmark. (Having polymorphic functions in theories, as theory declarations schema now in effect allow, is different because theories are typically built-in in an SMT solver.)
+While this is an actual limitation, it looks like in most practical cases it can be overcome by defining in the benchmark finitely many monomorphic versions of the polymorphic symbol.
+For instance, if a list 'append' symbol occurs in the benchmark without being a theory symbol, one can declare an append symbol for each of the finitely many list types occurring in the benchmark, and possibly add a corresponding defining axiom for each such symbol in the :assumptions attribute.
+*)
+
+
+4.1 Theory declaration schema for Booleans and equality
+
+Without the distinction between formulas and terms, and with theory declaration schemas, we can turn logical operators such as 'and', 'or', =, and so on, into theory-defined function symbols as opposed to distinguished logical constants. Semantically, the net effect is the same but we get much leaner abstract and concrete grammars.
+
+This is done by introducing the theory declaration schema below, and prescribing that every other theory declaration schema implicitly include this one, by implicitly including the same sorts and function symbols, with the same definition.
+
+(theory Core
+ :sorts ((Bool 0))
+ :funs (
+  (true Bool) (false Bool)
+  (not Bool Bool)
+  (implies Bool Bool Bool :right_assoc) 
+  (and Bool Bool Bool :left_assoc)
+  (or Bool Bool Bool :left_assoc)
+  (xor Bool Bool Bool :left_assoc)
+  (par (A)
+    (= A A Bool :chainable))
+  (par (A)
+    (ite Bool A A))
+  )
+ :definition
+ "Bool is the two-element domain of Boolean values.
+  For any sort s, 
+  - (= s s Bool) is the identity relation over the domain denoted
+    by s.
+  - (ite Bool s s) is the function that returns its second argument or
+    its third depending on whether the first argument is true or not.
+  - [The other function symbols are defined as expected.]
+"
+)
+
+NOTE: Refer back to Section 3 for the meaning of the :left_assoc, :right_assoc and :chainable annotations.
+
+As a consequence of considering formulas as terms of sort Bool, the iff operator of Version 1.2 is now superfluous because = can be used instead. Similarly, the old Boolean if_then_else operator is now superfluous too because 'ite' will now do.
+
+NOTE: The theory Empty currently in SMT-LIB is superseded by the theory declaration schema above.
+
+
+=====================
+5 Logic declarations
+=====================
+
+Logic declarations are defined essentially as in Version 1.2 except that they can now refer to one or more theory declaration schema.
+In the simpler case, a logic declaration defines an instance T[Q] of a single theory declaration schema T by specifying the input set Q of sort symbols for T. Then, as in Version 1.2 the logic declaration specifies some restriction on the language of T[Q].
+More generally, a logic declaration can specify a *combined* theory by referring to several theory declaration schemas. See Section 6 for more details on how the combined theory is determined.
+
+The names of the theory declaration schemas the logic refers to are listed in the value of the attribute :theories which replaces the attribute :theory of Version 1.2.
+Both the set Q of additional sort symbols and the restrictions on the language of the instance theory are specified, in English, in the :language attribute.
+
+NOTE: Q can be defined as a specific, finite set of sort symbols, or a generic one (e.g., the set of all free sort symbols of arity 0).
+
+NOTE: The restriction on the language can also involve the sorts of the theory instance. For example, for the theory schema ListWithInt in Section 4, it might state that the only allowed list sorts are those of the form (List s), where s is not a list sort. Such a restriction would define a logic of flat lists.
+
+
+============================
+6. Combinations of theories
+============================
+
+Defining a precise and simple mechanism for combining theories and sublogics in SMT-LIB is needed to contain the proliferation of theories and sublogics. Version 2 does this only for theories. 
+In practice, this means that a logic can refer to a theory obtained by combining two or more instance theories, but each logic must be specified individually.
+
+(* Introducing a simple modular mechanism for combining logic has turned out to be quite challenging and so it is left to later versions. *)
+
+
+6.1 Formal semantics
+
+Recall the difference between a theory declaration schema, standing for a class of theories, and an individual theory, an instance of some schema.
+If T is the name of a theory declaration schema and Q is a set of sort symbol, let T[Q] denote the instance of T obtained with Q as explained in Section 4.
+
+Independently from the instantiation mechanism, for our purposes, it is best to define a theory formally as a pair (Sigma, M) where
+
+- Sigma is a signature, a pair (S, F) where 
+  - S is a set of sort symbols with associated arity, and
+  - F is a set of function symbols with associated rank, and
+
+- M is a (possibly empty) set of many-sorted structures of
+  signature Sigma closed under (Sigma-)isomorphism.
+
+The closure condition on M means that if a structure A is in M, then every Sigma-structure isomorphic to A is also in M. It is a harmless technical requirement that avoids some unnecessary complications later.
+
+NOTE: Since we allow overloading, it is more convenient to see the rank of a function as part of the symbol itself. Similarly, for the sort symbols and their arity.
+
+Entailment, and so satisfiability, in these theories is defined as expected: a closed formula phi entails in T a closed formula psi (phi |=_T psi) iff every model in M that makes phi true also makes psi true.
+
+----------------------------------------------------------------------
+Ex:
+If we instantiate the theory declaration schema Arrays in the previous message (which, recall, implicitly includes the Core schema) with the sort symbols Q = {Int/0}, we get a theory T_A = Arrays[Q] = (Sigma_A, M_A) where
+
+o Sigma_A = ({Int/0, Bool/0, Array/2}, {...}) and
+o M_A is the set of all Sigma_A-structures that interpret
+  - Int as *any* non-empty set,
+  - Bool as the Booleans,
+  - and:Bool,Bool -> Bool, etc. as usual
+  - for all sorts s, s' over {Int/0, Bool/0, Array/2}
+    - (Array s s') as the set of total maps from the interpretation
+      of s to that of s'
+    - =:s,s -> Bool, ite:Bool,s,s -> s,
+      select:(Array s s'), s -> s', ..., as expected.
+
+RECALL:  '=', 'ite', 'select', 'store' are not function symbols of the signature. The whole '=:Bool,Bool -> Bool',  '=:Int,Int -> Bool', and so on are the function symbols.
+----------------------------------------------------------------------
+
+----------------------------------------------------------------------
+Ex:
+Similarly, consider a theory declaration schema for the integers like the Int theory currently in SMT-LIB, but again with the inclusion of the Core schema. If we instantiate it with the input sort set {Array/2},
+we get a theory T_I = (Sigma_I, M_I) where
+
+o Sigma_I = ({Int/0, Bool/0, Array/2}, {...}) and
+o M_I is the set of all Sigma_I-structures that interpret
+  - Int as the integers,
+  - Bool as the Booleans,
+  - and:Bool,Bool -> Bool, etc. as usual
+  - +:Int,Int -> Int, etc. as usual
+  - for all sorts s, s' over {Int/0, Bool/0, Array/2}
+    (Array s s') as *any* non-empty set.
+----------------------------------------------------------------------
+
+Generalizing from the examples above, the semantics requires that for any instance of a theory declaration schema, the sorts built with a symbol not originally from the theory be interpreted as *an arbitrary non-empty set*, for all possible such sets.
+
+
+6.2 Combinations of theories
+
+Now, for i = 1,2, let T_i = (Sigma_i, M_i) be a theory,
+with Sigma_i = (S_i, F_i).
+
+DEFINITION. The theories T_1 and T_2 are _combinable_ if they have exactly the same sort symbols (i.e, S_1 = S_2).
+
+--------------------------------------------------------------------
+Ex: The theories T_A and T_I in the previous examples are combinable:
+for each of them, the sort symbol set is {Bool/0, Int/0, Array/2}.
+--------------------------------------------------------------------
+
+NOTE: We combine theories, not theory schemas.
+
+NOTE: The requirement on the sort symbol sets for combinable theories is entirely out of convenience. In practice, it is no restriction at all since, we can always get combinable theories by proper instantiations of theory schemas.
+The convenience is that combinable theories already have all the sorts that the combined theory is going to have. Without the requirement, the combined theory would have more sorts than its component theories, making its definition somewhat more complicated. (For instance, if T_A above did not have the Int sort symbol, it would not have the (Array Int Int) sort either, and similarly for T_I. Then, it would not be obvious how (Array Int Int) should be interpreted in their combination.)
+
+DEFINITION. If T_1 and T_2 are combinable and S is their set of sort symbols, their _combination_ T_1 + T_2 is the theory T = (Sigma, M) where Sigma = (S, F_1 union F_2) and M consists of all Sigma-structure whose reduct to Sigma_i is isomorphic to a model of T_i, for i=1,2.
+
+RECALL: the reduct of a Sigma-structure A to a smaller signature Sigma' is the structure obtained from A by
+(i) forgetting about the interpretation of the function symbols not Sigma' and
+(ii) dropping all sets that are not the interpretation of a sort in Sigma'.
+
+---------------------------------------------------------------------
+Ex:
+The combination of T_A and T_I above is the theory all of whose models interprets
+- Bool as the Booleans
+- Int as the integers and
+- each (Array s s') as the total maps from s to s'.
+- the Boolean and the arithmetic symbols as expected
+- each 'select' and 'store' symbol as expected
+---------------------------------------------------------------------
+
+These notions extend trivially to the case of more than two theories that have the same shared signature pairwise.
+
+
+NOTE:
+(i) The combined theory T in the definition above is well-defined.
+
+(ii) For T_1 and T_2 whose M_i is the set of all models of a set A_i of first-order axioms, M is the set of all models of (A_1 union A_2).
+
+(iii) T may have an empty set of models. That is of course possible if T_1 and T_2 are jointly inconsistent, that is if |=_T_1 phi and |=_T_2 ~phi for some shared formula phi.
+That is why the definition of theory allows it to have a non-empty set of models. Of course, actual SMT-LIB benchmarks will use combinations of theories that do have models.
+
+(* A possibly useful strengthening of the definition of combinable theories would be to also require that their shared function symbols "have the same properties" in both theories. For instance, we may not want a shared symbol to be commutative in one theory and non-commutative in the other, the main reason being that we do not really know much on how to combine theory solvers for such theories.
+However, there are two problems with imposing such an additional restriction:
+(i) it is conceivable that future developments will give us methods for theories not satisfying it,
+(ii) we could not find a reasonably general formulation of it.
+
+A possible candidate could have been:
+
+T_1 and T_2 are combinable if S_1 = S_2 and each T_i is a conservative extension of some theory T_0 with signature Sigma_0 = (S_1, F_1 intersect F_2); in other words, if there exists a theory T_0 over the shared signature such that
+for all closed Sigma_0-formulas phi,  |=_T_i phi  iff  |=_T_0 phi.
+
+Unfortunately, this restriction is too strong for us. We sometimes need to combine two theories where a certain sort s is of some finite cardinality n, and so interpreted, in the first theory and uninterpreted, and so possibly infinite, in the second. Unfortunately, such theories are not conservative extensions of a common theory because the property of being a finite sort is expressible with a first-order formula (with just equality and the logical symbols). And this formula would be entailed in the first theory but not in the second.
+*)
+
+
+6.2 Logics referring to a combined theory
+
+As mentioned in Section 5 now a logic's declaration can refer to a combined theory by listing several theory declaration schemas T_1, ..., T_n in its :theories attribute.
+
+The combined theory is obtained as follows. Where Q is the set of (additional) sort symbols specified in the :language attribute, if any, let Q' collect all the symbols of Q and all the sort symbols of T_1, T_2, ..., and T_n.
+The combined theory is then T_1[Q'] + ... + T_n[Q'].
+
+------------------------------------------------------------------
+Ex:
+(logic QF_AUFLIA
+ :theories (Arrays Ints)
+
+ :language
+ "Closed quantifier-free formulas built over an arbitrary expansion
+  of the Array and Int signatures with free sort symbols of arity 0
+  and free function symbols, but containing only 
+  - linear atoms, that is, atoms with no occurrences of the symbol *,
+  - terms of sort s, (Array s s') where s and s' are either Int or
+    a free sort symbol.
+ "
+ ...
+)
+
+NOTE: This is exactly the same logic as QF_AUFLIA of Version 1.2, except that now we do not need to define explicitly a combined theory for it.
+------------------------------------------------------------------
+
+------------------------------------------------------------------
+Ex:
+(logic QF_LLIA
+ :theories (ListsWithLength Ints)
+
+ :language
+ "Closed quantifier-free formulas built over an arbitrary expansion
+  of the ListsWithLength and Int signatures with free sort symbols of
+  arity 0 and free function symbols, but containing only 
+  linear atoms, that is, atoms with no occurrences of the symbol *.
+ "
+ ...
+)
+
+NOTE: The theory of this logic is the theory of linear integer arithmetic and arbitrarily nested lists whose non-list elements are all of sort Int, Bool, or s for some free sort symbol s.
+
+NOTE: While the Int sort is already present in ListsWithLength, the combination with the Int theory adds its various arithmetic function symbols to ListsWithLength's 'length'.
+------------------------------------------------------------------
+
+
+TO DO
+
+- explain the semantic of the parallel let
+- remove special constants from the abstract syntax
+- use only single variable lets in abstract syntax?
+

@@ -1,0 +1,659 @@
+(define-module Strings (
+  (set-info :smt-lib-version 3.0)
+  (set-info :smt-lib-release "2020-XX-XX")
+  (set-info :written-by "Pascal Fontaine and Cesare Tinelli")
+  (set-info :date "2020-07-01")
+  (set-info :last-updated "2020-07-01")
+  (set-info :update-history
+   "TODO.
+   ")
+ 
+  (set-info :notes
+  "This is a theory of floating point numbers largely based on the IEEE standard 
+   754-2008 for floating-point arithmetic (http://grouper.ieee.org/groups/754/) 
+   but restricted to the binary case only.
+   A major extension over 754-2008 is that the theory has a sort for every 
+   possible exponent and significand length.
+
+   Version 1 of the theory was based on proposal by P. Ruemmer and T. Wahl [RW10].
+ 
+   [RW10] Philipp Ruemmer and Thomas Wahl.
+          An SMT-LIB Theory of Binary Floating-Point Arithmetic.
+          Proceedings of the 8th International Workshop on
+          Satisfiability Modulo Theories (SMT'10), Edinburgh, UK, July 2010.
+          (http://www.philipp.ruemmer.org/publications/smt-fpa.pdf)
+
+   Version 2 was written by C. Tinelli using community feedback.
+   Version 3, the current one, was written by C. Tinelli and M. Brain following
+   further discussion within the SMT-LIB community, and then relaborated with 
+   P. Ruemmer and T. Wahl.
+   A more detailed description of this version together with the rationale of
+   several models decisions as well as a formal semantics of the theory can be
+   found in
+  
+   [BTRW15] Martin Brain, Cesare Tinelli, Philipp Ruemmer, and Thomas Wahl.
+            An Automatable Formal Semantics for IEEE-754 Floating-Point Arithmetic
+            Technical Report, 2015.
+            (http://smt-lib.org/papers/BTRW15.pdf)
+
+   The following additional people provided substantial feedback and directions:
+   François Bobot, David Cok, Alberto Griggio, Florian Lapschies, Leonardo de 
+   Moura, Gabriele Paganelli, Cody Roux, Christoph Wintersteiger.
+  ")
+ 
+  (import (Core))
+  (open Core)
+
+  (set-info :notes
+  "The semantic interpretation of terms is provided by the function ⟦_⟧ 
+   used in the definition below for the builtin operators.
+  ")
+
+  (set-info :notes
+  "The semantics of this theory is described somewhat informally here.
+   A rigorous, self-contained specification can be found in [BTRW15].
+   That document takes precedence in case of any (unintended) inconsistencies.
+  ")
+
+  ;------------------
+  ; External symbols
+  ;------------------
+
+  ; Int
+  (declare-type Int () :extern Ints::Int)
+
+  (declare-const ⟨numeral⟩ Int :extern Ints::⟨numeral⟩)
+  (declare-const +1 (-> Int Int) :extern Ints::+1)
+  (declare-const + (-> Int Int Int) :extern Ints::+)
+  (declare-const - (-> Int Int Int) :extern Ints::-)
+  (declare-const < (-> Int Int Bool) :extern Ints::<)
+  (declare-const > (-> Int Int Bool) :extern Ints::>)
+
+  ; Bitvector
+  (declare-type BitVec ((! Int :var m :restrict (> m 0)) :extern FixedSizeBitVectors::BitVec))
+ 
+  ; Real
+  (declare-type Real () :extern Reals::Real)
+
+  (declare-const ⟨hexadecimal⟩
+    (-> (! Int :var m :syntax ⟨numeral⟩ :implicit
+         :restrict "m is 4 times the number of hexadecimal digits in the constant") 
+        (BitVec m))
+    :extern FixedSizeBitVectors::⟨hexadecimal⟩)
+
+  (declare-const ⟨binary⟩
+    (-> (! Int :var m :syntax ⟨numeral⟩ :implicit 
+         :restrict "m is the number of binary digits in the constant") 
+        (BitVec m))
+    :extern FixedSizeBitVectors::⟨binary⟩)
+
+  ;---------------
+  ; Builtin types
+  ;---------------
+
+  ; Floating point type, indexed by the length of the exponent and significand
+  ; components of the number
+  (declare-type FloatingPoint ((! Int :var eb :syntax ⟨numeral⟩ :restrict (> eb 1)) 
+                               (! Int :var sb :syntax ⟨numeral⟩ :restrict (> sb 1)))
+  :builtin
+  "(FloatingPoint eb sb) denotes the set of all binary floating point numbers
+   where 
+   eb is the number of bits in the exponent and
+   sb is the number of bits in the significand, *including* the hidden bit,
+   as defined by the IEEE 754-2008 standard. 
+   Technically, ⟦(FloatingPoint eb sb)⟧ is the union of the set 
+   {not_a_number} with four sets N, S, Z, I of bit-vector triples
+   (corresponding to normal numbers, subnormal numbers, zeros and
+   infinities) of the form (s, e, m) where s, e, and m correspond
+   respectively to the sign, the exponent and the significand (see
+   [BTRW15] for more details).")
+
+  (define-type Float16  () (FloatingPoint  5  11))
+  (define-type Float32  () (FloatingPoint  8  24))
+  (define-type Float64  () (FloatingPoint 11  53))
+  (define-type Float128 () (FloatingPoint 15 113))
+
+  (set-info :notes 
+  "Float16, Float32, Float64, and Float128 correspond to the IEEE 
+   binary16, binary32, binary64 and binary128 formats.
+  ")
+
+  ;----------------
+  ; Rounding modes
+  ;----------------
+
+  ; Constants for rounding modes
+  (declare-datatype RoundingMode 
+    ((RNE) (RNA) (RTP) (RTN) (RTZ)))
+
+  (set-info :notes
+  "Each value of RoundingMode corresponds to an IEEE rounding mode:
+   RNE: round nearest ties to even
+   RNA: round nearest ties to away
+   RTP: round toward positive
+   RTN: round toward negative
+   RTZ: round toward zero")
+
+  ; Expanded names for rounding modes
+  (define-const roundNearestTiesToEven RoundingMode RNE)
+  (define-const roundNearestTiesToAway RoundingMode RNA)
+  (define-const roundTowardPositive RoundingMode RTP)
+  (define-const roundTowardNegative RoundingMode RTN)
+  (define-const roundTowardZero RoundingMode RTZ)
+
+
+  ;--------------------
+  ; Value constructors
+  ;--------------------
+
+  ; Floating point literals
+  (declare-const fp
+    (-> (! Int :var eb :syntax ⟨numeral⟩ :implicit :restrict (> eb 1))
+        (! Int :var  i :syntax ⟨numeral⟩ :implicit :restrict (> i 1))
+        (! Int :var sb :syntax ⟨numeral⟩ :implicit :restrict (= sb (+1 i)))
+        (BitVec 1) (BitVec eb) (BitVec i)
+        (FloatingPoint eb sb))
+  :builtin
+  "⟦fp⟧ returns the element of ⟦(FloatingPoint eb sb)⟧ whose IEEE 754-2008 
+   binary encoding matches the input bit strings:
+   for all bitvectors b1 in ⟦(BitVec 1)⟧, b2 in ⟦(BitVec eb)⟧ and b3 in ⟦(BitVec i)⟧,
+   ⟦fp⟧(b1, b2 ,b3) is the binary floating point number encoded in the IEEE 
+   754-2008 standard with sign bit b1, exponent bits b2, and significant bit b3
+   (with 1 hidden bit).") 
+
+  ; +infinity
+  (declare-const +oo
+    (-> (! Int :var eb :syntax ⟨numeral⟩ :restrict (> eb 1))
+        (! Int :var sb :syntax ⟨numeral⟩ :restrict (> sb 1))
+        (FloatingPoint eb sb))
+  :builtin
+  "⟦(+oo eb sb)⟧ is +infinity, the positive infinity value.") 
+
+  ; -infinity
+  (declare-const -oo
+    (-> (! Int :var eb :syntax ⟨numeral⟩ :restrict (> eb 1))
+        (! Int :var sb :syntax ⟨numeral⟩ :restrict (> sb 1))
+        (FloatingPoint eb sb))
+  :builtin
+  "⟦(-oo eb sb)⟧ is -infinity, the negative infinity value.") 
+
+  (set-info :notes
+  "Semantically, for each eb and sb, there is exactly one +infinity value and 
+   exactly one -infinity value in the set denoted by (FloatingPoint eb sb), 
+   in agreement with the IEEE 754-2008 standard.
+   However, +/-infinity can have two representations in this theory. 
+
+   E.g., +infinity for type (FloatingPoint 2 3) is denoted by 
+   both (+oo 2 3) and (fp #b0 #b11 #b00).
+  ")
+ 
+  ; positive zero 
+  (declare-const +zero
+    (-> (! Int :var eb :syntax ⟨numeral⟩ :restrict (> eb 1))
+        (! Int :var sb :syntax ⟨numeral⟩ :restrict (> sb 1))
+        (FloatingPoint eb sb))
+  :builtin
+  "⟦(+zero eb sb)⟧ is ⟦fp⟧(⟦#b0⟧, ⟦#b0..0⟧, ⟦#b0..0⟧) where 
+   the first bitvector literal has eb 0s and
+   the second has sb - 1 0s  
+  ") 
+
+ ; negative zero 
+  (declare-const -zero
+    (-> (! Int :var eb :syntax ⟨numeral⟩ :restrict (> eb 1))
+        (! Int :var sb :syntax ⟨numeral⟩ :restrict (> sb 1))
+        (FloatingPoint eb sb))
+  :builtin
+  "⟦(-zero eb sb)⟧ is ⟦fp⟧(⟦#b1⟧, ⟦#b0..0⟧, ⟦#b0..0⟧) where
+   the first bitvector literal has eb 0s and
+   the second has sb - 1 0s .") 
+
+  (set-info :notes
+  "The +zero and -zero symbols are abbreviations for the corresponding fp literals.
+   E.g.,   (+zero 2 4) abbreviates (fp #b0 #b00 #b000)
+           (-zero 3 2) abbreviates (fp #b1 #b000 #b0)")
+
+  ; Non-numbers
+  (declare-const NaN
+    (-> (! Int :var eb :syntax ⟨numeral⟩ :restrict (> eb 1))
+        (! Int :var sb :syntax ⟨numeral⟩ :restrict (> sb 1))
+        (FloatingPoint eb sb))
+  :builtin
+  "⟦(NaN eb sb)⟧ is the 'not a number' value for ⟦(FloatingPoint eb sb)].")
+  
+  (set-info :notes
+  "For each eb and sb, there is exactly one NaN in the set denoted by 
+   (FloatingPoint eb sb), in agreeement with Level 2 of IEEE 754-2008
+   (floating-point data). There is no distinction in this theory between 
+   a _quiet_ and a _signaling_ NaN.
+
+   NaN has several representations, e.g.,(NaN eb sb) and any term of 
+   the form (fp t #b1..1 s) where s is a binary containing at least a 1
+   and t is either #b0 or #b1. For instance, in (FloatingPoint 2 2),
+   ⟦(NaN 2 2)⟧ = ⟦fp⟧(⟦#b0⟧, ⟦#b11⟧, ⟦#b1⟧)
+               = ⟦fp⟧(⟦#b1⟧, ⟦#b11⟧, ⟦#b1⟧)
+
+   Note that the (semantic) value not_a_number is shared across all
+   ⟦(FloatingPoint eb sb)⟧.
+  ")
+
+  ;-----------
+  ; Operators
+  ;-----------
+
+  ; absolute value 
+  (declare-const abs
+    (-> (! Int :var eb :syntax ⟨numeral⟩ :implicit :restrict (> eb 1))
+        (! Int :var sb :syntax ⟨numeral⟩ :implicit :restrict (> sb 1))
+        (FloatingPoint eb sb) (FloatingPoint eb sb))
+  :builtin "Absolute value.")
+
+  ; negation (no rounding needed)
+  (declare-const neg
+    (-> (! Int :var eb :syntax ⟨numeral⟩ :implicit :restrict (> eb 1))
+        (! Int :var sb :syntax ⟨numeral⟩ :implicit :restrict (> sb 1))
+        (FloatingPoint eb sb) (FloatingPoint eb sb))
+  :builtin "Negation.")
+
+  ; addition
+  (declare-const add
+    (-> (! Int :var eb :syntax ⟨numeral⟩ :implicit :restrict (> eb 1))
+        (! Int :var sb :syntax ⟨numeral⟩ :implicit :restrict (> sb 1))
+        RoundingMode (FloatingPoint eb sb) (FloatingPoint eb sb) 
+        (FloatingPoint eb sb))
+  :builtin "Addition.")
+
+  ; subtraction
+  (declare-const sub
+    (-> (! Int :var eb :syntax ⟨numeral⟩ :implicit :restrict (> eb 1))
+        (! Int :var sb :syntax ⟨numeral⟩ :implicit :restrict (> sb 1))
+        RoundingMode (FloatingPoint eb sb) (FloatingPoint eb sb) 
+        (FloatingPoint eb sb))
+  :builtin "Subtraction.")
+
+  ; multiplication
+  (declare-const mul
+    (-> (! Int :var eb :syntax ⟨numeral⟩ :implicit :restrict (> eb 1))
+        (! Int :var sb :syntax ⟨numeral⟩ :implicit :restrict (> sb 1))
+        RoundingMode (FloatingPoint eb sb) (FloatingPoint eb sb) 
+        (FloatingPoint eb sb))
+  :builtin "Multiplication.")
+
+  ; division
+  (declare-const div
+    (-> (! Int :var eb :syntax ⟨numeral⟩ :implicit :restrict (> eb 1))
+        (! Int :var sb :syntax ⟨numeral⟩ :implicit :restrict (> sb 1))
+        RoundingMode (FloatingPoint eb sb) (FloatingPoint eb sb) 
+        (FloatingPoint eb sb))
+  :builtin "Division.")
+
+  ; fused multiplication and addition; (x * y) + z 
+  (declare-const fma
+    (-> (! Int :var eb :syntax ⟨numeral⟩ :implicit :restrict (> eb 1))
+        (! Int :var sb :syntax ⟨numeral⟩ :implicit :restrict (> sb 1))
+        RoundingMode (FloatingPoint eb sb) (FloatingPoint eb sb) (FloatingPoint eb sb) 
+        (FloatingPoint eb sb))
+  :builtin "Fused multiplication and addition.")
+
+  ; square root 
+  (declare-const sqrt
+    (-> (! Int :var eb :syntax ⟨numeral⟩ :implicit :restrict (> eb 1))
+        (! Int :var sb :syntax ⟨numeral⟩ :implicit :restrict (> sb 1))
+        RoundingMode (FloatingPoint eb sb) 
+        (FloatingPoint eb sb))
+  :builtin "Square root.")
+
+  ; remainder: x - y * n, where n in Z is nearest to x/y 
+  (declare-const rem
+    (-> (! Int :var eb :syntax ⟨numeral⟩ :implicit :restrict (> eb 1))
+        (! Int :var sb :syntax ⟨numeral⟩ :implicit :restrict (> sb 1))
+        (FloatingPoint eb sb) (FloatingPoint eb sb) 
+        (FloatingPoint eb sb))
+  :builtin "Remainder: x - y * n, where n in Z is nearest to x/y .")
+
+  ; rounding to integral 
+  (declare-const roundToIntegral
+    (-> (! Int :var eb :syntax ⟨numeral⟩ :implicit :restrict (> eb 1))
+        (! Int :var sb :syntax ⟨numeral⟩ :implicit :restrict (> sb 1))
+        RoundingMode (FloatingPoint eb sb) 
+        (FloatingPoint eb sb))
+  :builtin "Rounding to integral.")
+
+  ; minimum
+  (declare-const min
+    (-> (! Int :var eb :syntax ⟨numeral⟩ :implicit :restrict (> eb 1))
+        (! Int :var sb :syntax ⟨numeral⟩ :implicit :restrict (> sb 1))
+        (FloatingPoint eb sb) (FloatingPoint eb sb) 
+        (FloatingPoint eb sb))
+  :builtin "Minimum.")
+
+  ; maximum
+  (declare-const max
+    (-> (! Int :var eb :syntax ⟨numeral⟩ :implicit :restrict (> eb 1))
+        (! Int :var sb :syntax ⟨numeral⟩ :implicit :restrict (> sb 1))
+        (FloatingPoint eb sb) (FloatingPoint eb sb) 
+        (FloatingPoint eb sb))
+  :builtin "Maximum.")
+
+  ; comparison operators
+  ; leq
+  (declare-const leq
+    (-> (! Int :var eb :syntax ⟨numeral⟩ :implicit :restrict (> eb 1))
+        (! Int :var sb :syntax ⟨numeral⟩ :implicit :restrict (> sb 1))
+        (FloatingPoint eb sb) (FloatingPoint eb sb) 
+        Bool)
+  :chainable
+  :builtin "Less than or equal.")
+
+  ; lt
+  (declare-const lt
+    (-> (! Int :var eb :syntax ⟨numeral⟩ :implicit :restrict (> eb 1))
+        (! Int :var sb :syntax ⟨numeral⟩ :implicit :restrict (> sb 1))
+        (FloatingPoint eb sb) (FloatingPoint eb sb) 
+        Bool)
+  :chainable
+  :builtin "Less than.")
+
+  ; geq
+  (declare-const geq
+    (-> (! Int :var eb :syntax ⟨numeral⟩ :implicit :restrict (> eb 1))
+        (! Int :var sb :syntax ⟨numeral⟩ :implicit :restrict (> sb 1))
+        (FloatingPoint eb sb) (FloatingPoint eb sb) 
+        Bool)
+  :chainable
+  :builtin "Greater than or equal.")
+
+  ; gt
+  (declare-const gt
+    (-> (! Int :var eb :syntax ⟨numeral⟩ :implicit :restrict (> eb 1))
+        (! Int :var sb :syntax ⟨numeral⟩ :implicit :restrict (> sb 1))
+        (FloatingPoint eb sb) (FloatingPoint eb sb) 
+        Bool)
+  :chainable
+  :builtin "Greater than.")
+
+  (set-info :note "All comparisons evaluate to false if either argument is NaN.")
+
+  ; eq
+  (declare-const eq
+    (-> (! Int :var eb :syntax ⟨numeral⟩ :implicit :restrict (> eb 1))
+        (! Int :var sb :syntax ⟨numeral⟩ :implicit :restrict (> sb 1))
+        (FloatingPoint eb sb) (FloatingPoint eb sb) 
+        Bool)
+  :chainable
+  :builtin "IEEE 754-2008 equality (as opposed to SMT-LIB =).")
+
+  ; Classification of numbers
+
+  ; isNormal
+  (declare-const isNormal
+    (-> (! Int :var eb :syntax ⟨numeral⟩ :implicit :restrict (> eb 1))
+        (! Int :var sb :syntax ⟨numeral⟩ :implicit :restrict (> sb 1))
+        (FloatingPoint eb sb)
+        Bool)
+  :builtin 
+  "⟦isNormal⟧(eb)(sb)(x) = true iff x is a normal number.")
+
+  ; isSubnormal
+  (declare-const isSubnormal
+    (-> (! Int :var eb :syntax ⟨numeral⟩ :implicit :restrict (> eb 1))
+        (! Int :var sb :syntax ⟨numeral⟩ :implicit :restrict (> sb 1))
+        (FloatingPoint eb sb)
+        Bool)
+  :builtin
+  "⟦isSubnormal⟧(eb)(sb)(x) = true iff x is a subnormal number.")
+
+  ; isZero
+  (declare-const isZero
+    (-> (! Int :var eb :syntax ⟨numeral⟩ :implicit :restrict (> eb 1))
+        (! Int :var sb :syntax ⟨numeral⟩ :implicit :restrict (> sb 1))
+        (FloatingPoint eb sb)
+        Bool)
+  :builtin 
+  "⟦isZero⟧(eb)(sb)(x) = true iff x is positive or negative zero.")
+
+  ; isInfinite
+  (declare-const isInfinite
+    (-> (! Int :var eb :syntax ⟨numeral⟩ :implicit :restrict (> eb 1))
+        (! Int :var sb :syntax ⟨numeral⟩ :implicit :restrict (> sb 1))
+        (FloatingPoint eb sb)
+        Bool)
+   :builtin 
+   "⟦isInfinite⟧(eb)(sb)(x) = true iff x is +infinity or -infinity.")
+
+  ; isNaN
+  (declare-const isNaN
+    (-> (! Int :var eb :syntax ⟨numeral⟩ :implicit :restrict (> eb 1))
+        (! Int :var sb :syntax ⟨numeral⟩ :implicit :restrict (> sb 1))
+        (FloatingPoint eb sb)
+        Bool)
+  :builtin "⟦isNaN⟧(eb)(sb)(x) = true iff x is not a number.")
+
+  ; isNegative
+  (declare-const isNegative
+    (-> (! Int :var eb :syntax ⟨numeral⟩ :implicit :restrict (> eb 1))
+        (! Int :var sb :syntax ⟨numeral⟩ :implicit :restrict (> sb 1))
+        (FloatingPoint eb sb)
+        Bool)
+  :builtin 
+  "⟦isNegative⟧(eb)(sb)(x) = true iff x is ⟦-zero⟧ or ⟦lt⟧(x)(⟦-zero⟧) holds.")
+
+  ; isPositive
+  (declare-const isPositive
+    (-> (! Int :var eb :syntax ⟨numeral⟩ :implicit :restrict (> eb 1))
+        (! Int :var sb :syntax ⟨numeral⟩ :implicit :restrict (> sb 1))
+        (FloatingPoint eb sb)
+        Bool)
+  :builtin 
+  "⟦isPositive⟧(x) = true iff x is ⟦+zero⟧ or ⟦lt⟧(⟦+zero⟧, x) holds.")
+
+  (set-info :note
+  "(eq x y) evaluates to true when x evaluates to -zero and y to +zero, or vice versa.
+   eq and all the other comparison operators evaluate to false when one of their
+   arguments is NaN.")
+
+
+  ;------------------------------
+  ; Conversions from other sorts
+  ;------------------------------
+
+  ; to_fp from bit-vector
+  (declare-const to_fp
+    (-> (! Int :var eb :syntax ⟨numeral⟩ :restrict (> eb 1))
+        (! Int :var sb :syntax ⟨numeral⟩ :restrict (> sb 1))
+        (! Int :var m :syntax ⟨numeral⟩ :implicit :restrict (= m (+ sb eb)))
+        (BitVec m)
+        (FloatingPoint eb sb))
+  :builtin 
+  "Converts from single bitstring representation 
+   in IEEE 754-2008 interchange format.
+
+   ⟦to_fp)⟧(eb)(sb)(m)(b) = ⟦fp⟧(b[m-1:m-1])(b[eb+sb-1:sb])(b[sb-1:0]) 
+   where b[p:q] denotes the subvector of bitvector b between positions p and q.")
+
+  ; to_fp from fp
+  (declare-const to_fp
+    (-> (! Int :var mb :syntax ⟨numeral⟩ :implicit :restrict (> mb 1))
+        (! Int :var nb :syntax ⟨numeral⟩ :implicit :restrict (> nb 1))
+        (! Int :var eb :syntax ⟨numeral⟩ :restrict (> eb 1))
+        (! Int :var sb :syntax ⟨numeral⟩ :restrict (> sb 1))
+        RoundingMode
+        (FloatingPoint mb nb)
+        (FloatingPoint eb sb))
+  :builtin 
+  "Conversion from another floating point sort.
+   - ⟦to_fp⟧(eb)(sb)(r)(x) = x if x in {+infinity, -infinity, not_a_number}.
+   - ⟦to_fp⟧(eb)(sb)(r)(x) = +/-infinity if ⟦to_real⟧(x) is too large/too
+     small to be represented as a finite number of ⟦FloatingPoint⟧(eb)(sb);
+   - ⟦to_fp⟧(eb)(sb)(r)(x) = y otherwise, where y is the finite number 
+     such that ⟦to_real⟧(y) is closest to ⟦to_real⟧(x) according to
+     rounding mode r.")
+
+  ; to_fp from real
+  (declare-const to_fp
+    (-> (! Int :var eb :syntax ⟨numeral⟩ :restrict (> eb 1))
+        (! Int :var sb :syntax ⟨numeral⟩ :restrict (> sb 1))
+        RoundingMode
+        Real
+        (FloatingPoint eb sb))
+  :builtin 
+  "Conversion from real.
+   - ⟦to_fp⟧(eb)(sb)(r)(x) = +/-infinity if x is too large/too small 
+     to be represented as a finite number of ⟦FloatingPoint⟧(eb)(sb).
+   - ⟦to_fp⟧(eb)(sb)(r)(x) = y otherwise, where y is the finite number 
+     such that ⟦to_real⟧(y) is closest to x according to rounding mode r.")
+
+  ; to_fp from signed machine integer
+  (declare-const to_fp_signed
+    (-> (! Int :var eb :syntax ⟨numeral⟩ :restrict (> eb 1))
+        (! Int :var sb :syntax ⟨numeral⟩ :restrict (> sb 1))
+        (! Int :var m :syntax ⟨numeral⟩ :implicit :restrict (> m 0))
+        RoundingMode
+       (BitVec m)
+       (FloatingPoint eb sb))
+  :builtin 
+  "Converts a signed machine integer, represented as a 2's complement bit vector.
+   Let 
+   - b in ⟦BitVec⟧(m);
+   - n be the signed integer represented by b (in 2's complement format).
+   Then,
+   - ⟦to_fp⟧(eb)(sb)(r)(b) = +/-infinity 
+     if n is too large/too small to be represented as a finite number 
+     of ⟦FloatingPoint⟧(eb)(sb);
+   - ⟦to_fp⟧(eb)(sb)(r)(b) = y  
+     otherwise, where y is the finite FP number such that ⟦to_real⟧(y) is closest 
+     to n according to rounding mode r.")
+
+  ; to_fp from unsigned machine integer
+  (declare-const to_fp_unsigned
+    (-> (! Int :var eb :syntax ⟨numeral⟩ :restrict (> eb 1))
+        (! Int :var sb :syntax ⟨numeral⟩ :restrict (> sb 1))
+        (! Int :var m :syntax ⟨numeral⟩ :implicit :restrict (> m 0))
+        RoundingMode
+        (BitVec m)
+        (FloatingPoint eb sb))
+  :builtin 
+  "Converts an unsigned machine integer, represented as a bit vector.
+   Let 
+   - b in ⟦BitVec⟧(m);
+   - n be the unsigned integer represented by b.
+   Then,
+   - ⟦to_fp_unsigned⟧(eb)(sb)(r)(b) = +infinity 
+     if n is too large to be represented as a finite number 
+     of ⟦FloatingPoint⟧(eb)(sb);
+   - ⟦to_fp_unsigned⟧(eb)(sb)(r)(b) = y 
+     otherwise, where y is the finite FP number such that ⟦to_real⟧(y) 
+     is closest to n according to rounding mode r.")
+
+
+  ;----------------------------
+  ; Conversions to other sorts
+  ;----------------------------
+
+  ; to_ubv 
+  (declare-const to_ubv
+    (-> (! Int :var eb :syntax ⟨numeral⟩ :implicit :restrict (> eb 1))
+        (! Int :var sb :syntax ⟨numeral⟩ :implicit :restrict (> sb 1))
+        (! Int :var m :syntax ⟨numeral⟩ :restrict (> m 0))
+        RoundingMode
+        (FloatingPoint eb sb)
+        (BitVec m))
+  :builtin 
+  "Converts to an unsigned machine integer, represented as a bit vector.
+   - ⟦to_ubv⟧(eb)(sb)(m)(r)(x) = b 
+     if the unsigned integer n represented by b is the closest integer 
+     according to rounding mode r to the real number 
+     represented by x, and n is in the range [0, 2^m - 1].
+   - ⟦to_ubv⟧(eb)(sb)(m)(r)(x) is unspecified in all other cases 
+     (including when x is in {-infinity, -infinity, not_a_number}).")
+
+  ; to_sbv 
+  (declare-const to_sbv
+    (-> (! Int :var eb :syntax ⟨numeral⟩ :implicit :restrict (> eb 1))
+        (! Int :var sb :syntax ⟨numeral⟩ :implicit :restrict (> sb 1))
+        (! Int :var m :syntax ⟨numeral⟩ :restrict (> m 0))
+        RoundingMode
+        (FloatingPoint eb sb)
+        (BitVec m))
+  :builtin 
+  "Converts to a signed machine integer, represented as a 2's complement bit vector.
+   - ⟦to_sbv⟧(eb)(sb)(m)(r)(x) = b 
+     if the signed integer n represented by b (in 2's complement format) is 
+     the closest integer according to rounding mode r to the real number 
+     represented by x, and n is in the range [-2^{m-1}, 2^{m-1} - 1].
+   - ⟦to_sbv⟧(eb)(sb)(m)(r)(x) is unspecified in all other cases (including when
+     x is in {-infinity, -infinity, not_a_number}).")
+
+  ; to_real
+  (declare-const to_real
+    (-> (! Int :var eb :syntax ⟨numeral⟩ :implicit :restrict (> eb 1))
+        (! Int :var sb :syntax ⟨numeral⟩ :implicit :restrict (> sb 1))
+        (FloatingPoint eb sb)
+        Real)
+  :builtin 
+  "⟦to_real⟧(x) is the real number represented by x if x is not in 
+   {-infinity, -infinity, not_a_number}. Otherwise, it is unspecified.")
+
+  (set-info :notes
+  "All to_* functions are unspecified for NaN and infinity input values.
+   In addition, to_ubv and to_sbv are unspecified for finite number inputs
+   that are out of range (which includes all negative numbers for to_ubv).
+
+   This means for instance that the formula
+
+     (= (to_real (NaN 8 24)) (to_real (fp c1 c2 c3))) 
+
+   is satisfiable in this theory for all binary constants c1, c2, and c3
+   (of the proper sort).")
+
+  (set-info :notes
+  "There is no function for converting from (FloatingPoint eb sb) to the
+   corresponding IEEE 754-2008 binary format, as a bit vector (BitVec m) with 
+   m = eb + sb, because (NaN eb sb) has multiple, well-defined representations.
+   Instead, an encoding of the kind below is recommended, where f is a term
+   of sort (FloatingPoint eb sb):
+
+    (declare-fun b () (BitVec m))
+    (assert (= ((to_fp eb sb) b) f))")
+
+;--------
+; Values
+;--------
+;
+; For all m,n > 1, the values of sort (FloatingPoint m n) are 
+;   - (+oo m n)  
+;   - (-oo m n)
+;   - (NaN m n)
+;   - all terms of the form (fp b1 b2 b3) where
+;     - b1 is the binary #b0 or #b1
+;     - b2 is a binary of size > 1 other than #b1...1 (all 1s)
+;     - b3 is a binary of size > 1
+;   The set of values for RoundingMode is {RNE, RNA, RTP, RTN, RTZ}.")
+
+(define-syntax 
+  ; non-terminals
+  (⟨fp_value⟩ ⟨n⟩ ⟨c1⟩ ⟨c2⟩ ⟨c3⟩)
+  ; production rules
+  ((⟨fp_value⟩ ((+oo ⟨n⟩ ⟨n⟩)
+                (-oo ⟨n⟩ ⟨n⟩)
+                (NaN ⟨n⟩ ⟨n⟩)
+                (fp ⟨b1⟩ ⟨b2⟩ ⟨b3⟩)
+               ))
+   (⟨n⟩ (! ⟨numeral⟩ :syntax-restrict "it is neither 0 nor 1"))
+   (⟨b1⟩ (#b0 #b1))
+   (⟨b2⟩ (! ⟨binary⟩ :syntax-restrict
+                      "it has size > 1 other than #b1...1 (all 1s)"))
+   (⟨b3⟩ (! ⟨binary⟩ :syntax-restrict
+                      "it has size > 1"))))
+
+(define-values () Real ⟨real_value⟩)
+
+(define-syntax 
+  ; non-terminals
+  (⟨rm_value⟩)
+  ; production rules
+  ((⟨rm_value⟩ (RNE, RNA, RTP, RTN, RTZ))))
+
+(define-values () RoundingMode ⟨rm_value⟩)
+
+))

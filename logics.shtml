@@ -1,0 +1,344 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<!--
+Design by http://www.bluewebtemplates.com
+Released for free under a Creative Commons Attribution 3.0 License
+-->
+<html xmlns="http://www.w3.org/1999/xhtml">
+<!--#include virtual="head.shtml" -->
+ <body>
+  <div class="main">
+   <div class="header">
+    <div class="header_resize">
+     <div class="menu_nav">
+      <ul>
+       <li><a href="index.shtml">Home</a></li>
+       <li><a href="about.shtml">About</a></li>
+       <li><a href="news.shtml">News</a></li>
+       <li class="active"><a href="standard.shtml">Standard</a></li>
+       <li><a href="benchmarks.shtml">Benchmarks</a></li>
+       <li><a href="software.shtml">Software</a></li>
+       <li><a href="credits.shtml">Credits</a></li>
+      </ul>
+     </div>
+     <!--#include virtual="logo.shtml" -->
+    </div>
+   </div>
+   <div class="content">
+    <div class="content_resize">
+     <div class="mainbar">
+      <h2>Logics</h2>
+      <p>SMT-LIB 2 scripts, which includes all the benchmarks available from the <a href="benchmarks.shtml">Benchmarks</a> section, refer to one of the following sub-logics of the main SMT-LIB logic.
+       The reason to have a (sub-)logic is pragmatic: to identify fragment of the main logic where it may possible to apply specialized and more efficient satisfiability techniques.
+       New logics are added to the standard opportunistically, once enough benchmarks are available for it.
+      </p>
+      <p>Here is an overview of the logics listed below, ordered by inclusion. A link from a logic L1 to a logic L2 means that every formula of L1 is also a formula of L2. Click on the node to go to its description. Then, click on the logic's name to see its specification in SMT-LIB format.
+       <center>
+        <img border=0 src="Logics/logics.png" usemap="#logicsDag" />
+        <!--#include virtual="Logics/logics.map" -->
+       </center>
+       The logics have been named using letter groups that evoke the theories used by the logics and some major restriction in their language, with the following conventions:
+       <ul>
+        <li><b>QF</b> for the restriction to quantifier free formulas
+        </li>
+        <li><b>A</b> or <b>AX</b> for the theory <a href="theories-ArraysEx.shtml">ArraysEx</a>
+        </li>
+        <li><b>BV</b> for the theory <a href="theories-FixedSizeBitVectors.shtml">FixedSizeBitVectors</a>
+        </li>
+        <li><b>FP</b> (forthcoming) for the theory <a href="theories-FloatingPoint.shtml">FloatingPoint</a>
+        </li>
+        <li><b>IA</b> for the theory <a href="theories-Ints.shtml">Ints</a> (Integer Arithmetic)
+        <li><b>RA</b> for the theory <a href="theories-Reals.shtml">Reals</a> (Real Arithmetic)
+        <li><b>IRA</b> for the theory <a href="theories-Reals_Ints.shtml">Reals_Ints</a> (mixed Integer Real Arithmetic)
+        </li>
+        <li><b>IDL</b> for Integer Difference Logic
+        </li>
+        <li><b>RDL</b> for Rational Difference Logic
+        </li>
+        <li><b>L</b> before <b>IA</b>, <b>RA</b>, or <b>IRA</b> for the linear fragment of those arithmetics
+        </li>
+        <li><b>N</b> before <b>IA</b>, <b>RA</b>, or <b>IRA</b> for the non-linear fragment of those arithmetics
+        </li>
+        <li><b>UF</b> for the extension allowing free sort and function symbols
+        </li>
+       </ul>
+       The reason for this, admittedly idiosyncratic, nomenclature is mostly historical.
+       Also historical is the fact that some logics impose further restrictions on the language. For instance, in the *A*LIA logics the only array sort allowed is <code>(Array Int Int)</code>, whereas in some A*IRA logics the only array sort allowed are <code>(Array Int Real)</code> and <code>(Array Int (Array Int Real))</code>.
+       This is why, for instance, QF_AX is not a sublogic of QF_AUFLIA or QF_ABV.
+       Finally, benchmarks are typically classified by the smallest logic they belong to.
+       One consequence of this is that we do not have
+       a logic such as RA here, for instance, since an RA benchmark belongs to either LRA or NRA.
+      </p>
+      <h3>Logic Descriptions</h3>
+      <p>Click on the logic's name for a full description.</p>
+      <p><strong>Note:</strong>The listing below is currently incomplete. More will be added later.
+      </p>
+      <p class="footnote">[Logic declarations for Version 1.2 of SMT-LIB, superseded by the ones below, are still available <a href="version1/logics.html">here</a> but their use is deprecated.]
+      </p>
+      <dl>
+       <dt><a name="AUFLIA"/>
+        <a href="logics-all.shtml#AUFLIA">
+         <b>
+          AUFLIA:
+         </b>
+        </a>
+       </dt>
+       <dd>
+        Closed formulas over the theory of linear integer arithmetic and arrays
+        extended with free sort and function symbols
+        but restricted to arrays with integer indices and values.
+       </dd>
+       <dt><a name="AUFLIRA" />
+        <a href="logics-all.shtml#AUFLIRA">
+         <b>
+          AUFLIRA:
+         </b>
+        </a>
+       </dt>
+       <dd>
+        Closed linear formulas with free sort and function symbols
+        over one- and two-dimentional arrays of integer index and real value.
+       </dd>
+       <dt><a name="AUFNIRA" />
+        <a href="logics-all.shtml#AUFNIRA">
+         <b>
+          AUFNIRA:
+         </b>
+        </a>
+       </dt>
+       <dd>
+        Closed formulas with free function and predicate symbols
+        over a theory of arrays of arrays of integer index and real value.
+       </dd>
+       <dt><a name="LIA" />
+        <a href="logics-all.shtml#LIA">
+         <b>
+          LIA:
+         </b>
+        </a>
+       </dt>
+       <dd>
+        Closed linear formulas over linear integer arithmetic.
+       </dd>
+       <dt><a name="LRA" />
+        <a href="logics-all.shtml#LRA">
+         <b>
+          LRA:
+         </b>
+        </a>
+       </dt>
+       <dd>
+        Closed linear formulas in linear real arithmetic.
+       </dd>
+       <dt><a name="QF_ABV" />
+        <a href="logics-all.shtml#QF_ABV">
+         <b>
+          QF_ABV:
+         </b>
+        </a>
+       </dt>
+       <dd>
+        Closed quantifier-free formulas over the theory of bitvectors and bitvector arrays.
+       </dd>
+       <dt><a name="QF_AUFBV" />
+        <a href="logics-all.shtml#QF_AUFBV">
+         <b>
+          QF_AUFBV:
+         </b>
+        </a>
+       </dt>
+       <dd>
+        Closed quantifier-free formulas over the theory of bitvectors and bitvector arrays extended with free sort and function symbols.
+       </dd>
+       <dt><a name="QF_AUFLIA" />
+        <a href="logics-all.shtml#QF_AUFLIA">
+         <b>
+          QF_AUFLIA:
+         </b>
+        </a>
+       </dt>
+       <dd>
+        Closed quantifier-free linear formulas over the theory of integer arrays
+        extended with free sort and function symbols.
+       </dd>
+       <dt><a name="QF_AX" />
+        <a href="logics-all.shtml#QF_AX">
+         <b>
+          QF_AX:
+         </b>
+        </a>
+       </dt>
+       <dd>
+        Closed quantifier-free formulas over the theory of arrays with extensionality.
+       </dd>
+       <dt><a name="QF_BV" />
+        <a href="logics-all.shtml#QF_BV">
+         <b>
+          QF_BV:
+         </b>
+        </a>
+       </dt>
+       <dd>
+        Closed quantifier-free formulas over the theory of fixed-size bitvectors.
+       </dd>
+       <dt><a name="QF_IDL" />
+        <a href="logics-all.shtml#QF_IDL">
+         <b>
+          QF_IDL:
+         </b>
+        </a>
+       </dt>
+       <dd>
+        Difference Logic over the integers.
+        In essence,
+        Boolean combinations of inequations of the form <i>x - y < b</i>
+        where <i>x</i> and <i>y</i> are integer variables and <i>b</i> is an integer constant.
+       </dd>
+       <dt><a name="QF_LIA" />
+        <a href="logics-all.shtml#QF_LIA">
+         <b>
+          QF_LIA:
+         </b>
+        </a>
+       </dt>
+       <dd>
+        Unquantified linear integer arithmetic.
+        In essence,
+        Boolean combinations of inequations between
+        linear polynomials over integer variables.
+       </dd>
+       <dt><a name="QF_LRA" />
+        <a href="logics-all.shtml#QF_LRA">
+         <b>
+          QF_LRA:
+         </b>
+        </a>
+       </dt>
+       <dd>
+        Unquantified linear real arithmetic.
+        In essence,
+        Boolean combinations of inequations between linear polynomials
+        over real variables.
+       </dd>
+       <dt><a name="QF_NIA" />
+        <a href="logics-all.shtml#QF_NIA">
+         <b>
+          QF_NIA:
+         </b>
+        </a>
+       </dt>
+       <dd>
+        Quantifier-free integer arithmetic.
+       </dd>
+       <dt><a name="QF_NRA" />
+        <a href="logics-all.shtml#QF_NRA">
+         <b>
+          QF_NRA:
+         </b>
+        </a>
+       </dt>
+       <dd>
+        Quantifier-free real arithmetic.
+       </dd>
+       <dt><a name="QF_RDL" />
+        <a href="logics-all.shtml#QF_RDL">
+         <b>
+          QF_RDL:
+         </b>
+        </a>
+       </dt>
+       <dd>
+        Difference Logic over the reals.
+        In essence,
+        Boolean combinations of inequations of the form <i>x - y < b</i>
+        where <i>x</i> and <i>y</i> are real variables and <i>b</i> is a rational constant.
+       </dd>
+       <dt><a name="QF_UF" />
+        <a href="logics-all.shtml#QF_UF">
+         <b>
+          QF_UF:
+         </b>
+        </a>
+       </dt>
+       <dd>
+        Unquantified formulas built over a signature of uninterpreted (i.e., free) sort and function symbols.
+       </dd>
+       <dt><a name="QF_UFBV" />
+        <a href="logics-all.shtml#QF_UFBV">
+         <b>
+          QF_UFBV:
+         </b>
+        </a>
+       </dt>
+       <dd>
+        Unquantified formulas over bitvectors with uninterpreted sort function and symbols.
+       </dd>
+       <dt><a name="QF_UFIDL" />
+        <a href="logics-all.shtml#QF_UFIDL">
+         <b>
+          QF_UFIDL:
+         </b>
+        </a>
+       </dt>
+       <dd>
+        Difference Logic over the integers (in essence) but with uninterpreted sort and function symbols.
+       </dd>
+       <dt><a name="QF_UFLIA" />
+        <a href="logics-all.shtml#QF_UFLIA">
+         <b>
+          QF_UFLIA:
+         </b>
+        </a>
+       </dt>
+       <dd>
+        Unquantified linear integer arithmetic with uninterpreted sort and function symbols.
+       </dd>
+       <dt><a name="QF_UFLRA" />
+        <a href="logics-all.shtml#QF_UFLRA">
+         <b>
+          QF_UFLRA:
+         </b>
+        </a>
+       </dt>
+       <dd>
+        Unquantified linear real arithmetic with uninterpreted sort and function symbols.
+       </dd>
+       <dt><a name="QF_UFNRA" />
+        <a href="logics-all.shtml#QF_UFNRA">
+         <b>
+          QF_UFNRA:
+         </b>
+        </a>
+       </dt>
+       <dd>
+        Unquantified non-linear real arithmetic with uninterpreted sort and function symbols.
+       </dd>
+       <dt><a name="UFLRA" />
+        <a href="logics-all.shtml#UFLRA">
+         <b>
+          UFLRA:
+         </b>
+        </a>
+       </dt>
+       <dd>
+        Linear real arithmetic with uninterpreted sort and function symbols.
+       </dd>
+       <dt><a name="UFNIA" />
+        <a href="logics-all.shtml#UFNIA">
+         <b>
+          UFNIA:
+         </b>
+        </a>
+       </dt>
+       <dd>
+        Non-linear integer arithmetic with uninterpreted sort and function symbols.
+       </dd>
+      </dl>
+      <br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>
+     </div>
+      <!--#include virtual="sidebar.shtml" -->
+    </div>
+   </div>
+   <!--#include virtual="standard-footer.shtml" -->
+  </div>
+ </body>
+</html>

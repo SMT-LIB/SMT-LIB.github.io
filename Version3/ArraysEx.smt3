@@ -1,0 +1,56 @@
+
+(define-module Arrays (
+  (set-info :smt-lib-version 3.0)
+  (set-info :smt-lib-release "2020-XX-XX")
+  (set-info :written-by "Pascal Fontaine and Cesare Tinelli")
+  (set-info :date "2020-07-01")
+  (set-info :last-updated "2020-07-01")
+  (set-info :update-history
+   "TODO.
+   ")
+  (set-info :notes 
+   "TO REVISE. A schematic version of the theory of functional arrays with extensionality.")
+  
+  (import (Core))
+  (open Core)
+
+  (declare-type Array (Type Type))
+
+  (declare-const make_const_array
+    (-> (! Type :var I) ; this type must be provided explicitly
+        (! Type :var E :implicit) 
+        E (Array I E)))
+
+  (declare-const select
+    (-> (! Type :var I :implicit) 
+        (! Type :var E :implicit) 
+        (Array I E) I E))
+
+  (declare-const store
+    (-> (! Type :var I :implicit) 
+        (! Type :var E :implicit)
+        (Array I E) I E (Array I E)))
+
+  ; Axiomatization
+  ; make_const_array
+  (assert (forall ((I Type) (E Type) (i I) (e E))
+	    (= (select (make_const_array I e) i) e)))
+
+  ; select
+  (assert (forall ((I Type) (E Type) (a (Array I E)) (i I) (e E))
+	    (= (select (store a i e) i) e)))
+
+  ; store
+  (assert (forall ((I Type) (E Type) (a (Array I E)) (i I) (j I) (e E))
+	    (=> (distinct i j) (= (select (store a i e) j) (select a j)))))
+			
+  (assert (forall ((I Type) (E Type) (a (Array I E)) (b (Array I E)))
+	    (=> (forall ((i I)) (= (select a i) (select b i))) (= a b))))
+
+  ;--------------
+  ; Array values
+  ;--------------
+  (define-values ((I Type) (E Type)) (Array I E) ⟨abstract_value⟩)
+
+))
+
