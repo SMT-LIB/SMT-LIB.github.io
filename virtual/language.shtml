@@ -1,0 +1,140 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<!--
+Design by http://www.bluewebtemplates.com
+Released for free under a Creative Commons Attribution 3.0 License
+-->
+<html xmlns="http://www.w3.org/1999/xhtml">
+<!--#include virtual="head.shtml" -->
+ <body>
+  <div class="main">
+   <div class="header">
+    <div class="header_resize">
+     <div class="menu_nav">
+      <ul>
+       <li><a href="index.shtml">Home</a></li>
+       <li><a href="about.shtml">About</a></li>
+       <li><a href="news.shtml">News</a></li>
+       <li class="active"><a href="standard.shtml">Standard</a></li>
+       <li><a href="benchmarks.shtml">Benchmarks</a></li>
+       <li><a href="software.shtml">Software</a></li>
+       <li><a href="credits.shtml">Credits</a></li>
+      </ul>
+     </div>
+     <!--#include virtual="logo.shtml" -->
+    </div>
+   </div>
+   <div class="content">
+    <div class="content_resize">
+     <div class="mainbar">
+      <h2>Language</h2>
+       <dl>
+        <dt><strong>The SMT-LIB Standard: Version 2.6</strong>,
+         by Clark Barrett, Pascal Fontaine, and Cesare Tinelli.
+        </dt>
+        <dd>Latest official release of Version 2.6 of the SMT-LIB standard.
+         [ <a href="papers/smt-lib-reference-v2.6-r2021-05-12.pdf">pdf</a> | <a href="biblio/BarFT-RR-17.bib">bib</a> ]
+        </dd>
+        <dd>Previous releases:
+	   <a href="papers/smt-lib-reference-v2.6-r2021-04-02.pdf">2021-04-02</a>;
+           <a href="papers/smt-lib-reference-v2.6-r2017-07-18.pdf">2017-07-18</a>
+        </dd>
+        <dt><strong>The SMT-LIB Standard: Version 2.5</strong>,
+         by Clark Barrett, Pascal Fontaine, and Cesare Tinelli.
+        </dt>
+        <dd>Latest official release of Version 2.5 of the SMT-LIB standard.
+         [ <a href="papers/smt-lib-reference-v2.5-r2015-06-28.pdf">pdf</a> | <a href="biblio/BarFT-RR-15.bib">bib</a> ]
+        </dd>
+        <dd>Previous releases:
+         <a href="papers/smt-lib-reference-v2.5-r2015-05-28.pdf">2015-05-28</a>;
+        </dd>
+        <dt><strong>The SMT-LIB v2 Language and Tools: A Tutorial</strong>,
+         by David R. Cok.
+        </dt>
+        <dd>A tutorial on Version <strong>2.0</strong> of the language and on a number of SMT-LIB tools developed by the author.
+         [ <a href="http://smtlib.github.io/jSMTLIB/SMTLIBTutorial.pdf">pdf</a> ]
+        </dd>
+       </dl>
+       <br>
+<!--      <h3>Next Version</h3>
+      <dl>
+       <dt><strong>The SMT-LIB Standard: Version 2.6</strong>,
+        by Clark Barrett, Pascal Fontaine, and Cesare Tinelli.
+       </dt>
+       <dd>Latest draft, not yet official.
+        [ <a href="papers/smt-lib-reference-v2.6-draft-3.pdf">pdf</a> ]
+       </dd>
+      </dl>
+-->
+      <h3>Previous Versions</h3>
+      <p>The following earlier versions of the standard are subsumed by the current one and so are deprecated. They are listed here only for historical reasons.
+      </p>
+      <dl>
+       <dt><strong>The SMT-LIB Standard: Version 2.0</strong>,
+        by Clark Barrett, Aaron Stump, and Cesare Tinelli.
+       </dt>
+       <dd>Last official release of Version 2.0 of the SMT-LIB standard (9 Sep 9 2012).
+       </dd>
+       <dd>[ <a href="papers/smt-lib-reference-v2.0-r12.09.09.pdf">pdf</a> | <a href="http://www.cs.uiowa.edu/~tinelli/biblio/BarST-RR-10.bib">bib</a> ]
+       </dd>
+       <dd>Previous releases (<a href="papers/v2-change-log.txt">Change log</a>):
+        Version 2.0
+        <a href="papers/smt-lib-reference-v2.0-r10.12.21.pdf">21-12-10</a>;
+        <a href="papers/smt-lib-reference-v2.0-r10.08.28.pdf">28-08-10</a>;
+        <a href="papers/smt-lib-reference-v2.0-r10.03.30.pdf">30-03-10</a>.
+       </dd>
+       <dt>
+        <strong>The SMT-LIB Standard: Version 1.2</strong>,
+        by Silvio Ranise and Cesare Tinelli.
+       </dt>
+       <dd>
+        Last release (30 Aug 2006) of Version 1.2 of the SMT-LIB standard.
+       </dd>
+       <dd>[ <a href="papers/format-v1.2-r06.08.30.pdf">pdf</a> | <a href="http://www.cs.uiowa.edu/~tinelli/biblio/RanTin-RR-06.bib">bib</a> ]
+       </dd>
+       <dd>Previous releases (<a href="papers/change-log.txt">Change log</a>):
+        Version 1.2
+        <a href="papers/format-v1.2-r06.08.05.pdf">05-08-06</a>.
+        Version 1.1
+        <a href="papers/format-v1.1-r05.04.12.pdf">12-04-05</a>;
+        <a href="papers/format-v1.1-r05.04.08.pdf">08-04-05</a>;
+        <a href="papers/format-v1.1-r05.03.18.pdf">18-03-05</a>.
+        Version 1.0
+        <a href="papers/format-v1.0-r04.09.15.pdf">15-09-04</a>;
+        <a href="papers/format-v1.0-r04.07.26.pdf">26-07-04</a>.
+       </dd>
+       <dt><strong>The SMT-LIB Format: An Initial Proposal</strong>,
+        by Silvio Ranise and Cesare Tinelli.
+       </dt>
+       <dd>Proceedings of PDPAR'03, July 2003.
+       </dd>
+       <dd>
+        This is the initial proposal of the format, put forward during the
+        <a href="http://www.loria.fr/~ranise/pdpar03/">PDPAR'03</a>
+        workshop.
+       </dd>
+       <dd>[ <a href="papers/pdpar-proposal.pdf">pdf</a> | <a href="http://www.cs.uiowa.edu/~tinelli/biblio/RanTin-PDPAR-03">bib</a> ]
+       </dd>
+      </dl>
+     </div>
+      <!--#include virtual="sidebar.shtml" -->
+    </div>
+   </div>
+   <div class="clr"></div>
+   <div class="footer">
+    <div class="footer_resize">
+    <!--#include virtual="copyright.shtml" -->
+     <ul class="fmenu">
+      <li><a href="index.shtml">Home</a></li>
+      <li><a href="about.shtml">About</a></li>
+      <li><a href="news.shtml">News</a></li>
+      <li class="active"><a href="standard.shtml">Standard</a></li>
+      <li><a href="benchmarks.shtml">Benchmarks</a></li>
+      <li><a href="software.shtml">Software</a></li>
+      <li><a href="credits.shtml">Credits</a></li>
+     </ul>
+     <div class="clr"></div>
+    </div>
+   </div>
+  </div>
+ </body>
+</html>

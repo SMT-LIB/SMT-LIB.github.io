@@ -1,0 +1,85 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<!--
+Design by http://www.bluewebtemplates.com
+Released for free under a Creative Commons Attribution 3.0 License
+-->
+<html xmlns="http://www.w3.org/1999/xhtml">
+<!--#include virtual="head.shtml" -->
+ <body>
+  <div class="main">
+   <div class="header">
+    <div class="header_resize">
+     <div class="menu_nav">
+      <ul>
+       <li><a href="index.shtml">Home</a></li>
+       <li><a href="about.shtml">About</a></li>
+       <li><a href="news.shtml">News</a></li>
+       <li><a href="standard.shtml">Standard</a></li>
+       <li><a href="benchmarks.shtml">Benchmarks</a></li>
+       <li><a href="software.shtml">Software</a></li>
+       <li><a href="credits.shtml">Credits</a></li>
+      </ul>
+     </div>
+     <!--#include virtual="logo.shtml" -->
+    </div>
+   </div>
+   <div class="content">
+    <div class="content_resize">
+     <div class="mainbar">
+      <div class="article">
+       <h2>Related Sites</h2>
+       <dl>
+        <dt><a href="http://smt-comp.org/">SMT-COMP</a></dt>
+        <dd>The SMT solver competition</dd>
+        <dt><a href="http://smt-workshop.org/">SMT workshop</a></dt>
+        <dd>The International Workshop on Satisfiability Modulo Theories</dd>
+        <dt><a href="http://starexec.org/">StarExec</a></dt>
+        <dd>The benchmark repository and execution service current used by SMT-LIB and SMT-COMP</dd>
+        <dt><a href="https://satassociation.org/sat-smt-school.html">SAT/SMT/AR Summer School</a></dt>
+        <dd>Annual summer school on SAT, SMT and Automated Reasoning</dd>
+        <dt><a href="http://smtexec.cs.uiowa.edu/">SMT-EXEC</a></dt>
+ 
+        <dd>The benchmark repository and execution service previously used by SMT-LIB and SMT-COMP.</dd>
+        <dd>(This service is no longer active although it still contains historical data.)</dd>
+       </dl>
+       The following sites are related or have similar objectives to those of SMT-LIB.
+       <dl>
+<!--
+        <dt><a href="http://www.satlib.org/">SATLIB</a></dt>
+        <dd>A collection of benchmark problems, solvers, and tools for propositional satisfiability.</dd>
+-->
+        <dt><a href="http://www.qbflib.org/">QBFLIB</a></dt>
+        <dd>A collection of benchmark problems, solvers, and tools related to Quantified Boolean Formula (QBF) satisfiability.
+        </dd>
+        <dt><a href="http://www.csplib.org">CSPLib</a></dt>
+        <dd>A library of test problems for constraint solvers.</dd>
+        <dt><a href="http://sygus.org">SyGuS</a></dt>
+        <dd>A competition and benchmark library for Syntax-Guided Synthesis.</dd>
+        <dt><a href="http://www.tptp.org/">TPTP</a></dt>
+        <dd>A benchmarks library for automated theorem proving.</dd>
+       </dl>
+      </div>
+     </div>
+      <!--#include virtual="sidebar.shtml" -->
+    </div>
+   </div>
+   
+   <div class="clr"></div>
+   <div class="footer">
+    <div class="footer_resize">
+    <!--#include virtual="copyright.shtml" -->
+     <ul class="fmenu">
+      <li><a href="index.shtml">Home</a></li>
+      <li><a href="about.shtml">About</a></li>
+      <li><a href="news.shtml">News</a></li>
+      <li><a href="standard.shtml">Standard</a></li>
+      <li><a href="benchmarks.shtml">Benchmarks</a></li>
+      <li><a href="software.shtml">Software</a></li>
+      <li><a href="credits.shtml">Credits</a></li>
+     </ul>
+     <div class="clr"></div>
+    </div>
+   </div>
+  </div>
+ </body>
+</html>

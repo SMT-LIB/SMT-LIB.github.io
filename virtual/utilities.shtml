@@ -1,0 +1,138 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+ <!--#include virtual="head.shtml" -->
+ <body>
+  <div class="main">
+   <div class="header">
+    <div class="header_resize">
+     <div class="menu_nav">
+      <ul>
+       <li><a href="index.shtml">Home</a></li>
+       <li><a href="about.shtml">About</a></li>
+       <li><a href="news.shtml">News</a></li>
+       <li><a href="standard.shtml">Standard</a></li>
+       <li><a href="benchmarks.shtml">Benchmarks</a></li>
+       <li class="active"><a href="software.shtml">Software</a></li>
+       <li><a href="credits.shtml">Credits</a></li>
+      </ul>
+     </div>
+     <!--#include virtual="logo.shtml" -->
+    </div>
+   </div>
+   <div class="content">
+    <div class="content_resize">
+     <div class="mainbar">
+      <div class="article">
+       <h2>Utilities and Tools</h2>
+       <p>The page contains a set of utilities and tools to work with the SMT-LIB 2 format.
+        <div class="footnote"><b>Note:</b>
+         Most of the utilities tools below have been developed by third parties and are provided here as a convenience to the community.
+         Appearance on this page does not imply an endorsement of their full conformance to the SMT-LIB standard.
+         Please contact each utility's authors directly for questions, bug reports, or other requests.
+        </div>
+        
+        <h4>Editing</h4>
+        <ul>
+         <li>
+          Syntax highlighting for <a href="https://github.com/bohlender/vim-z3-smt2">VIM</a>.
+         </li>
+         <li>
+         Syntax highlighting mode <a href="https://bitbucket.org/AdrienChampion/tmlanguages">TextMate and Sublime</a>.
+         </li>
+         <li>
+          <a href="https://github.com/chsticksel/smtlib-mode">Emacs mode</a> to edit and run SMT-LIB 2 scripts.
+         </li>
+         </ul>
+        
+        
+        <h4>Parsing</h4>
+<ul>
+         <li>
+          An <a href="https://github.com/julianthome/smtlibv2-grammar">ANTLR grammar</a> of SMT-LIB 2.6 scripts.
+         </li>
+         <li>
+          <a href="http://smtlib.github.io/jSMTLIB/"><b>jSMTLIB</b></a>, a suite of Java tools for parsing and type-checking SMT-LIB 2 scripts, and
+          translating them to the input languages of some non-SMT-LIB-conforming solvers.
+         </li>
+         <li>
+          An open source <a href="http://es.fbk.eu/people/griggio/misc/smtlib2parser.html">generic lexer and parser</a> for SMT-LIB 2.0 scripts implemented in Flex and Bison and C99.
+         </li>
+         <li>
+          A <a href="http://hackage.haskell.org/package/smt-lib">Haskell library</a> for parsing and printing SMT-LIB 2 scripts.
+         </li>
+         <li>
+          An SWI-Prolog <a href="https://eu.swi-prolog.org/pack/list?p=smtlib">parser</a> for SMT-LIB 2.6 scripts.
+         </li>
+         <li>
+          An OCaml <a href="http://www.cs.uiowa.edu/~astump/software/ocaml-smt2.zip">parser</a> for SMT-LIB 2.0 scripts (not maintained).
+         </li>
+</ul>
+
+<h4>Language Servers</h4>
+<ul>
+         <li>
+          <a href="https://github.com/Gbury/dolmen"><b>Dolmen</b></a>,
+          an LSP server SMT-LIB 2.6.
+         </li>
+         
+</ul>
+
+<h4>Debugging</h4>
+<ul>
+         <li>
+          <a href="http://fmv.jku.at/ddsmt/"><b>ddSMT</b></a>, a delta-debugger (input minimizer) for SMT-LIB-compliant solvers.
+         </li>
+<!--
+         <li>
+          <a href="http://www.verit-solver.org/distrib/deltasmt.tar.gz"><b>Delta SMT</b></a>, another delta-debugger for SMT-LIB-compliant solvers.
+         </li>
+-->
+</ul>
+
+        <h4>Interfaces</h4>
+        <ul>
+
+         <li>
+          <a href="https://github.com/delcypher/nsolv"><b>Nsolv</b></a>, a front-end that allows multiple SMT-LIB 2 compliant solvers to be executed in parallel.
+         </li>
+         <li>
+          <a href="https://github.com/kino-mc/rsmt2"><b>rsmt2</b></a>, a generic Rust library to interact with SMT-LIB 2 compliant solvers running in a separate system process.
+         </li>
+         <li>
+          <a href="http://leventerkok.github.com/sbv/"><b>SBV</b></a>, a tool to express properties of Haskell programs and prove them using SMT solvers via an SMT-LIB interface.
+         </li>
+         <li>
+          <a href="http://ahorn.github.io/smt-kit/"><b>SMT Kit</b></a>, a C++11 library for many-sorted logics targeting quantifier-free SMT-LIB 2.0 formulas.
+         </li>
+         <li>
+          <a href="https://github.com/ossanha/smtpp"><b>SMTpp</b></a>, an OCaml tool operating both as a source-to-source transformer and analyzer for SMT-LIB 2.0.
+         </li>
+         <li>
+          <a href="http://www.pysmt.org"><b>pySMT</b></a>, a Python library for manipulating and solving SMT formulas using SMT-LIB 2-compliant solvers.
+        </ul>
+       </p>
+      </div>
+     </div>
+     <!--#include virtual="sidebar.shtml" -->
+    </div>
+   </div>
+   
+   <div class="clr"></div>
+   <div class="footer">
+    <div class="footer_resize">
+     <!--#include virtual="copyright.shtml" -->
+     <ul class="fmenu">
+      <li><a href="index.shtml">Home</a></li>
+      <li><a href="about.shtml">About</a></li>
+      <li><a href="news.shtml">News</a></li>
+      <li><a href="standard.shtml">Standard</a></li>
+      <li><a href="benchmarks.shtml">Benchmarks</a></li>
+      <li class="active"><a href="software.shtml">Software</a></li>
+      <li><a href="credits.shtml">Credits</a></li>
+     </ul>
+     <div class="clr"></div>
+    </div>
+   </div>
+  </div>
+ </body>
+</html>

@@ -1,0 +1,98 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+ <!--#include virtual="head.shtml" -->
+ <body>
+  <div class="main">
+   <div class="header">
+    <div class="header_resize">
+     <div class="menu_nav">
+      <ul>
+       <li><a href="index.shtml">Home</a></li>
+       <li><a href="about.shtml">About</a></li>
+       <li><a href="news.shtml">News</a></li>
+       <li><a href="standard.shtml">Standard</a></li>
+       <li><a href="benchmarks.shtml">Benchmarks</a></li>
+       <li><a href="software.shtml">Software</a></li>
+       <li><a href="credits.shtml">Credits</a></li>
+      </ul>
+     </div>
+     <!--#include virtual="logo.shtml" -->
+    </div>
+   </div>
+   <div class="content">
+    <div class="content_resize">
+     <div class="mainbar">
+      <div class="article">
+       <h2>Contacts and Contributions</h2>
+       <p>
+        For feedback, comments, and inquiries
+        please send an email to one of co-ordinators:
+        <a href="http://www.cs.stanford.edu/~barrett/">
+         Clark Barrett</a>,
+        <a href="http://www.loria.fr/~fontaine/">
+         Pascal Fontaine</a>, and
+        <a href="http://www.cs.uiowa.edu/%7Etinelli">
+         Cesare Tinelli</a>.
+       </p>
+       <h3>Discussion Forum</h3>
+       <p>There is a discussion forum dedicated to discussing the SMT-LIB standard and proposed extensions, as well as any other matter regarding the library:
+       <a href="https://groups.google.com/d/forum/smt-lib">https://groups.google.com/d/forum/smt-lib</a>.
+       <br>
+       You can follow or join the discussion by subscribing to the forum.
+       </p>
+       <p><b>Note:</b>
+       The discussion forum is not an appropriate one for announcements such as calls for papers, positions, and so on. For that, please use <a href="https://groups.google.com/d/forum/smt-announce">https://groups.google.com/d/forum/smt-announce</a> instead.
+       </p>
+       <p>Until May 30, 2017, the discussion list was on a different server. You can access its archived messages at <a href="http://www.cs.nyu.edu/pipermail/smt-lib">http://www.cs.nyu.edu/pipermail/smt-lib</a>.
+       </p>
+       <h3>Benchmarks</h3>
+       <p>The success of this initiative depends on collecting and maintaining a large and varied collection of benchmarks.
+        If you would like to contribute your benchmarks to SMT-LIB please contact one of the organizers above.
+       </p>
+       <h3>Extensions</h3>
+       <p>The SMT-LIB standard is driven by the needs of the community.
+        If you would like to propose any extensions to the standard (new theories or logics, or new features for the SMT-LIB language) please contact the organizers first.
+        For non-minor extensions, the usual process is the following:
+        <ol>
+         <li>A person or group of people decides to propose an extension.</li>
+         <li>They contact the organizers or they bring up the issue during the SMT-LIB discussion session at the <a href="http://smt-workshop.org/">SMT workshop</a>.
+         <li>In either case, there in an initial discussion to see whether
+          <ul>
+           <li>the proposed extension is within the scope of the initiative and the SMT-LIB language;</li>
+           <li>it is of interest to enough people;</li>
+           <li>there are applications that would generate enough benchmarks using the extension.</li>
+          </ul>
+         </li>
+         <li>If the extension is deemed feasible, a work group is formed, with participation open to any interested people. At least one of the SMT-LIB co-organizers joins the work group at some point to make sure that the technical aspects of the proposal are sound.
+         </li>
+         <li>The work group discusses the extension in depth and prepares a detailed proposal.
+         </li>
+         <li>The proposal is presented to the SMT-LIB community through the discussion list above.</li>
+         <li>Feedback from the community is used to improve the final version of the proposal.</li>
+         <li>The proposed extension is officially incorporated into the standard and documented on this site.</li>
+        </ol>
+       </p>
+      </div>
+     </div>
+     <!--#include virtual="sidebar.shtml" -->
+    </div>
+   </div>
+   <div class="clr"></div>
+   <div class="footer">
+    <div class="footer_resize">
+     <!--#include virtual="copyright.shtml" -->
+     <ul class="fmenu">
+      <li><a href="index.shtml">Home</a></li>
+      <li><a href="about.shtml">About</a></li>
+      <li><a href="news.shtml">News</a></li>
+      <li><a href="standard.shtml">Standard</a></li>
+      <li><a href="benchmarks.shtml">Benchmarks</a></li>
+      <li><a href="software.shtml">Software</a></li>
+      <li><a href="credits.shtml">Credits</a></li>
+     </ul>
+     <div class="clr"></div>
+    </div>
+   </div>
+  </div>
+ </body>
+</html>

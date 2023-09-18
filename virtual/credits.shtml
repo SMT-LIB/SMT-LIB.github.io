@@ -1,0 +1,454 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<!--
+Design by http://www.bluewebtemplates.com
+Released for free under a Creative Commons Attribution 3.0 License
+-->
+<html xmlns="http://www.w3.org/1999/xhtml">
+<!--#include virtual="head.shtml" -->
+ <body>
+  <div class="main">
+   <div class="header">
+    <div class="header_resize">
+     <div class="menu_nav">
+      <ul>
+       <li><a href="index.shtml">Home</a></li>
+       <li><a href="about.shtml">About</a></li>
+       <li><a href="news.shtml">News</a></li>
+       <li><a href="standard.shtml">Standard</a></li>
+       <li><a href="benchmarks.shtml">Benchmarks</a></li>
+       <li><a href="software.shtml">Software</a></li>
+       <li class="active"><a href="credits.shtml">Credits</a></li>
+      </ul>
+     </div>
+     <!--#include virtual="logo.shtml" -->
+    </div>
+   </div>
+   <div class="content">
+    <div class="content_resize">
+     <div class="mainbar">
+      <div class="article">
+       <h2>Credits </h2>
+       <ul class="ex_menu">
+        <li><a href="#citing">Citing SMT-LIB</a>
+        <li><a href="#players">Major Players</a>
+        <li><a href="#suggestions">Suggestions and Feedback</a>
+        <li><a href="#benchmarks">Benchmarks</a>
+        <li><a href="#funding">Funding</a>
+        <li><a href="#website">Web Site</a>
+       </ul>
+       <a name="citing"></a>
+       <h3>Citing SMT-LIB </h3>
+       To cite SMT-LIB as a whole the best would be to use something like the following:
+       <p>
+        <cite>
+         Clark Barrett, Pascal Fontaine, and Cesare Tinelli.
+         The Satisfiability Modulo Theories Library (SMT-LIB),
+         <tt>www.SMT-LIB.org</tt>. 2016.
+         [<a href="http://www.cs.uiowa.edu/~tinelli/biblio/BarFT-SMTLIB.bib">BibTeX entry</a>]
+        </cite>
+       </p>
+       To cite a publication on the the SMT-LIB format specifically, please use:
+       <p>
+        <cite>
+         Clark Barrett, Aaron Stump, and Cesare Tinelli.
+         The SMT-LIB Standard - Version 2.0.
+         Proceedings of the 8th International Workshop on Satisfiability Modulo Theories
+         (Edinburgh, England), 2010.
+         [<a href="http://www.cs.uiowa.edu/~tinelli/biblio/BarST-SMT-10.bib">BibTeX entry</a>]
+        </cite>
+       </p>
+       <a name="players"></a>
+       <h3>Major Players</h3>
+       <p>The SMT-LIB initiative was created by
+        <a href="http://st.fbk.eu/SilvioRanise">
+         Silvio Ranise</a>
+        and
+        <a href="http://www.cs.uiowa.edu/%7Etinelli">
+         Cesare Tinelli</a>
+        in 2002, after a proposal made at
+        <a href="http://www.mrg.dist.unige.it/conferences/frocos2002/">
+         FroCoS 2002</a>
+        by <a href="http://st.fbk.eu/AlessandroArmando">
+         Alessandro Armando</a>.
+       </p>
+       <p>
+        The initiative is currently co-ordinated by
+        <a href="http://www.cs.nyu.edu/~barrett/">
+         Clark Barrett</a>,
+        <a href="http://www.loria.fr/~fontaine/">
+         Pascal Fontaine</a>,
+        and
+        Cesare Tinelli.
+        Previous coordinators include
+        Silvio Ranise and
+        <a href="http://www.cs.uiowa.edu/~astump/">
+         Aaron Stump</a>.
+       </p>
+
+       <h4>Benchmarks</h4>
+       <p>
+        The SMT-LIB benchmark collection is co-managed by
+        Clark Barrett,
+        Pascal Fontaine,
+        <a href="https://cs.stanford.edu/~niemetz/">Aina Niemetz</a>,
+        <a href="https://cs.stanford.edu/~preiner/">Mathias Preiner</a>, and
+        <a href="https://team.inria.fr/veridis/schurr/">Hans-Jörg Schurr</a>.
+        Previous benchmark managers include
+        <a href="http://research.microsoft.com/en-us/um/people/leonardo/">Leonardo de Moura</a>,
+        and
+        <a href="http://research.microsoft.com/en-us/people/cwinter/">Christoph Wintersteiger</a>.
+        Since 2022, new benchmarks are checked for compliance with the Dolmen tool developed by 
+        <a href="https://gbury.eu">Guillaume Bury</a>. 
+        The collection is currently hosted on a <a href="https://clc-gitlab.cs.uiowa.edu:2443/explore/groups">GitLab server</a> at the <a href="http://www.uiowa.edu/">University of Iowa</a>.
+        The server was initially set up and populated by <a href="https://mebsout.github.io/">Alain Mebsout</a>.
+        Until 2013, the benchmark collection was co-managed by
+        Clark Barrett and <a href="http://cs.nyu.edu/~mdeters/">Morgan Deters</a>.
+        The querying and browsing interface for that, now discontinued, collection was developed and maintained by Morgan Deters.
+        <br><br>
+        An official copy of the benchmarks is also available on the <a href="https://www.starexec.or">StarExec</a> solver execution service. 
+      </p>
+
+       <h4>SMT-COMP</h4>
+       <p>
+        A great impulse to the growth of the benchmark collection and to SMT-LIB as a whole has
+        been given by the affiliated solver competition <a href="http://www.smt-comp.org">SMT-COMP</a>.
+        Past and present organizers of SMT-COMP include
+        <a href="http://homepages.dcc.ufmg.br/~hbarbosa/">Haniel Barbosa</a>,
+        Clark Barrett,
+        <a href="https://it.linkedin.com/in/robertobruttomesso">Roberto Bruttomesso</a>,
+        David Cok,
+        <a href="https://www.lri.fr/~conchon/">Sylvain Conchon</a>,
+        <a href="https://www.sites.google.com/site/deharbe/">David Deharbe</a>,
+        Morgan Deters,
+        <a href="https://es.fbk.eu/people/griggio/">Alberto Griggio</a>,
+        Liana Hadarean,
+        <a href="https://swt.informatik.uni-freiburg.de/staff/heizmann">Matthias Heizmann</a>,
+        <a href="https://jochen-hoenicke.de/">Jochen Hoenicke</a>,
+        <a href="https://www.inf.usi.ch/postdoc/hyvarinen/">Antti Hyvarinen</a>,
+        Leonardo de Moura,
+        <a href="https://cs.stanford.edu/people/niemetz">Aina Niemetz</a>,
+        <a href="http://www.lsi.upc.edu/~oliveras/">Albert Oliveras</a>,
+        <a href="http://www.cs.man.ac.uk/~regerg/index.html">Giles Reger</a>,
+        Aaron Stump,
+        and
+        <a href="http://user.it.uu.se/~tjawe125/">Tjark Weber</a>.
+       </p>
+       <a name="suggestions"></a>
+       <h3>Suggestions and Feedback</h3>
+       <p>
+        The following additional people have contributed to the initiative over the years
+        with their suggestions and feedback on the SMT-LIB standard, the library, or
+        the solver competition (we apologize in advance for any omissions):
+       </p>
+       <p>
+        Peter Andrews,
+        Alessandro Armando,
+        Domagoj Babi&cacute;,
+        Kshitij Bansal,
+        Fran&ccedil;ois Bobot,
+        Adrian Bock,
+        Sergey Berezin,
+        Murphy Berzish,
+        Nikolaj Bj&oslash;rner,
+        Maria Paola Bonacina,
+        Sascha Boehme,
+        Alessandro Cimatti,
+        Adrien Champion,
+        J&uuml;rgen Christ,
+        David Cok,
+        Christopher Conway,
+        David Deharbe,
+        Morgan Deters,
+        Bruno Dutertre,
+        Levent Erkok,
+        Kousha Etessami,
+        Pascal Fontaine,
+        Anders Franzen,
+        Andrew Gacek,
+        Vijay Ganesh,
+        Amit Goel,
+        Alberto Griggio,
+        Jim Grundy,
+        John Harrison,
+        Matthias Heizmann,
+        Jochen Hoenicke,
+        Joxan Jaffar, 
+        Predrag Jani&#269;i&cacute;,
+        Paul Jackson,
+        Tim King,
+        Joseph Kiniry,
+        Daniel Kr&ouml;ning,
+        Sava Krsti&cacute;,
+        Viktor Kuncak,
+        Pierre van de Laar,
+        Shuvendu Lahiri,
+        Vincent Langenfeld,
+        Florian Lapschies,
+        Anthony Lin,
+        Tianyi Liang,
+        Dan Liew,
+        Nuno Lopes,
+        Jinpeng Lv,
+        Claude March&egrave;,
+        Paulo Matos,
+        John Matthews,
+        Raphaël Michel,
+        David Monniaux,
+        Micha&#322; Moskal,
+        Jose Meseguer,
+        Leonardo de Moura,
+        Greg Nelson,
+        Ilkka Niemela,
+        Aina Niemetz,
+        Robert Nieuwenhuis,
+        Andres Nötzli,
+        Albert Oliveras,
+        Frank Pfenning,
+        Gabriele Paganelli,
+        Andrew Reynolds,
+        Cody Roux,
+        Philipp R&uuml;mmer,
+        Harald Rue&szlig,
+        James Saxe,
+        Florian Schanda,
+        Roberto Sebastiani,
+        Sanjit Seshia,
+        Natarajan Shankar,
+        Eli Singerman,
+        Fabio Somenzi,
+        Ofer Strichman,
+        Geoff Sutcliffe,
+        Moshe Vardi,
+        Margus Veanes,
+        Andrei Voronkov,
+        Johannes Waldmann,
+        Tjark Weber,
+        Georg Weissenbacher,
+        Christoph Wintersteiger.
+       </p>
+       <a name="benchmarks"></a>
+       <h3>Benchmarks</h3>
+       <p>
+        The following people have also directly or indirectly contributed to SMT-LIB by
+        providing benchmarks natively in SMT-LIB format, or
+        translating existing benchmarks for us into SMT-LIB or similar formats, or
+        more generally making their benchmarks available to the research community
+        (we apologize in advance for any omissions):
+       </p>
+       <p>
+        Nicolas Amat,
+        Domagoj Babi&cacute;,
+        Nicolas Beauger,
+        Armin Biere,
+        Nikolaj Bj&oslash;rner,
+        Miquel Bofill,
+        Russell Bradford,
+        Aaron Bradley,
+        Brian Brady,
+        Martin Bromberger,
+        Geoffrey Brown,
+        Robert Brummayer,
+        Roberto Bruttomesso,
+        Randy Bryant,
+        Sebastian Buchwald,
+        Thomas Bunk,
+        Rick Butler,
+        Claudio Castellini,
+        Alex Coffin,
+        James Davenport,
+        Morgan Deters,
+        Michael Decoster,
+        David Deharbe,
+        Stefan Disch,
+        Bruno Dutertre,
+        Matthew England,
+        Levent Erkok,
+        Matteo Favaro,
+        Jean-Christophe Filli&acirc;tre,
+        Bernd Fischer,
+        Pascal Fontaine,
+        Andreas Fried,
+        Malay Ganai,
+        Vijay Ganesh,
+        Alexandre Gonzalvez,
+        Yeting Ge,
+        Bernhard Gleiss,
+        Patrice Godefroid,
+        Aman Goel,
+        Gert-Martin Greuel,
+        Alberto Griggio,
+        Matthias Güdemann,
+        Sumit Gulwani,
+        Trevor Hansen,
+        Matthias Heizmann,
+        Keijo Heljanko,
+        Andre Henning,
+        Julien Henry,
+        Jochen Hoenicke,
+        Anastasiia Izycheva,
+        Paul Jackson,
+        Ivan Jager,
+        Tomi Janhunen,
+        Fuqi Jia,
+        Jie-Hong Roland Jiang,
+        Andrew Jones,
+        Dejan Jovanovi&cacute;,
+        Johannes Kanig,
+        Gergely Kovasznai,
+        Hyondeuk Kim,
+        Tim King,
+        Daniel Kr&ouml;ning,
+        Wolfgang Kunz,
+        Stefan Kupferschmid,
+        Shuvendu Lahiri,
+        Rustan Leino,
+        Bohan Li,
+        Rhishikesh Limaye,
+        Nuno Lopes,
+        Fred Maris,
+        John Matthews,
+        Claude March&egrave;,
+        David Molnar,
+        Makai Mann,
+        Panagiotis Manolios,
+        Micha&#322; Moskal,
+        Leonardo de Moura,
+        Yannick Moy,
+        Casey Mulligan,
+        Ilkka Niemela,
+        Robert Nieuwenhuis,
+        Andres Nötzli,
+        Alex Ozdemir,
+        Kazuhiro Ogata,
+        Albert Oliveras,
+        Hristina Palikareva,
+        Lee Pike,
+        Lorenzo Platania,
+        Andre Platzer,
+        Florian Pigorsch,
+        Elizabeth Polgreen,
+        Hernán Ponce de Leon,
+        Mathias Preiner,
+        Shaz Qaader,
+        Jan-David Quesel,
+        Zvonimir Rakamaric,
+        Andrew Reynolds,
+        Miguel del Rio Almajano
+        Enric Rodriguez-Carbonell,
+        John Rushby,
+        Johann-Tobias Schäg,
+        Maria Schett,
+        Michael Schidlowsky,
+        Johannes Schoisswohl,
+        Christoph Scholl,
+        Hans-Jörg Schurr,
+        Sanjit Seshia,
+        Hossein Sheini,
+        Da Shen,
+        Jiae Shin,
+        Saurabh Srivastava,
+        Maria Sorea,
+        Volker Sorge,
+        Dominik Stoffel,
+        Ofer Strichman,
+        Christoph Sticksel,
+        Aaron Stump,
+        Geoff Sutcliffe,
+        Naoyuki Tamura,
+        Nestan Tsiskaridze,
+        Aaron Tomb,
+        Zak Tonks,
+        Ali Uncu,
+        Miroslav Velev,
+        Ramarathnam Venkatesan,
+        Alexey Vishnyakov,
+        Johannes Waldmann,
+        Angela Wallenburg,
+        Tjark Weber,
+        Markus Wedler,
+        Philipp Wendler,
+        Oliver Wienand,
+        Christoph Wintersteiger,
+        Clifford Wolf,
+        Dennis Yurichev,
+        Harald Roman Zankl,
+        Yoni Zohar,
+        the <a href="http://www.averest.org/">Averest</a> team,
+        <a href="http://www.calypto.com/">Calypto Design Systems</a>,
+        the <a href="http://www.cs.nyu.edu/acsys/cvcl/">CVC Lite</a> team,
+        the <a href="http://cvc4.cs.stanford.edu/web/">CVC4</a> team,
+        the <a href="http://bach.istc.kobe-u.ac.jp/csp2sat/">CSP2SAT</a> team,
+        the <a href="http://harvey.loria.fr/">HarVey</a> team,
+        the <a href="http://mathsat.itc.it/">MathSAT</a> team,
+        the <a href="http://miplib.zib.de/">MIPLIB</a> team,
+        the <a href="http://www.csl.sri.com/projects/sal/">SAL</a> team,
+        the Simplify team,
+        the <a href="http://www.event-b.org/">Rodin</a> team,
+        the <a href="http://www.cs.miami.edu/~tptp/">TPTP</a> team,
+        the <a href="http://www.cs.cmu.edu/~uclid/">UCLID</a> team,
+        the <a href="http://www.cs.wisc.edu/wisa">WiSA</a> team.
+       </p>
+       <a name="funding"></a>
+       <h3>Funding</h3>
+       <p>
+        The work on SMT-LIB has been partially supported over the years by the following companies and institutions:
+        <ul>
+         <li>
+          the <a href="http://www.nsf.gov">
+           National Science Foundation</a>,
+          2006-2008
+          (with grants 0551646, 0551645 and 0551697)
+         </li>
+         <li>
+          the <a href="http://obermann.uiowa.edu/">
+           Obermann Center for Advanced Studies</a>,
+          2007
+         </li>
+         <li>
+          <a href="http://www.intel.com/">
+           Intel Corporation</a>,
+          2005, 2006
+         </li>
+         <li>
+          <a href="http://www.src.org/">
+           Semiconductor Research Corporation</a>,
+          2008-9
+          (with grant 2008-TJ-1850)
+         </li>
+        </ul>
+       </p>
+       <a name="website"></a>
+       <h3>Web Site</h3>
+       <p>
+        This site was developed and is currently maintained by
+        Cesare Tinelli,
+        with contributions from Clark Barrett and Pascal Fontaine.
+       </p>
+       <p>
+        <em>Any opinions, findings and conclusions or recommendations expressed in this site are those of the authors and do not necessarily reflect the views of the funding institutions or corporations.
+        </em>
+       </p>
+      </div>
+     </div>
+      <!--#include virtual="sidebar.shtml" -->
+    </div>
+   </div>
+   <div class="clr"></div>
+   <div class="footer">
+    <div class="footer_resize">
+    <!--#include virtual="copyright.shtml" -->
+     <ul class="fmenu">
+      <li><a href="index.shtml">Home</a></li>
+      <li><a href="about.shtml">About</a></li>
+      <li><a href="news.shtml">News</a></li>
+      <li><a href="standard.shtml">Standard</a></li>
+      <li><a href="benchmarks.shtml">Benchmarks</a></li>
+      <li><a href="software.shtml">Software</a></li>
+      <li class="active"><a href="credits.shtml">Credits</a></li>
+     </ul>
+     <div class="clr"></div>
+    </div>
+   </div>
+  </div>
+ </body>
+</html>

@@ -1,0 +1,159 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+ <!--#include virtual="head.shtml" -->
+ <body>
+  <div class="main">
+   <div class="header">
+    <div class="header_resize">
+     <div class="menu_nav">
+      <ul>
+       <li><a href="index.shtml">Home</a></li>
+       <li><a href="about.shtml">About</a></li>
+       <li><a href="news.shtml">News</a></li>
+       <li><a href="standard.shtml">Standard</a></li>
+       <li><a href="benchmarks.shtml">Benchmarks</a></li>
+       <li class="active"><a href="software.shtml">Software</a></li>
+       <li><a href="credits.shtml">Credits</a></li>
+      </ul>
+     </div>
+     <!--#include virtual="logo.shtml" -->
+    </div>
+   </div>
+   <div class="content">
+    <div class="content_resize">
+     <div class="mainbar">
+      <div class="article">
+       <a name="solvers"><h2>SMT Solvers</h2></a>
+       <p>This is an incomplete list of publicly available SMT solvers.
+        Please contact us if you have or know of another solver not listed here.
+       </p>
+       <h3>Current Systems</h3>
+       <p>
+        To our knowledge, the following systems (listed alphabetically) were
+        under active development in 2018:
+        <a href="http://ergo.lri.fr/">
+         Alt-Ergo</a>,
+        <a href="http://aprove.informatik.rwth-aachen.de/">
+         AProVE</a>,
+        <a href="http://fmv.jku.at/boolector/">
+         Boolector</a>,
+        <a href="http://cs.nyu.edu/acsys/cvc4/">
+         CVC4</a>,
+        <a href="http://mathsat.fbk.eu/">
+         MathSAT 5</a>,
+        <a href="https://minkeyrink.com">
+         Minkeyrink</a>,
+        <a href="http://verify.inf.usi.ch/content/opensmt2">
+         OpenSMT 2</a>,   
+        <a href="https://github.com/martinjonas/Q3B">
+         Q3B</a>,
+        <a href="http://ultimate.informatik.uni-freiburg.de/smtinterpol/">
+         SMTInterpol</a>,
+        <a href="http://smtrat.github.io/">
+         SMT-RAT</a>,
+        <a href="http://stp.github.io/">
+         STP</a>,
+        <a href="http://www.verit-solver.org/">
+         veriT</a>,
+        <a href="http://yices.csl.sri.com/">
+         Yices 2</a>,
+        <a href="https://github.com/Z3Prover/z3/wiki">
+         Z3</a>.
+       </p>
+       <h3>Older Systems</h3>
+       <p>To our knowledge, the following systems are no longer current
+        as their development has been discontinued.
+        They are included for historical reasons and comparison purposes.
+        <!--<a href="http://www.matf.bg.ac.yu/~janicic/argo/">
+         Argo-lib</a>,
+        -->
+        <a href="http://www.eecs.umich.edu/~ario/">
+         Ario</a>,
+        <a href="http://www.lsi.upc.es/~oliveras/bclt-main.html">
+         Barcelogic</a>,
+        <a href="http://uclid.eecs.berkeley.edu/Beaver/">
+         Beaver</a>,
+        <!--<a href="http://verify.stanford.edu/CVC/">
+         CVC</a>,
+        <a href="http://www.cs.nyu.edu/acsys/cvcl/">
+         CVC Lite</a>,
+        -->
+        <a href="http://www.cs.nyu.edu/acsys/cvc3/">
+         CVC3</a>,
+        <a href="http://sourceforge.net/projects/dpt">
+         DPT</a>,
+        <a href="http://moskal.me/smt/en.html">
+         Fx7</a>,
+        <a href="http://webloria.loria.fr/equipes/cassis/softwares/haRVey/">
+         haRVey</a>,
+        <!--<a href="http://www.fordocsys.com/htp.htm">
+         HTP</a>,
+        -->
+        <a href="http://ics.csl.sri.com/">
+         ICS</a>,
+        <a href="https://projects.avacs.org/projects/isat3">
+         iSAT3</a>,
+        <a href="http://www.cs.washington.edu/ai/lpsat.html">
+         LPSAT</a>,
+        <a href="http://mathsat4.disi.unitn.it/">
+         MathSAT 4</a>,
+        <a href="http://cl-informatik.uibk.ac.at/software/minismt/">
+         MiniSmt</a>,
+        <a href="http://www.cs.utexas.edu/~tdillig/mistral/index.html">
+         Mistral</a>,
+        <a href="http://verify.inf.usi.ch/opensmt1">
+         OpenSMT</a>,
+        <a href="http://www.jaist.ac.jp/~mizuhito/tools/rasat.html">
+         raSAT</a>,
+        <a href="http://www.ai-lab.it/ccr/index.html">
+         RDL</a>,
+        <a href="http://vlsi.colorado.edu/~hhkim/sateen/">
+         SatEEn</a>,
+        <a href="http://kind.ucd.ie/products/opensource/Simplify/">
+         Simplify</a>,
+        <a href="http://fm.csl.sri.com/simplics/">
+         Simplics</a>,
+        <a href="http://www.informatik.uni-bremen.de/agbs/florian/sonolar/">
+         SONOLAR</a>,
+        <a href="http://www.domagoj-babic.com/index.php/ResearchProjects/Spear">
+         Spear</a>,
+        <a href="http://www-step.stanford.edu/">
+         STeP</a>,
+        <a href="http://verify.stanford.edu/SVC/">
+         SVC</a>,
+        <a href="http://www.informatik.uni-bremen.de/agra/eng/sword.php">
+         SWORD</a>,
+        <!--
+        <a href="http://www.star.dist.unige.it/~marco/Tsat/default.htm">
+         Tsat++</a>,
+        -->
+        <a href="http://uclid.eecs.berkeley.edu">
+         UCLID</a>,
+        <a href="http://yices.csl.sri.com/old/yices1-documentation.shtml">
+         Yices</a>.
+       </p>
+      </div>
+     </div>
+     <!--#include virtual="sidebar.shtml" -->
+    </div>
+   </div>
+   
+   <div class="clr"></div>
+   <div class="footer">
+    <div class="footer_resize">
+     <!--#include virtual="copyright.shtml" -->
+     <ul class="fmenu">
+      <li><a href="index.shtml">Home</a></li>
+      <li><a href="about.shtml">About</a></li>
+      <li><a href="news.shtml">News</a></li>
+      <li><a href="standard.shtml">Standard</a></li>
+      <li><a href="benchmarks.shtml">Benchmarks</a></li>
+      <li class="active"><a href="software.shtml">Software</a></li>
+      <li><a href="credits.shtml">Credits</a></li>
+     </ul>
+     <div class="clr"></div>
+    </div>
+   </div>
+  </div>
+ </body>
+</html>

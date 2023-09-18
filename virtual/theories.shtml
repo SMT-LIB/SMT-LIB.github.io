@@ -1,0 +1,82 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<!--
+Design by http://www.bluewebtemplates.com
+Released for free under a Creative Commons Attribution 3.0 License
+-->
+<html xmlns="http://www.w3.org/1999/xhtml">
+<!--#include virtual="head.shtml" -->
+ <body>
+  <div class="main">
+   <div class="header">
+    <div class="header_resize">
+     <div class="menu_nav">
+      <ul>
+       <li><a href="index.shtml">Home</a></li>
+       <li><a href="about.shtml">About</a></li>
+       <li><a href="news.shtml">News</a></li>
+       <li class="active"><a href="standard.shtml">Standard</a></li>
+       <li><a href="benchmarks.shtml">Benchmarks</a></li>
+      <li><a href="software.shtml">Software</a></li>
+       <li><a href="credits.shtml">Credits</a></li>
+      </ul>
+     </div>
+     <!--#include virtual="logo.shtml" -->
+    </div>
+   </div>
+   <div class="content">
+    <div class="content_resize">
+     <div class="mainbar">
+      <h2>Theories</h2>
+      <p>SMT-LIB logics refer to one or more theories below.
+       Click on a theory's name to see its declaration in Version 2.x of the format.
+       <dl>
+        <dt><a href="theories-ArraysEx.shtml">ArraysEx</a></dt>
+        <dd>
+         Functional arrays with extensionality
+        </dd>
+        <dt><a href="theories-FixedSizeBitVectors.shtml">FixedSizeBitVectors</a></dt>
+        <dd>
+         Bit vectors with arbitrary size
+        </dd>
+        <dt>
+         <a href="theories-Core.shtml">Core</a>
+        </dt>
+        <dd>
+         Core theory, defining the basic Boolean operators
+        </dd>
+        <dt><a href="theories-FloatingPoint.shtml">FloatingPoint</a></dt>
+        <dd>
+         Floating point numbers
+        </dd>
+        <dt><a href="theories-Ints.shtml">Ints</a></dt>
+        <dd>
+         Integer numbers
+        </dd>
+        <dt>
+         <a href="theories-Reals.shtml">Reals</a>
+        </dt>
+        <dd>
+         Real numbers
+        </dd>
+        <dt><a href="theories-Reals_Ints.shtml">Reals_Ints</a></dt>
+        <dd>
+         Real and integer numbers
+        </dd>
+        <dt><a href="theories-UnicodeStrings.shtml">Strings</a></dt>
+        <dd>
+         Unicode character strings and regular expressions
+        </dd>
+     </dl>
+      </p>
+      <div class="footnote">Theory declarations for Version 1.2 of SMT-LIB, superseded by the ones above, are still available <a href="version1/theories.html">here</a> although their use is deprecated.
+      <br><br>
+      </div>
+     </div>
+      <!--#include virtual="sidebar.shtml" -->
+    </div>
+   </div>
+   
+   <!--#include virtual="standard-footer.shtml" -->
+  </div>
+ </body>
+</html>
