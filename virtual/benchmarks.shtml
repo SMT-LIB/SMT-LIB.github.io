@@ -147,7 +147,7 @@ Released for free under a Creative Commons Attribution 3.0 License
     </div>
    </div>
    
-   <!--include virtual="bottom.shtml" -->
+   <!--#include virtual="bottom.shtml" -->
    <div class="clr"></div>
    <div class="footer">
     <div class="footer_resize">
