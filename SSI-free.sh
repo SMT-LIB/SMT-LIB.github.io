@@ -5,7 +5,7 @@ dst=SSI-free
 
 replace() {
     IFS=
-    cat "$1" | sed "s/<\!--#include\([^>]*\)>/\n<\!--#include\1>\n/" | \
+    (cat "$1" ; echo) | sed "s/<\!--#include\([^>]*\)>/\n<\!--#include\1>\n/" | \
 	while read -r x; do
 	    if [[ "$x" =~ \<!--\ *#include\ virtual=\"([^\.]+.[^\.]+)\"\ *--\> ]]; then
 		replace "${BASH_REMATCH[1]}";
@@ -16,7 +16,12 @@ replace() {
 	done
 }
 
-cd $src
-while read f; do
-  replace "$f" > ../$dst/"$f"
-done < <(find . -maxdepth 1 -name '*.shtml')
+cd virtual
+for FILE in `find . -maxdepth 1 -name '*.shtml'`; do
+    replace "$FILE" > ../"$FILE"
+done
+cd -
+
+
+# version3
+# why 2 times
