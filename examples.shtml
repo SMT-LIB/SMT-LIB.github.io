@@ -4,19 +4,20 @@ Design by http://www.bluewebtemplates.com
 Released for free under a Creative Commons Attribution 3.0 License
 -->
 <html xmlns="http://www.w3.org/1999/xhtml">
-<!--#include virtual="head.shtml" -->
-      <head>
-      <title>SMT-LIB The Satisfiability Modulo Theories Library</title>
-      <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
-      <link href="style.css" rel="stylesheet" type="text/css" />
-      <!-- CuFon: Enables smooth pretty custom font rendering. 100% SEO friendly. To disable, remove this section -->
-      <script type="text/javascript" src="js/cufon-yui.js"></script>
-      <script type="text/javascript" src="js/arial.js"></script>
-      <script type="text/javascript" src="js/cuf_run.js"></script>
-     <!-- CuFon ends -->
-     <link href="code-prettify/prettify.css" type="text/css" rel="stylesheet" />
-     <script src="code-prettify/run_prettify.js?lang=smtlib&amp;skin=desert"></script>
-     </head>
+
+<head>
+ <title>SMT-LIB The Satisfiability Modulo Theories Library</title>
+ <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+ <link href="style.css" rel="stylesheet" type="text/css" />
+ <!-- CuFon: Enables smooth pretty custom font rendering. 100% SEO friendly. To disable, remove this section -->
+ <script type="text/javascript" src="js/cufon-yui.js"></script>
+ <script type="text/javascript" src="js/arial.js"></script>
+ <script type="text/javascript" src="js/cuf_run.js"></script>
+<!-- CuFon ends -->
+<link href="code-prettify/prettify.css" type="text/css" rel="stylesheet" />
+<script src="code-prettify/run_prettify.js?lang=smtlib&amp;skin=desert"></script>
+</head>
+
 
  <body>
   <div class="main">
@@ -33,13 +34,16 @@ Released for free under a Creative Commons Attribution 3.0 License
        <li><a href="credits.shtml">Credits</a></li>
       </ul>
      </div>
-     <!--#include virtual="logo.shtml" -->
+     
+
 <div class="clr"></div>
 <div class="logo">
  <h1><a href="index.shtml">SMT-LIB <br/>
    <small>The Satisfiability Modulo Theories Library</small></a>
  </h1>
 </div>
+
+
 
     </div>
    </div>
@@ -48,39 +52,19 @@ Released for free under a Creative Commons Attribution 3.0 License
      <div class="mainbar">
       <h2>Examples</h2>
 <pre class="prettyprint lang-smtlib">; Basic Boolean example
-(set-option :print-success false)
-(set-logic QF_UF)
-(declare-const p Bool)
-(assert (and p (not p))) 
-(check-sat) ; returns 'unsat'
-(exit)</pre>
+(set-option :print-success false)(set-logic QF_UF)(declare-const p Bool)(assert (and p (not p))) (check-sat) ; returns 'unsat'(exit)</pre>
       <br>
 <pre class="prettyprint lang-smtlib">; Integer arithmetic
-(set-logic QF_LIA)
-(declare-const x Int)
-(declare-const y Int)
-(assert (= (- x y) (+ x (- y) 1)))
-(check-sat)
-; unsat
+(set-logic QF_LIA)(declare-const x Int)(declare-const y Int)(assert (= (- x y) (+ x (- y) 1)))
+(check-sat); unsat
 (exit)</pre>
       <br>
 <pre class="prettyprint lang-smtlib">; Getting values or models
-(set-option :print-success false)
-(set-option :produce-models true)
-(set-logic QF_LIA)
-(declare-const x Int)
-(declare-const y Int)
-(assert (= (+ x (* 2 y)) 20))
-(assert (= (- x y) 2))
-(check-sat)
-; sat
-(get-value (x y))
-; ((x 8) (y 6))
+(set-option :print-success false)(set-option :produce-models true)(set-logic QF_LIA)(declare-const x Int)(declare-const y Int)(assert (= (+ x (* 2 y)) 20))(assert (= (- x y) 2))(check-sat); sat(get-value (x y)); ((x 8) (y 6))
 (get-model)
 ; ((define-fun x () Int 8)
 ;  (define-fun y () Int 6)
-; )
-(exit)</pre>
+; )(exit)</pre>
       <br>
 <pre class="prettyprint lang-smtlib">; Modeling sequential code in SSA form
 ;; Buggy swap
@@ -140,142 +124,74 @@ Released for free under a Creative Commons Attribution 3.0 License
 (exit)</pre>
       <br>
 <pre class="prettyprint lang-smtlib">; Using scopes to explore multiple problems
-(set-option :print-success false)
-(set-logic QF_LIA)
-(declare-const x Int) (declare-const y Int)
-(assert (= (+ x (* 2 y)) 20))
-(push 1)
-  (assert (= (- x y) 2))
-  (check-sat)
-  ; sat
-(pop 1)
-(push 1)
-  (assert (= (- x y) 3))
-  (check-sat)
-  ; unsat
-(pop 1)
-(exit)</pre>
+(set-option :print-success false)(set-logic QF_LIA)(declare-const x Int) (declare-const y Int)(assert (= (+ x (* 2 y)) 20))(push 1)  (assert (= (- x y) 2))  (check-sat)  ; sat(pop 1)(push 1)  (assert (= (- x y) 3))  (check-sat)  ; unsat(pop 1)(exit)</pre>
       <br>
 <pre class="prettyprint lang-smtlib">; Defining and using new sorts
-(set-option :print-success false)
-(set-logic QF_UF)
-(declare-sort A 0)
-(declare-const a A) (declare-const b A) (declare-const c A)
-(declare-const d A) (declare-const e A)
-(assert (or (= c a)(= c b)))
-(assert (or (= d a)(= d b)))
-(assert (or (= e a)(= e b)))
-(push 1)
-  (assert (distinct c d))
-  (check-sat)
-  ; sat
-(pop 1)
-(push 1)
-  (assert (distinct c d e))
-  (check-sat)
-  ; unsat
-(pop 1)
-(exit)</pre>
+(set-option :print-success false)(set-logic QF_UF)(declare-sort A 0)(declare-const a A) (declare-const b A) (declare-const c A)(declare-const d A) (declare-const e A)(assert (or (= c a)(= c b)))(assert (or (= d a)(= d b)))(assert (or (= e a)(= e b)))(push 1)  (assert (distinct c d))  (check-sat)  ; sat(pop 1)(push 1)  (assert (distinct c d e))  (check-sat)  ; unsat(pop 1)(exit)</pre>
       <br>
 <pre class="prettyprint lang-smtlib">; Getting info
-(get-info :name)
-; (:name "CVC4")
-(get-info :version )
-; (:version "4.0" )
-(get-info :authors )
-; (:authors "The CVC4 Team" )
-(exit)</pre>
+(get-info :name); (:name "CVC4")
+(get-info :version ); (:version "4.0" )(get-info :authors ); (:authors "The CVC4 Team" )(exit)</pre>
       <br>
 <pre class="prettyprint lang-smtlib">; Getting assignments
-(set-option :produce-assignments true)
-(set-logic QF_UF)
-(declare-const p Bool) (declare-const q Bool) (declare-const r Bool)
-(assert (not (=(! (and (! p :named P) q) :named PQ) (! r :named R))))
-(check-sat)
-; sat
-(get-assignment)
-; ((P true) (R false) (PQ true))
+(set-option :produce-assignments true)(set-logic QF_UF)(declare-const p Bool) (declare-const q Bool) (declare-const r Bool)(assert (not (=(! (and (! p :named P) q) :named PQ) (! r :named R))))(check-sat); sat(get-assignment); ((P true) (R false) (PQ true))
 (exit)</pre>
       <br>
 <pre class="prettyprint lang-smtlib">; Getting unsatisfiable cores
-(set-option :produce-unsat-cores true)
-(set-logic QF_UF)
-(declare-const p Bool) (declare-const q Bool) (declare-const r Bool)
-(declare-const s Bool) (declare-const t Bool)
-(assert (! (=> p q) :named PQ))
-(assert (! (=> q r) :named QR))
-(assert (! (=> r s) :named RS))
-(assert (! (=> s t) :named ST))
-(assert (! (not (=> q s)) :named NQS))
-(check-sat)
-; unsat
-(get-unsat-core)
-; (QR RS NQS)
+(set-option :produce-unsat-cores true)(set-logic QF_UF)(declare-const p Bool) (declare-const q Bool) (declare-const r Bool)(declare-const s Bool) (declare-const t Bool)(assert (! (=> p q) :named PQ))(assert (! (=> q r) :named QR))(assert (! (=> r s) :named RS))(assert (! (=> s t) :named ST))(assert (! (not (=> q s)) :named NQS))(check-sat); unsat(get-unsat-core); (QR RS NQS)
 (exit)</pre>
       <br>
 <pre class="prettyprint lang-smtlib">; Getting assertions
-(set-option :produce-assertions true)
-(set-logic QF_UF)
-(declare-const p Bool) (declare-const q Bool) 
-(push 1)
- (assert (or p q))
- (push 1)
-  (assert (not q))
-  (get-assertions)
-  ; ((or p q)
-  ;  (not q)
-  ; )
- (pop 1)
-  (get-assertions)
- ; ((or p q))
- (pop 1)
- (get-assertions)
- ; ()
+(set-option :produce-assertions true)(set-logic QF_UF)(declare-const p Bool) (declare-const q Bool) 
+(push 1) (assert (or p q)) (push 1)  (assert (not q))  (get-assertions)  ; ((or p q)  ;  (not q)  ; ) (pop 1)  (get-assertions) ; ((or p q)) (pop 1) (get-assertions) ; ()
 (exit)</pre>
       <br>
      </div>
-      <!--#include virtual="sidebar.shtml" -->
-      <div class="sidebar">
-            <div class="gadget">
-             <ul class="sb_menu">
-              <li><a href="index.shtml">Home</a></li>
-              <li><a href="about.shtml">About</a></li>
-              <li><a href="news.shtml">News</a></li>
-              <li>Standard
-               <ul class="ex_menu">
-                <li><a href="language.shtml">Language</a>
-                <li><a href="theories.shtml">Theories</a>
-                <li><a href="logics.shtml">Logics</a>
-                <li><a href="examples.shtml">Examples</a>
-               </ul>
-              </li>
-              <li><a href="benchmarks.shtml">Benchmarks</a></li>
-              <li>Software
-               <ul class="ex_menu">
-                <li><a href="solvers.shtml">Solvers</a></li>
-                <li><a href="utilities.shtml">Utilities</a></li>
-               </ul>
-              </li>
-              <li><a href="contact.shtml">Contact</a></li>
-              <li><a href="related.shtml">Related</a></li>
-              <li><a href="credits.shtml">Credits</a></li>
-             </ul>
-            </div>
-           </div>
-                
+      
+<div class="sidebar">
+ <div class="gadget">
+  <ul class="sb_menu">
+   <li><a href="index.shtml">Home</a></li>
+   <li><a href="about.shtml">About</a></li>
+   <li><a href="news.shtml">News</a></li>
+   <li>Standard
+    <ul class="ex_menu">
+     <li><a href="language.shtml">Language</a>
+     <li><a href="theories.shtml">Theories</a>
+     <li><a href="logics.shtml">Logics</a>
+     <li><a href="examples.shtml">Examples</a>
+    </ul>
+   </li>
+   <li><a href="benchmarks.shtml">Benchmarks</a></li>
+   <li>Software
+    <ul class="ex_menu">
+     <li><a href="solvers.shtml">Solvers</a></li>
+     <li><a href="utilities.shtml">Utilities</a></li>
+    </ul>
+   </li>
+   <li><a href="contact.shtml">Contact</a></li>
+   <li><a href="related.shtml">Related</a></li>
+   <li><a href="credits.shtml">Credits</a></li>
+  </ul>
+ </div>
+</div>
+
+
+
     </div>
    </div>
-   <!--#include virtual="standard-footer.shtml" -->
+   
    <div class="clr"></div>
    <div class="footer">
     <div class="footer_resize">
-    <!--#include virtual="copyright.shtml" -->
-    <p class="lf">
-      &copy; Copyright The SMT-LIB Initiative <br>
-      Based on a design by 
-      Blue <a href="http://www.bluewebtemplates.com">Web Templates</a>
-      </p>
-      
+    
+<p class="lf">
+&copy; Copyright The SMT-LIB Initiative <br>
+Based on a design by 
+Blue <a href="http://www.bluewebtemplates.com">Web Templates</a>
+</p>
+
+
      <ul class="fmenu">
       <li><a href="index.shtml">Home</a></li>
       <li><a href="about.shtml">About</a></li>
@@ -289,6 +205,9 @@ Released for free under a Creative Commons Attribution 3.0 License
     </div>
    </div>
 
+
+
   </div>
  </body>
 </html>
+

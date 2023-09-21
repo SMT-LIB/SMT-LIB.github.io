@@ -26,7 +26,7 @@ Released for free under a Creative Commons Attribution 3.0 License
      <div class="menu_nav">
       <ul>
        <li><a href="index.shtml">Home</a></li>
-       <li class="active"><a href="about.shtml">About</a></li>
+       <li><a href="about.shtml">About</a></li>
        <li><a href="news.shtml">News</a></li>
        <li><a href="standard.shtml">Standard</a></li>
        <li><a href="benchmarks.shtml">Benchmarks</a></li>
@@ -51,19 +51,37 @@ Released for free under a Creative Commons Attribution 3.0 License
     <div class="content_resize">
      <div class="mainbar">
       <div class="article">
-       <h2>About SMT-LIB</h2>
-       <p> SMT-LIB was created with the expectation that the availability of common standards and a library of benchmarks would greatly facilitate the evaluation and the comparison of SMT systems, and advance the state of the art in the field in the same way as, for instance, the <a href="http://www.cs.miami.edu/~tptp/">TPTP</a> library has done for theorem proving, or the <a href="http://www.satlib.org/">SATLIB</a> library has done initially for SAT.
-       </p>
-       <p>These expectations have been largely met, thanks in no small part to extensive contributions from the research community and to an annual SMT solver competition, <a href="http://smt-comp.org/">SMT-COMP</a>, based on benchmarks from the library. The initiative is, however, still on-going, with work on improving the usefulness and the scope of the SMT-LIB language, defining new background theories, and collecting more benchmarks.
-       </p>
-      </div>
-      <div class="article">
-       <h2>About SMT</h2>
-       <p>  Satisfiability Modulo theories (SMT) is an area of automated deduction that studies methods for checking the satisfiability of first-order formulas with respect to some logical theory <i>T</i> of interest. It differs from general automated deduction in that the background theory <i>T</i> need not be finitely or even first-order axiomatizable, and specialized inference methods are used for each theory. By being theory-specific and restricting their language to certain classes of formulas (such as, typically but not exclusively, quantifier-free formulas), these specialized methods can be implemented in solvers that are more efficient in practice than general-purpose theorem provers.
-       </p>
-       <p>
-        While SMT techniques have been traditionally used to support deductive software verification, they are now finding applications in other areas of computer science such as, for instance, planning, model checking and automated test generation. Typical theories of interest in these applications include formalizations of arithmetic, arrays, bit vectors, algebraic datatypes, equality with uninterpreted functions, and various combinations of these.
-       </p>
+       <h2>Related Sites</h2>
+       <dl>
+        <dt><a href="http://smt-comp.org/">SMT-COMP</a></dt>
+        <dd>The SMT solver competition</dd>
+        <dt><a href="http://smt-workshop.org/">SMT workshop</a></dt>
+        <dd>The International Workshop on Satisfiability Modulo Theories</dd>
+        <dt><a href="http://starexec.org/">StarExec</a></dt>
+        <dd>The benchmark repository and execution service current used by SMT-LIB and SMT-COMP</dd>
+        <dt><a href="https://satassociation.org/sat-smt-school.html">SAT/SMT/AR Summer School</a></dt>
+        <dd>Annual summer school on SAT, SMT and Automated Reasoning</dd>
+        <dt><a href="http://smtexec.cs.uiowa.edu/">SMT-EXEC</a></dt>
+ 
+        <dd>The benchmark repository and execution service previously used by SMT-LIB and SMT-COMP.</dd>
+        <dd>(This service is no longer active although it still contains historical data.)</dd>
+       </dl>
+       The following sites are related or have similar objectives to those of SMT-LIB.
+       <dl>
+<!--
+        <dt><a href="http://www.satlib.org/">SATLIB</a></dt>
+        <dd>A collection of benchmark problems, solvers, and tools for propositional satisfiability.</dd>
+-->
+        <dt><a href="http://www.qbflib.org/">QBFLIB</a></dt>
+        <dd>A collection of benchmark problems, solvers, and tools related to Quantified Boolean Formula (QBF) satisfiability.
+        </dd>
+        <dt><a href="http://www.csplib.org">CSPLib</a></dt>
+        <dd>A library of test problems for constraint solvers.</dd>
+        <dt><a href="http://sygus.org">SyGuS</a></dt>
+        <dd>A competition and benchmark library for Syntax-Guided Synthesis.</dd>
+        <dt><a href="http://www.tptp.org/">TPTP</a></dt>
+        <dd>A benchmarks library for automated theorem proving.</dd>
+       </dl>
       </div>
      </div>
       
@@ -100,45 +118,6 @@ Released for free under a Creative Commons Attribution 3.0 License
     </div>
    </div>
    
-   
-<div class="clr"></div>
-<div class="fbg">
- <div class="fbg_resize">
-  <div class="col c1">
-    <h3>Latest News</h3>
-    <small>May 12, 2021</small>
-    <p>
-     A new release of the the SMT-LIB 2.6 reference document
-     is now available. This is a minor release addressing a
-     minor error in the 2021-04-02 release.
-    </p>
-  </div>
-  <div class="col c2">
-   <h3>Previous News</h3>
-   <small>April 2, 2021</small>
-   <p>
-    A new release of the SMT-LIB 2.6 reference document
-    is now available. This is a minor release addressing a few
-    errors in the 2017-07-18 release.
-   </p>
-  </div>
-  <div class="col c3">
-   <h3>Older News</h3>
-   <small>Feb 11, 2020</small>
-   <p>
-    A theory of Unicode character strings and regular expressions has been added
-    to the set of <a href="theories.shtml">SMT-LIB theories</a>.
-   </p>
-    <a href="news.shtml#2020-01-11">[More]</a>
-   </p>
-  </div>
- </div>
-</div>
-
-
-
-
-
    <div class="clr"></div>
    <div class="footer">
     <div class="footer_resize">
@@ -152,7 +131,7 @@ Blue <a href="http://www.bluewebtemplates.com">Web Templates</a>
 
      <ul class="fmenu">
       <li><a href="index.shtml">Home</a></li>
-      <li class="active"><a href="about.shtml">About</a></li>
+      <li><a href="about.shtml">About</a></li>
       <li><a href="news.shtml">News</a></li>
       <li><a href="standard.shtml">Standard</a></li>
       <li><a href="benchmarks.shtml">Benchmarks</a></li>

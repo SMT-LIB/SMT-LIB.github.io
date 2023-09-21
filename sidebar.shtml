@@ -1,0 +1,28 @@
+<div class="sidebar">
+ <div class="gadget">
+  <ul class="sb_menu">
+   <li><a href="index.shtml">Home</a></li>
+   <li><a href="about.shtml">About</a></li>
+   <li><a href="news.shtml">News</a></li>
+   <li>Standard
+    <ul class="ex_menu">
+     <li><a href="language.shtml">Language</a>
+     <li><a href="theories.shtml">Theories</a>
+     <li><a href="logics.shtml">Logics</a>
+     <li><a href="examples.shtml">Examples</a>
+    </ul>
+   </li>
+   <li><a href="benchmarks.shtml">Benchmarks</a></li>
+   <li>Software
+    <ul class="ex_menu">
+     <li><a href="solvers.shtml">Solvers</a></li>
+     <li><a href="utilities.shtml">Utilities</a></li>
+    </ul>
+   </li>
+   <li><a href="contact.shtml">Contact</a></li>
+   <li><a href="related.shtml">Related</a></li>
+   <li><a href="credits.shtml">Credits</a></li>
+  </ul>
+ </div>
+</div>
+

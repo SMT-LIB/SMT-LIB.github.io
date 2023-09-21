@@ -1,5 +1,10 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<!--
+Design by http://www.bluewebtemplates.com
+Released for free under a Creative Commons Attribution 3.0 License
+-->
 <html xmlns="http://www.w3.org/1999/xhtml">
+
 <head>
  <title>SMT-LIB The Satisfiability Modulo Theories Library</title>
  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
@@ -20,15 +25,16 @@
     <div class="header_resize">
      <div class="menu_nav">
       <ul>
-       <li class="active"><a href="index.shtml">Home</a></li>
+       <li><a href="index.shtml">Home</a></li>
        <li><a href="about.shtml">About</a></li>
        <li><a href="news.shtml">News</a></li>
-       <li><a href="standard.shtml">Standard</a></li>
+       <li class="active"><a href="standard.shtml">Standard</a></li>
        <li><a href="benchmarks.shtml">Benchmarks</a></li>
        <li><a href="software.shtml">Software</a></li>
        <li><a href="credits.shtml">Credits</a></li>
       </ul>
      </div>
+     
 
 <div class="clr"></div>
 <div class="logo">
@@ -44,36 +50,60 @@
    <div class="content">
     <div class="content_resize">
      <div class="mainbar">
-      <div class="article">
-       <p> SMT-LIB is an international initiative aimed at facilitating research and development in
-        <a href="http://en.wikipedia.org/wiki/Satisfiability_Modulo_Theories">Satisfiability Modulo Theories</a> (SMT). Since its inception in 2003, the initiative has pursued these aims by focusing on the following concrete goals.
-        <ul>
-         <li>Provide standard rigorous descriptions of background theories used in SMT systems.
-         </li>
-         <li>Develop and promote common input and output languages for
-          <a href="http://en.wikipedia.org/wiki/Satisfiability_Modulo_Theories#SMT_solvers">SMT solvers</a>.
-         </li>
-         <li>Connect developers, researchers and users of SMT, and develop a community around it.
-         </li>
-         <li>Establish and make available to the research community a large library of benchmarks for SMT solvers.
-         </li>
-         <li>Collect and promote software tools useful to the SMT community.
-         </li>
-        </ul>
-        This website provides access to the following main artifacts of the initiative.
-        <ul>
-         <li>Documents describing the SMT-LIB input/output language for SMT solvers and its semantics;
-         </li>
-         <li>Specifications of background theories and <em>logics</em>;
-         </li>
-         <li>A large library of input problems, or benchmarks, written in the SMT-LIB language.
-         </li>
-         <li>Links to SMT solvers and related tools and utilities.
-         </li>
-        </ul>
-       </p>
-      </div>
+      <h2>ArraysEx</h2>
+       <pre class="prettyprint lang-smtlib">
+(theory ArraysEx
+
+ :smt-lib-version 2.6
+ :smt-lib-release "2017-11-24"
+ :written-by "Cesare Tinelli"
+ :date "2010-04-28"
+ :last-updated "2015-04-25"
+ :update-history
+ "Note: history only accounts for content changes, not release changes.
+  2015-04-25 Updated to Version 2.5.
+  2010-08-15 Minor fix.
+ "
+
+ :sorts ((Array 2))
+
+ :funs ((par (X Y) (select (Array X Y) X Y))
+        (par (X Y) (store (Array X Y) X Y (Array X Y))) )
+
+ :notes "A schematic version of the theory of functional arrays with extensionality." 
+
+ :definition
+ "For every expanded signature Sigma, the instance of ArraysEx with that signature 
+  is the theory consisting of all Sigma-models that satisfy all axioms of the form 
+  below, for all sorts s1, s2 in Sigma: 
+
+  - (forall ((a (Array s1 s2)) (i s1) (e s2))
+      (= (select (store a i e) i) e)) 
+
+  - (forall ((a (Array s1 s2)) (i s1) (j s1) (e s2))
+      (=> (distinct i j)
+               (= (select (store a i e) j) (select a j))))
+
+  - (forall ((a (Array s1 s2)) (b (Array s1 s2)))
+      (=> (forall ((i s1)) (= (select a i) (select b i)))
+               (= a b)))
+ "
+
+ :values
+ "For all sorts s1, s2 in in the signature, the values of sort (Array s1 s2) are
+  abstract.
+ "    
+)
+
+
+
+
+</pre>
+      (<a href="Theories/ArraysEx.smt2">raw file</a>)
+      <br>
+      <br>
      </div>
+      
 <div class="sidebar">
  <div class="gadget">
   <ul class="sb_menu">
@@ -103,51 +133,15 @@
 </div>
 
 
-     
+
     </div>
    </div>
    
-<div class="clr"></div>
-<div class="fbg">
- <div class="fbg_resize">
-  <div class="col c1">
-    <h3>Latest News</h3>
-    <small>May 12, 2021</small>
-    <p>
-     A new release of the the SMT-LIB 2.6 reference document
-     is now available. This is a minor release addressing a
-     minor error in the 2021-04-02 release.
-    </p>
-  </div>
-  <div class="col c2">
-   <h3>Previous News</h3>
-   <small>April 2, 2021</small>
-   <p>
-    A new release of the SMT-LIB 2.6 reference document
-    is now available. This is a minor release addressing a few
-    errors in the 2017-07-18 release.
-   </p>
-  </div>
-  <div class="col c3">
-   <h3>Older News</h3>
-   <small>Feb 11, 2020</small>
-   <p>
-    A theory of Unicode character strings and regular expressions has been added
-    to the set of <a href="theories.shtml">SMT-LIB theories</a>.
-   </p>
-    <a href="news.shtml#2020-01-11">[More]</a>
-   </p>
-  </div>
- </div>
-</div>
-
-
-
-
-
+   
    <div class="clr"></div>
    <div class="footer">
     <div class="footer_resize">
+    
 <p class="lf">
 &copy; Copyright The SMT-LIB Initiative <br>
 Based on a design by 
@@ -155,12 +149,11 @@ Blue <a href="http://www.bluewebtemplates.com">Web Templates</a>
 </p>
 
 
-      
      <ul class="fmenu">
-      <li class="active"><a href="index.shtml">Home</a></li>
+      <li><a href="index.shtml">Home</a></li>
       <li><a href="about.shtml">About</a></li>
       <li><a href="news.shtml">News</a></li>
-      <li><a href="standard.shtml">Standard</a></li>
+      <li class="active"><a href="standard.shtml">Standard</a></li>
       <li><a href="benchmarks.shtml">Benchmarks</a></li>
       <li><a href="software.shtml">Software</a></li>
       <li><a href="credits.shtml">Credits</a></li>
@@ -168,6 +161,9 @@ Blue <a href="http://www.bluewebtemplates.com">Web Templates</a>
      <div class="clr"></div>
     </div>
    </div>
+
+
+
   </div>
  </body>
 </html>
