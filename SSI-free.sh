@@ -5,7 +5,8 @@ dst=SSI-free
 
 replace() {
     IFS=
-    (cat "$1" ; echo) | sed "s/<\!--#include\([^>]*\)>/\n<\!--#include\1>\n/" | \
+    (cat "$1" ; echo ) | sed ':a;/^[ \n]*$/{$d;N;ba}' \
+	| sed "s/<\!--#include\([^>]*\)>/\n<\!--#include\1>\n/" | \
 	while read -r x; do
 	    if [[ "$x" =~ \<!--\ *#include\ virtual=\"([^\.]+.[^\.]+)\"\ *--\> ]]; then
 		replace "${BASH_REMATCH[1]}";
