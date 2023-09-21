@@ -44,7 +44,6 @@ Released for free under a Creative Commons Attribution 3.0 License
 </div>
 
 
-
     </div>
    </div>
    <div class="content">
@@ -83,9 +82,6 @@ Released for free under a Creative Commons Attribution 3.0 License
 :notes
  "This logic properly extends the logic QF_AUFLIA by allowing quantifiers."
 )
-
-
-
 
 </pre>
       (<a href="Logics/AUFLIA.smt2">raw file</a>)
@@ -146,7 +142,6 @@ Released for free under a Creative Commons Attribution 3.0 License
  "
 )
 
-
 </pre>
       (<a href="Logics/AUFLIRA.smt2">raw file</a>)
       <br>
@@ -190,7 +185,6 @@ Released for free under a Creative Commons Attribution 3.0 License
  "
 )
 
-
 </pre>
       (<a href="Logics/AUFNIRA.smt2">raw file</a>)
       <br>
@@ -222,9 +216,6 @@ Released for free under a Creative Commons Attribution 3.0 License
   c is a term of the form n or (- n) for some numeral n.
  "
 )
-
-
-
 
 </pre>
       (<a href="Logics/LIA.smt2">raw file</a>)
@@ -271,8 +262,6 @@ Released for free under a Creative Commons Attribution 3.0 License
  "This logic properly extends the logic QF_LRA by allowing quantifiers."
 )
 
-
-
 </pre>
       (<a href="Logics/LRA.smt2">raw file</a>)
       <br>
@@ -303,9 +292,6 @@ Released for free under a Creative Commons Attribution 3.0 License
 
  :extensions "As in the logic QF_BV."
 )
-
-
-
 
 </pre>
       (<a href="Logics/QF_ABV.smt2">raw file</a>)
@@ -338,7 +324,6 @@ Released for free under a Creative Commons Attribution 3.0 License
 
  :extensions "As in the logic QF_BV."
 )
-
 
 </pre>
       (<a href="Logics/QF_AUFBV.smt2">raw file</a>)
@@ -380,8 +365,6 @@ Released for free under a Creative Commons Attribution 3.0 License
   - c is a term of the form n or (- n) for some numeral n.
  ")
 
-
-
 </pre>
       (<a href="Logics/QF_AUFLIA.smt2">raw file</a>)
       <br>
@@ -411,9 +394,6 @@ Released for free under a Creative Commons Attribution 3.0 License
  :notes
  "Formulas can contain variables as long as they are bound by a let binder."
 )
-
-
-
 
 </pre>
       (<a href="Logics/QF_AX.smt2">raw file</a>)
@@ -681,8 +661,6 @@ Released for free under a Creative Commons Attribution 3.0 License
  "
 )
 
-
-
 </pre>
       (<a href="Logics/QF_BV.smt2">raw file</a>)
       <br>
@@ -717,9 +695,6 @@ Released for free under a Creative Commons Attribution 3.0 License
     - n is a numeral. 
  "
 )
-
-
-
 
 </pre>
       (<a href="Logics/QF_IDL.smt2">raw file</a>)
@@ -758,9 +733,6 @@ Released for free under a Creative Commons Attribution 3.0 License
  "
 )
 
-
-
-
 </pre>
       (<a href="Logics/QF_LIA.smt2">raw file</a>)
       <br>
@@ -788,7 +760,6 @@ Released for free under a Creative Commons Attribution 3.0 License
  "
 )
 
-
 </pre>
       (<a href="Logics/QF_NIA.smt2">raw file</a>)
       <br>
@@ -814,9 +785,6 @@ Released for free under a Creative Commons Attribution 3.0 License
  "Closed quantifier-free formulas built over arbitrary expansions of 
   the Reals signature with free constant symbols."
 )
-
-
-
 
 </pre>
       (<a href="Logics/QF_NRA.smt2">raw file</a>)
@@ -861,9 +829,6 @@ Released for free under a Creative Commons Attribution 3.0 License
  "
 )
 
-
-
-
 </pre>
       (<a href="Logics/QF_RDL.smt2">raw file</a>)
       <br>
@@ -902,9 +867,6 @@ Released for free under a Creative Commons Attribution 3.0 License
  "
 )
 
-
-
-
 </pre>
       (<a href="Logics/QF_UF.smt2">raw file</a>)
       <br>
@@ -935,7 +897,6 @@ Released for free under a Creative Commons Attribution 3.0 License
 
 :extensions "As in the logic QF_BV."
 )
-
 
 </pre>
       (<a href="Logics/QF_UFBV.smt2">raw file</a>)
@@ -986,9 +947,6 @@ Released for free under a Creative Commons Attribution 3.0 License
  "
 )
 
-
-
-
 </pre>
       (<a href="Logics/QF_UFIDL.smt2">raw file</a>)
       <br>
@@ -1022,8 +980,6 @@ Released for free under a Creative Commons Attribution 3.0 License
  :extensions
  "As in the logic QF_LIA."
 )
-
-
 
 </pre>
       (<a href="Logics/QF_UFLIA.smt2">raw file</a>)
@@ -1063,9 +1019,6 @@ Released for free under a Creative Commons Attribution 3.0 License
     for some decimal d, integer coefficient c and numeral n other than 0.
  "
 )
-
-
-
 
 </pre>
       (<a href="Logics/QF_UFLRA.smt2">raw file</a>)
@@ -1108,9 +1061,6 @@ Released for free under a Creative Commons Attribution 3.0 License
  "
 )
 
-
-
-
 </pre>
       (<a href="Logics/QF_LRA.smt2">raw file</a>)
       <br>
@@ -1137,9 +1087,6 @@ Released for free under a Creative Commons Attribution 3.0 License
   the Reals signature with free sort and function symbols.
  "
 )
-
-
-
 
 </pre>
       (<a href="Logics/QF_UFNRA.smt2">raw file</a>)
@@ -1180,9 +1127,6 @@ Released for free under a Creative Commons Attribution 3.0 License
  "
 )
 
-
-
-
 </pre>
       (<a href="Logics/UFLRA.smt2">raw file</a>)
       <br>
@@ -1208,7 +1152,6 @@ Released for free under a Creative Commons Attribution 3.0 License
  "Closed formulas built over an arbitrary expansion of the Ints signature
   with free sort and function symbols."
 )
-
 
 </pre>
       (<a href="Logics/UFNIA.smt2">raw file</a>)
@@ -1245,7 +1188,6 @@ Released for free under a Creative Commons Attribution 3.0 License
 </div>
 
 
-
     </div>
    </div>
    
@@ -1275,8 +1217,6 @@ Blue <a href="http://www.bluewebtemplates.com">Web Templates</a>
    </div>
 
 
-
   </div>
  </body>
 </html>
-
