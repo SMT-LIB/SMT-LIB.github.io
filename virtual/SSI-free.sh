@@ -1,7 +1,5 @@
 #!/bin/bash
 
-src=virtual
-
 replace() {
     IFS=
     (cat "$1" ; echo ) | sed ':a;/^[ \n]*$/{$d;N;ba}' \
@@ -16,11 +14,9 @@ replace() {
 	done
 }
 
-cd virtual
 for FILE in `find . -maxdepth 1 -name '*.shtml'`; do
     replace "$FILE" > ../"$FILE"
 done
-cd -
 
 
 # version3
