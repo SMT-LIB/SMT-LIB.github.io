@@ -1,7 +1,6 @@
 #!/bin/bash
 
 src=virtual
-dst=SSI-free
 
 replace() {
     IFS=
