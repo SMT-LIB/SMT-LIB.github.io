@@ -59,8 +59,8 @@ Released for free under a Creative Commons Attribution 3.0 License
       </p>
 <h3>Submitting Benchmarks</h3>
        <p>For details on how to submit benchmarks to SMT-LIB, please refer to the README file in
-       the <a href="https://clc-gitlab.cs.uiowa.edu:2443/SMT-LIB-benchmarks-tmp/benchmarks-pending">benchmarks-pending</a> 
-       repository on the SMT-LIB GitLab.
+       the <a href="https://github.com/SMT-LIB/benchmark-submission">benchmark-submission</a> 
+       SMT-LIB GitHub repository.
       </p>
      </div>
       
