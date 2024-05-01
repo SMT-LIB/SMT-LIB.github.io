@@ -35,14 +35,12 @@ Released for free under a Creative Commons Attribution 3.0 License
       </ul>
      </div>
      
-
 <div class="clr"></div>
 <div class="logo">
  <h1><a href="index.shtml">SMT-LIB <br/>
    <small>The Satisfiability Modulo Theories Library</small></a>
  </h1>
 </div>
-
 
     </div>
    </div>
@@ -52,10 +50,11 @@ Released for free under a Creative Commons Attribution 3.0 License
       <h2>Benchmarks</h2>
       <p>
         The latest release of the SMT-LIB benchmark library is hosted on Zenodo under the <a href="https://zenodo.org/communities/smt-lib">SMT-LIB community</a>.
+        Also available there are all previous releases starting from 2023.
       </p>
 
 <h3>StarExec</h3>
-       <p>The latest release of the benchmark library is also available on <a href="https://www.starexec.org/starexec/secure/explore/spaces.jsp?id=239">StarExec</a>.
+       <p>Historical releases of the benchmark library, from 2013 to 2023, are available on <a href="https://www.starexec.org/starexec/secure/explore/spaces.jsp?id=239">StarExec</a>.
       </p>
 <h3>Submitting Benchmarks</h3>
        <p>For details on how to submit benchmarks to SMT-LIB, please refer to the README file in
