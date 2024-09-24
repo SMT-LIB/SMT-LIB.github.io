@@ -25,6 +25,19 @@
       <div class="article">
        <h2>News</h2>
        <!------------------------------------------------------------------------>
+       <a name="2024-04-02"></a>
+       <small>April 2, 2024</small>
+       <p>
+        From today on the benchmark library will no longer be publicly available from the University of Iowa's GitLab server.
+        Official yearly releases of the library will be available
+        <a href="https://zenodo.org/communities/smt-lib">Zenodo</a>.
+       </p>
+       <a name="2024-02-13"></a>
+       <small>Feb 13, 2024</small>
+       <p>
+        The latest release (2023) of the SMT-LIB benchmark library is now
+        available on <a href="https://zenodo.org/communities/smt-lib">Zenodo</a> in the form of compressed archives.
+       </p>
        <a name="2021-05-12"></a>
        <small>May 12, 2021</small>
        <p>

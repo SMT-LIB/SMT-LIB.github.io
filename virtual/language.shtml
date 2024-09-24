@@ -35,10 +35,9 @@ Released for free under a Creative Commons Attribution 3.0 License
          [ <a href="papers/smt-lib-reference-v2.6-r2024-09-20.pdf">pdf</a> | <a href="biblio/BarFT-RR-17.bib">bib</a> ]
         </dd>
         <dd>Previous releases:
+	   <a href="papers/smt-lib-reference-v2.6-r2021-05-12.pdf">2021-05-12</a>;
 	   <a href="papers/smt-lib-reference-v2.6-r2021-04-02.pdf">2021-04-02</a>;
-           <a href="papers/smt-lib-reference-v2.6-r2017-07-18.pdf">2017-07-18</a>;
-	   <a href="papers/smt-lib-reference-v2.6-r2021-05-12.pdf">2021-05-12</a>
-	  
+           <a href="papers/smt-lib-reference-v2.6-r2017-07-18.pdf">2017-07-18</a>
         </dd>
         <dt><strong>The SMT-LIB Standard: Version 2.5</strong>,
          by Clark Barrett, Pascal Fontaine, and Cesare Tinelli.
