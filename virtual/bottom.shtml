@@ -3,6 +3,15 @@
  <div class="fbg_resize">
   <div class="col c1">
     <h3>Latest News</h3>
+       <small>September 20, 2024</small>
+       <p>
+         A new release of the the SMT-LIB 2.6 reference document
+        is now available. This is a minor release.  The main changes
+        concern the verbosity of the output.
+       </p>
+  </div>
+  <div class="col c2">
+   <h3>Previous News</h3>
        <small>April 2, 2024</small>
        <p>
         Starting today, the benchmark library will no longer be publicly available from the University of Iowa's GitLab server.
@@ -10,23 +19,14 @@
         <a href="https://zenodo.org/communities/smt-lib">Zenodo</a>.
        </p>
   </div>
-  <div class="col c2">
-   <h3>Previous News</h3>
+  <div class="col c3">
+   <h3>Older News</h3>
        <small>Feb 13, 2024</small>
        <p>
         The latest release (2023) of the SMT-LIB benchmark library is now
         available on <a href="https://zenodo.org/communities/smt-lib">Zenodo</a> in the form of compressed archives.
        </p>
-  </div>
-  <div class="col c3">
-   <h3>Older News</h3>
-       <small>May 12, 2021</small>
-       <p>
-        A new release of the the SMT-LIB 2.6 reference document
-        is now available. This is a minor release addressing a
-        minor error in the 2021-04-02 release.
-       </p>
-    <a href="news.shtml#2021-04-02">[More]</a>
+    <a href="news.shtml#2021-05-12">[More]</a>
    </p>
   </div>
  </div>
