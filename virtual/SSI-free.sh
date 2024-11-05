@@ -15,7 +15,7 @@ replace() {
 }
 
 for FILE in `find . -maxdepth 1 -name '*.shtml'`; do
-    replace "$FILE" > ../"$FILE"
+    replace "$FILE" > ../new/"$FILE"
 done
 
 
