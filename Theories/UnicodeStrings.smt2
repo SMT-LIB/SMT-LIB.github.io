@@ -448,7 +448,7 @@
        a non-empty string literal l₂.
 
        Ex: ⟦""a\u02C1""⟧ = ⟦""a""⟧⟦""\u02C1""⟧ = 0x00061 0x002C1
-           ⟦""\u2CA""⟧ = 0x0005C ⟦""u2CXA""⟧           (not an escape sequence)
+           ⟦""\u2CA""⟧ = 0x0005C ⟦""u2CA""⟧            (not an escape sequence)
            ⟦""\u2CXA""⟧ = 0x0005C ⟦""u2CXA""⟧          (not an escape sequence)
            ⟦""\u{ACG}A""⟧ = 0x0005C ⟦""u{ACG}A""⟧      (not an escape sequence)
 
