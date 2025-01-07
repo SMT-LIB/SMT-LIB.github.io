@@ -1,12 +1,13 @@
 (theory Ints
 
- :smt-lib-version 2.6
- :smt-lib-release "2017-11-24"
+ :smt-lib-version 2.7
+ :smt-lib-release "2024-07-21"
  :written-by "Cesare Tinelli"
  :date "2010-04-17"
- :last-updated "2015-04-25"
+ :last-updated "2024-07-21"
  :update-history
  "Note: history only accounts for content changes, not release changes.
+  2024-07-21 Updated to Version 2.7.
   2015-04-25 Updated to Version 2.5.
  "
  
@@ -54,7 +55,7 @@
   - div and mod according to Boute's Euclidean definition [1], that is,
     so as to satify the formula
 
-    (for all ((m Int) (n Int))
+    (forall ((m Int) (n Int))
       (=> (distinct n 0)
           (let ((q (div m n)) (r (mod m n)))
             (and (= m (+ (* n q) r))
