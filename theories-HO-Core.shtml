@@ -49,57 +49,42 @@ Released for free under a Creative Commons Attribution 3.0 License
    <div class="content">
     <div class="content_resize">
      <div class="mainbar">
-      <h2>Theories</h2>
-      <p>SMT-LIB logics refer to one or more theories below.
-       Click on a theory's name to see its declaration in Version 2.x of the format.
-       <dl>
-        <dt><a href="theories-ArraysEx.shtml">ArraysEx</a></dt>
-        <dd>
-         Functional arrays with extensionality
-        </dd>
-        <dt><a href="theories-FixedSizeBitVectors.shtml">FixedSizeBitVectors</a></dt>
-        <dd>
-         Bit vectors with arbitrary size
-        </dd>
-        <dt>
-         <a href="theories-Core.shtml">Core</a>
-        </dt>
-        <dd>
-         Core theory, defining the basic Boolean operators
-        </dd>
-        <dt><a href="theories-FloatingPoint.shtml">FloatingPoint</a></dt>
-        <dd>
-         Floating point numbers
-        </dd>
-        <dt>
-         <a href="theories-Core.shtml">Core</a>
-        </dt>
-        <dd>
-         HO-Core theory, defining maps
-        </dd>
-        <dt><a href="theories-Ints.shtml">Ints</a></dt>
-        <dd>
-         Integer numbers
-        </dd>
-        <dt>
-         <a href="theories-Reals.shtml">Reals</a>
-        </dt>
-        <dd>
-         Real numbers
-        </dd>
-        <dt><a href="theories-Reals_Ints.shtml">Reals_Ints</a></dt>
-        <dd>
-         Real and integer numbers
-        </dd>
-        <dt><a href="theories-UnicodeStrings.shtml">Strings</a></dt>
-        <dd>
-         Unicode character strings and regular expressions
-        </dd>
-     </dl>
-      </p>
-      <div class="footnote">Theory declarations for Version 1.2 of SMT-LIB, superseded by the ones above, are still available <a href="version1/theories.html">here</a> although their use is deprecated.
-      <br><br>
-      </div>
+      <h2>HO-Core</h2>
+       <pre class="prettyprint lang-smtlib">
+(theory HO-Core
+
+ :smt-lib-version 2.7
+ :smt-lib-release "2025-02-05"
+ :written-by "Clark Barrett, Pascal Fontaine, and Cesare Tinelli"
+ :date "2025-02-05"
+ :last-updated "2025-02-05"
+ :update-history
+
+ :sorts ( (-> 2 :right-assoc) )
+
+ :funs ( (par (A B) (_ (-> A B :left-assoc) A B) ) )
+
+ :definition
+ "For every expanded signature Sigma, the instance of HO-Core with that signature
+  is the theory consisting of all Sigma-models in which: 
+  - the sort constructor -> denotes the map sort constructor;
+  - for all sorts s1, s2 in Sigma, 
+    - (_ (-> s1 s2) s1 s2) denotes the function that
+      returns the result of applying its first argument to its second."
+  
+ :values 
+ "For all sorts s1, s2, the set of values for the sort (-> s1 s2) consists of
+  - an abstract value for each map (from a countable subset of the maps)
+    of type s1 -> s2;
+  - terms of the form (lambda ((x s1)) t) where t has sort s2 when every
+    free occurrence of x in t has sort s1.
+ " 
+)
+
+</pre>
+      (<a href="Theories/HO-Core.smt2">raw file</a>)
+      <br>
+      <br>
      </div>
       
 <div class="sidebar">
