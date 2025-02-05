@@ -25,10 +25,18 @@
       <div class="article">
        <h2>News</h2>
        <!------------------------------------------------------------------------>
+       <a name="2025-02-05"></a>
+       <small>February 5, 2025</small>
+       <p>
+         A new release of Version 2.7 of the SMT-LIB reference document
+         is now available.  This release allows polymorphic types in
+	 assertions, and introduces a theory of maps that models
+	 higher-order functions.
+       </p>
        <a name="2024-09-20"></a>
        <small>September 20, 2024</small>
        <p>
-         A new release of the the SMT-LIB 2.6 reference document
+         A new release of the SMT-LIB 2.6 reference document
         is now available. This is a minor release.  The main changes
         concern the verbosity of the output.
        </p>

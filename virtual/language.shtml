@@ -28,6 +28,12 @@ Released for free under a Creative Commons Attribution 3.0 License
      <div class="mainbar">
       <h2>Language</h2>
        <dl>
+        <dt><strong>The SMT-LIB Standard: Version 2.7</strong>,
+         by Clark Barrett, Pascal Fontaine, and Cesare Tinelli.
+        </dt>
+        <dd>Latest official release of Version 2.7 of the SMT-LIB standard.
+         [ <a href="papers/smt-lib-reference-v2.7-r2025-02-05.pdf">pdf</a> | <a href="biblio/BarFT-RR-25.bib">bib</a> ]
+        </dd>
         <dt><strong>The SMT-LIB Standard: Version 2.6</strong>,
          by Clark Barrett, Pascal Fontaine, and Cesare Tinelli.
         </dt>
