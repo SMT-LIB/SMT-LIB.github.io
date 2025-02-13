@@ -228,7 +228,7 @@
         (re.* RegLan RegLan) 
        )
 
- :note 
+ :notes 
  "Function str.to_re allows one to write _symbolic regular expressions_, 
   e.g., RegLan terms with subterms like (str.to_re x) where x is a variable. 
   Such terms have more expressive power than regular expressions. This is 

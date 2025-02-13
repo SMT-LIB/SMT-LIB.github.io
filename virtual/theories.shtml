@@ -49,10 +49,10 @@ Released for free under a Creative Commons Attribution 3.0 License
          Floating point numbers
         </dd>
         <dt>
-         <a href="theories-Core.shtml">Core</a>
+         <a href="theories-HO-Core.shtml">HO-Core</a>
         </dt>
         <dd>
-         HO-Core theory, defining maps
+         Higher-order maps
         </dd>
         <dt><a href="theories-Ints.shtml">Ints</a></dt>
         <dd>
