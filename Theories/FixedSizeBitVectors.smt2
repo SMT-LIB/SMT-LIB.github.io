@@ -1,13 +1,18 @@
 (theory FixedSizeBitVectors
 
- :smt-lib-version 2.6
- :smt-lib-release "2017-11-24"
- :written-by "Silvio Ranise, Cesare Tinelli, and Clark Barrett"
+ :smt-lib-version 2.7
+ :smt-lib-release "2024-07-21"
+ :written-by "Clark Barrett, Pascal Fontaine, Silvio Ranise, and Cesare Tinelli"
  :date "2010-05-02" 
- :last-updated "2017-06-13"
+ :last-updated "2025-02-25"
  :update-history
  "Note: history only accounts for content changes, not release changes.
-  2020-05-20 Fixed minor typo
+  2025-02-25 Renamed and updated conversion operators to/from integers.
+  2024-07-21 Updated to Version 2.7.
+  2024-07-16 Added conversion operators between bitvectors and integers.
+  2024-07-14 Fixed minor typos.
+  2023-11-29 Added bvnego bvuaddo bvsaddo bvumulo bvsmulo.
+  2020-05-20 Fixed minor typo.
   2017-06-13 Added :left-assoc attribute to bvand, bvor, bvadd, bvmul
   2017-05-03 Updated to version 2.6; changed semantics of division and
              remainder operators.
@@ -82,8 +87,25 @@
     - m is a numeral greater than 0
  "
 
+ :funs_description "
+   If the Ints theory is also present, all function symbols with declarations of the form
+
+       (ubv_to_int (_ BitVec m) Int)
+    or
+       (sbv_to_int (_ BitVec m) Int)
+    or
+       ((_ int_to_bv m) Int (_ BitVec m))
+
+    where
+    - m is a numeral greater than 0.
+
+    Note that only a single operator for conversions from integers to bitvectors is needed,
+    as the semantics are the same whether the intention is to convert to a signed or
+    unsigned bitvector.  See the definition for more details.
+"
+
  :definition
- "For every expanded signature Sigma, the instance of Fixed_Size_BitVectors
+ "For every expanded signature Sigma, the instance of FixedSizeBitVectors
    with that signature is the theory consisting of all Sigma-models that 
    satisfy the constraints detailed below.
 
@@ -94,12 +116,18 @@
    To define some of the semantics below, we need the following additional
    functions :
 
-   o _ div _,  which takes an integer x ≥ 0 and an integer y > 0 and returns
-     the integer part of x divided by y (i.e., truncated integer division).
+   o div and mod, binary infix functions on integers defined as the
+     interpretations of the corresponding operators in the Ints theory,
+     i.e., the operators satisfying:
 
-   o _ rem _, which takes an integer x ≥ 0 and y > 0 and returns the
-     remainder when x is divided by y.  Note that we always have the following
-     equivalence for y > 0: (x div y) * y + (x rem y) = x.
+     (forall ((m Int) (n Int))
+       (=> (distinct n 0)
+           (let ((q (div m n)) (r (mod m n)))
+             (and (= m (+ (* n q) r))
+                  (<= 0 r (- (abs n) 1))))))
+
+     Note that an important consequence of the above definition is that
+     for n > 0, m mod n is always in the range [0, n).
 
    o bv2nat, which takes a bitvector b: [0, m) → {0, 1}
      with 0 < m, and returns an integer in the range [0, 2^m),
@@ -107,17 +135,10 @@
 
        bv2nat(b) := b(m-1)*2^{m-1} + b(m-2)*2^{m-2} + ⋯ + b(0)*2^0
 
-   o bv2int, which takes a bitvector b: [0, m) → {0, 1}
-     with 0 < m, and returns an integer in the range [- 2^(m - 1), 2^(m - 1)),
-     and is defined as follows:
+   o nat2bv[m], with 0 < m, which takes a non-negative integer n and returns
+     the (unique) bitvector b: [0, m) -> {0, 1} such that:
 
-       bv2int(b) := if b(m-1) = 0 then bv2nat(b) else bv2nat(b) - 2^m
-
-   o nat2bv[m], with 0 < m, which takes a non-negative integer
-     n and returns the (unique) bitvector b: [0, m) → {0, 1}
-     such that
-
-       b(m-1)*2^{m-1} + ⋯ + b(0)*2^0 = n rem 2^m
+       bv2nat(b) = n mod 2^m
 
    The semantic interpretation [[_]] of well-sorted BitVec-terms is
    inductively defined as follows.
@@ -125,7 +146,7 @@
    - Variables
 
    If v is a variable of sort (_ BitVec m) with 0 < m, then
-   [[v]] is some element of [[0, m-1) → {0, 1}], the set of total
+   [[v]] is some element of {[0, m) → {0, 1}}, the set of total
    functions from [0, m) to {0, 1}.
 
    - Constant symbols
@@ -185,11 +206,11 @@
 
    [[(bvurem s t)]] := if bv2nat([[t]]) = 0
                        then [[s]]
-                       else nat2bv[m](bv2nat([[s]]) rem bv2nat([[t]]))
+                       else nat2bv[m](bv2nat([[s]]) mod bv2nat([[t]]))
 
    We also define the following predicates
 
-   [[(bvnego s)]] := bv2int([[s]]) >= 2^(m - 1)
+   [[(bvnego s)]] := bv2int([[s]]) == -2^(m - 1)
 
    [[(bvuaddo s t)]] := (bv2nat([[s]]) + bv2nat([[t]])) >= 2^m
 
@@ -213,6 +234,30 @@
    Finally, we can define bvult:
 
    [[bvult s t]] := true iff bv2nat([[s]]) < bv2nat([[t]])
+
+   If the Ints theory is also present, let [[_]] be extended to additionally
+   interpret terms of sort Int.  For operations in that theory, [[_]]
+   interprets them according to the semantics defined there.  We further
+   define:
+
+   [[(ubv_to_int s)]] := bv2nat([[s]])
+
+   [[(sbv_to_int s)]] := if [[s]](m-1) = 0 then bv2nat([[s]])
+                                           else bv2nat([[s]]) - 2^m
+
+   where s is of sort (_ BitVec m) and 0 < m.  We also define:
+
+   [[((_ int_to_bv N) x)]] := nat2bv[[[N]]]([[x]] mod 2^[[N]])
+
+   where N is a numeral greater than 0 and x is a term of sort Int.
+
+   Notice that the semantics are correct regardless of whether the intended
+   target is a signed or unsigned bitvector.  For example:
+
+     [[((_ int_to_bv 4) -7)]] = [[((_ int_to_bv 4) 9)]] = 1001.
+
+   In both cases, the mod operation (as defined above to always return a
+   nonnegative value) leads to the correct result.
  "
 
 :values

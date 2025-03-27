@@ -54,13 +54,14 @@ Released for free under a Creative Commons Attribution 3.0 License
       <pre class="prettyprint lang-smtlib">
 (logic AUFLIA
 
- :smt-lib-version 2.6
- :smt-lib-release "2017-11-24"
+ :smt-lib-version 2.7
+ :smt-lib-release "2024-07-21"
  :written-by "Cesare Tinelli"
  :date "2010-04-30"
- :last-updated "2015-04-25"
+ :last-updated "2024-07-21"
  :update-history
  "Note: history only accounts for content changes, not release changes.
+  2024-07-21 Updated to Version 2.7.
   2015-04-25 Updated to Version 2.5.
  "
 
@@ -92,13 +93,14 @@ Released for free under a Creative Commons Attribution 3.0 License
       <pre class="prettyprint lang-smtlib">
 (logic AUFLIRA
 
- :smt-lib-version 2.6
- :smt-lib-release "2017-11-24"
+ :smt-lib-version 2.7
+ :smt-lib-release "2024-07-21"
  :written-by "Cesare Tinelli and Clark Barrett"
  :date "2010-05-05"
- :last-updated "2015-04-25"
+ :last-updated "2024-07-21"
  :update-history
  "Note: history only accounts for content changes, not release changes.
+  2024-07-21 Updated to Version 2.7.
   2015-04-25 Updated to Version 2.5.
   2011-06-03 Replaced "(* c x), or (* x c)" with "c, (* c x), or (* x c)" 
              in :extensions.
@@ -151,13 +153,14 @@ Released for free under a Creative Commons Attribution 3.0 License
       <pre class="prettyprint lang-smtlib">
 (logic AUFNIRA
 
- :smt-lib-version 2.6
- :smt-lib-release "2017-11-24"
+ :smt-lib-version 2.7
+ :smt-lib-release "2024-07-21"
  :written-by "Cesare Tinelli and Clark Barrett"
  :date "2010-05-12"
- :last-updated "2015-04-25"
+ :last-updated "2024-07-21"
  :update-history
  "Note: history only accounts for content changes, not release changes.
+  2024-07-21 Updated to Version 2.7.
   2015-04-25 Updated to Version 2.5.
   2012-09-26 Clarified in :notes in what way AUFNIRA extendes AUFLIRA.
  "
@@ -194,12 +197,14 @@ Released for free under a Creative Commons Attribution 3.0 License
       <pre class="prettyprint lang-smtlib">
 (logic LIA
 
- :smt-lib-version 2.6
- :smt-lib-release "2017-11-24"
+ :smt-lib-version 2.7
+ :smt-lib-release "2024-07-21"
  :written-by "Cesare Tinelli"
  :date "2016-02-07"
+ :last-updated "2024-07-21"
  :update-history
  "Note: history only accounts for content changes, not release changes.
+  2024-07-21 Updated to Version 2.7.
  "
  :theories (Ints)
 
@@ -226,13 +231,14 @@ Released for free under a Creative Commons Attribution 3.0 License
       <pre class="prettyprint lang-smtlib">
 (logic LRA
 
- :smt-lib-version 2.6
- :smt-lib-release "2017-11-24"
+ :smt-lib-version 2.7
+ :smt-lib-release "2024-07-21"
  :written-by "Cesare Tinelli"
  :date "2010-05-11"
- :last-updated "2015-04-25"
+ :last-updated "2024-07-21"
  :update-history
  "Note: history only accounts for content changes, not release changes.
+  2024-07-21 Updated to Version 2.7.
   2015-04-25 Updated to Version 2.5.
   2011-06-03 Replaced ''(* c x), or (* x c)'' with ''c, (* c x), or (* x c)'' 
              in :extensions.
@@ -271,13 +277,14 @@ Released for free under a Creative Commons Attribution 3.0 License
       <pre class="prettyprint lang-smtlib">
 (logic QF_ABV
 
- :smt-lib-version 2.6
- :smt-lib-release "2017-11-24"
+ :smt-lib-version 2.7
+ :smt-lib-release "2024-07-21"
  :written-by "Cesare Tinelli and Clark Barrett"
  :date "2010-07-05"
- :last-updated "2015-04-25"
+ :last-updated "2024-07-21"
  :update-history
  "Note: history only accounts for content changes, not release changes.
+  2024-07-21 Updated to Version 2.7.
   2015-04-25 Updated to Version 2.5.
   2013-06-24 Changed references to Fixed_Size_Bitvectors to FixedSizeBitVectors.
  "
@@ -302,13 +309,14 @@ Released for free under a Creative Commons Attribution 3.0 License
       <pre class="prettyprint lang-smtlib">
 (logic QF_AUFBV
 
- :smt-lib-version 2.6
- :smt-lib-release "2017-11-24"
+ :smt-lib-version 2.7
+ :smt-lib-release "2024-07-21"
  :written-by "Cesare Tinelli and Clark Barrett"
  :date "2010-05-11"
- :last-updated "2015-04-25"
+ :last-updated "2024-07-21"
  :update-history
  "Note: history only accounts for content changes, not release changes.
+  2024-07-21 Updated to Version 2.7.
   2015-04-25 Updated to Version 2.5.
   2013-06-24 Changed references to Fixed_Size_Bitvectors to FixedSizeBitVectors.
  "
@@ -334,13 +342,14 @@ Released for free under a Creative Commons Attribution 3.0 License
       <pre class="prettyprint lang-smtlib">
 (logic QF_AUFLIA
 
- :smt-lib-version 2.6
- :smt-lib-release "2017-11-24"
+ :smt-lib-version 2.7
+ :smt-lib-release "2024-07-21"
  :written-by "Cesare Tinelli"
  :date "2010-04-30"
- :last-updated "2015-04-25"
+ :last-updated "2024-07-21"
  :update-history
  "Note: history only accounts for content changes, not release changes.
+  2024-07-21 Updated to Version 2.7.
   2015-04-25 Updated to Version 2.5.
   2011-06-03 Allowed x to be more than a free constants in terms of the form 
              (* c x) or (*x c)   in :extensions.
@@ -374,13 +383,14 @@ Released for free under a Creative Commons Attribution 3.0 License
       <pre class="prettyprint lang-smtlib">
 (logic QF_AX
 
- :smt-lib-version 2.6
- :smt-lib-release "2017-11-24"
+ :smt-lib-version 2.7
+ :smt-lib-release "2024-07-21"
  :written-by "Cesare Tinelli"
  :date "2010-04-30"
- :last-updated "2015-04-25"
+ :last-updated "2024-07-21"
  :update-history
  "Note: history only accounts for content changes, not release changes.
+  2024-07-21 Updated to Version 2.7.
   2015-04-25 Updated to Version 2.5.
  "
 
@@ -404,13 +414,18 @@ Released for free under a Creative Commons Attribution 3.0 License
       <pre class="prettyprint lang-smtlib">
 (logic QF_BV
 
- :smt-lib-version 2.6
- :smt-lib-release "2017-11-24"
- :written-by "Silvio Ranise, Cesare Tinelli, and Clark Barrett"
+ :smt-lib-version 2.7
+ :smt-lib-release "2024-07-21"
+ :written-by "Clark Barrett, Pascal Fontaine, Silvio Ranise, and Cesare Tinelli"
  :date "2010-05-02"
- :last-updated "2017-06-13"
+ :last-updated "2025-02-25"
  :update-history
  "Note: history only accounts for content changes, not release changes.
+  2025-02-25 Renamed and updated conversion operators to/from integers.
+  2024-07-21 Updated to Version 2.7.
+  2024-07-15 Added conversion operators between bitvectors and integers.
+  2024-07-14 Minor disambiguation.
+  2023-11-29 Added bvnego bvuaddo bvsaddo bvumulo bvsmulo bvusubo bvssubo bvsdivo
   2020-05-20 bvxnor is no longer marked as left associative, as that is
              inconsistent with its meaning as the negation of bvxor.
   2017-06-13 Added that bvxor and bvxnor are left associative
@@ -479,6 +494,22 @@ Released for free under a Creative Commons Attribution 3.0 License
         the value of the second argument)
     (bvult (_ BitVec m) (_ BitVec m) Bool)
       - binary predicate for unsigned less-than
+    (bvnego (_ BitVec m) Bool)
+      - overflow predicate for 2's complement unary minus
+    (bvuaddo (_ BitVec m) (_ BitVec m) Bool)
+      - overflow predicate for unsigned addition modulo 2^m
+    (bvsaddo (_ BitVec m) (_ BitVec m) Bool)
+      - overflow predicate for signed addition on m-bit 2's complement
+    (bvumulo (_ BitVec m) (_ BitVec m) Bool)
+      - overflow predicate for unsigned multiplication modulo 2^m
+    (bvsmulo (_ BitVec m) (_ BitVec m) Bool)
+      - overflow predicate for signed multiplication on m-bit 2's complement
+    (ubv_to_int (_ BitVec m) Int)
+      - convert bitvector, interpreted as unsigned, to its integer value
+    (sbv_to_int (_ BitVec m) Int)
+      - convert a bitvector, interpreted as signed, to its integer value
+    ((_ int_to_bv m) (Int) (_ BitVec m))
+      - convert an Integer to a bitvector
 
   Defined below:
 
@@ -506,6 +537,12 @@ Released for free under a Creative Commons Attribution 3.0 License
       - Arithmetic shift right, like logical shift right except that the most
         significant bits of the result always copy the most significant
         bit of the first argument.
+    (bvusubo (_ BitVec m) (_ BitVec m) Bool)
+      - overflow predicate for unsigned subtraction modulo 2^m
+    (bvssubo (_ BitVec m) (_ BitVec m) Bool)
+      - overflow predicate for signed 2's complement m-bit subtraction
+    (bvsdivo (_ BitVec m) (_ BitVec m) Bool)
+      - overflow predicate for 2's complement signed division
 
     The following symbols are parameterized by the numeral i, where i >= 1.
 
@@ -553,7 +590,8 @@ Released for free under a Creative Commons Attribution 3.0 License
 
     See the specification of the theory's semantics for a definition
     of the functions [[_]] and nat2bv.  Note that this convention implicitly
-    considers the numeral X as a number written in base 10.
+    considers the numeral X as a number written in decimal.  It is
+    an error to write (_ bvX n) with X >= 2^n.
 
   - Bitwise operators
 
@@ -626,6 +664,9 @@ Released for free under a Creative Commons Attribution 3.0 License
                (bvule s t)))
     (bvsgt s t) abbreviates (bvslt t s)
     (bvsge s t) abbreviates (bvsle t s)
+    (bvusubo s t) stands for (bvult s t)
+    (bvssubo s t) abbreviates (ite (bvnego t) (bvsge s (_ bv0 m)) (bvsaddo s (bvneg t)))
+    (bvsdivo s t) abbreviates (and (bvnego s) (= t (bvnot (_ bv0 m))))
 
   - Other operations
 
@@ -670,13 +711,14 @@ Released for free under a Creative Commons Attribution 3.0 License
       <pre class="prettyprint lang-smtlib">
 (logic QF_IDL
 
- :smt-lib-version 2.6
- :smt-lib-release "2017-11-24"
+ :smt-lib-version 2.7
+ :smt-lib-release "2024-07-21"
  :written-by "Cesare Tinelli"
  :date "2010-04-30"
- :last-updated "2015-04-25"
+ :last-updated "2024-07-21"
  :update-history
  "Note: history only accounts for content changes, not release changes.
+  2024-07-21 Updated to Version 2.7.
   2015-04-25 Updated to Version 2.5.
  "
 
@@ -705,13 +747,14 @@ Released for free under a Creative Commons Attribution 3.0 License
       <pre class="prettyprint lang-smtlib">
 (logic QF_LIA
 
- :smt-lib-version 2.6
- :smt-lib-release "2017-11-24"
+ :smt-lib-version 2.7
+ :smt-lib-release "2024-07-21"
  :written-by "Cesare Tinelli"
  :date "2010-04-30"
- :last-updated "2015-04-25"
+ :last-updated "2024-07-21"
  :update-history
  "Note: history only accounts for content changes, not release changes.
+  2024-07-21 Updated to Version 2.7.
   2021-01-21 Clarified wording around what terms are included in extensions.
   2015-04-25 Updated to Version 2.5.
  "
@@ -742,13 +785,14 @@ Released for free under a Creative Commons Attribution 3.0 License
       <pre class="prettyprint lang-smtlib">
 (logic QF_NIA
 
- :smt-lib-version 2.6
- :smt-lib-release "2017-11-24"
+ :smt-lib-version 2.7
+ :smt-lib-release "2024-07-21"
  :written-by "Cesare Tinelli"
  :date "2010-05-12"
- :last-updated "2015-04-25"
+ :last-updated "2024-07-21"
  :update-history
  "Note: history only accounts for content changes, not release changes.
+  2024-07-21 Updated to Version 2.7.
   2015-04-25 Updated to Version 2.5.
  "
 
@@ -769,13 +813,14 @@ Released for free under a Creative Commons Attribution 3.0 License
       <pre class="prettyprint lang-smtlib">
 (logic QF_NRA
 
- :smt-lib-version 2.6
- :smt-lib-release "2017-11-24"
+ :smt-lib-version 2.7
+ :smt-lib-release "2024-07-21"
  :written-by "Cesare Tinelli"
  :date "2011-06-11"
- :last-updated "2015-04-25"
+ :last-updated "2024-07-21"
  :update-history
  "Note: history only accounts for content changes, not release changes.
+  2024-07-21 Updated to Version 2.7.
   2015-04-25 Updated to Version 2.5.
  "
  
@@ -795,13 +840,14 @@ Released for free under a Creative Commons Attribution 3.0 License
       <pre class="prettyprint lang-smtlib">
 (logic QF_RDL
 
- :smt-lib-version 2.6
- :smt-lib-release "2017-11-24"
+ :smt-lib-version 2.7
+ :smt-lib-release "2024-07-21"
  :written-by "Cesare Tinelli"
  :date "2010-04-30"
- :last-updated "2015-04-25"
+ :last-updated "2024-07-21"
  :update-history
  "Note: history only accounts for content changes, not release changes.
+  2024-07-21 Updated to Version 2.7.
   2015-04-25 Updated to Version 2.5.
   2010-12-16 Replaced erroneous ''n > 0'' with ''n > 1'' in language attribute.
  "
@@ -838,13 +884,14 @@ Released for free under a Creative Commons Attribution 3.0 License
       <pre class="prettyprint lang-smtlib">
 (logic QF_UF
 
- :smt-lib-version 2.6
- :smt-lib-release "2017-11-24"
+ :smt-lib-version 2.7
+ :smt-lib-release "2024-07-21"
  :written-by "Cesare Tinelli"
  :date "2010-04-14"
- :last-updated "2015-04-25"
+ :last-updated "2024-07-21"
  :update-history
  "Note: history only accounts for content changes, not release changes.
+  2024-07-21 Updated to Version 2.7.
   2015-04-25 Updated to Version 2.5.
  "
  
@@ -876,13 +923,14 @@ Released for free under a Creative Commons Attribution 3.0 License
       <pre class="prettyprint lang-smtlib">
 (logic QF_UFBV
 
- :smt-lib-version 2.6
- :smt-lib-release "2017-11-24"
+ :smt-lib-version 2.7
+ :smt-lib-release "2024-07-21"
  :written-by "Cesare Tinelli"
  :date "2011-06-11"
- :last-updated "2015-04-25"
+ :last-updated "2024-07-21"
  :update-history
  "Note: history only accounts for content changes, not release changes.
+  2024-07-21 Updated to Version 2.7.
   2015-04-25 Updated to Version 2.5.
   2013-06-24 Changed references to Fixed_Size_Bitvectors to FixedSizeBitVectors.
  "
@@ -907,13 +955,14 @@ Released for free under a Creative Commons Attribution 3.0 License
       <pre class="prettyprint lang-smtlib">
 (logic QF_UFIDL
 
- :smt-lib-version 2.6
- :smt-lib-release "2017-11-24"
+ :smt-lib-version 2.7
+ :smt-lib-release "2024-07-21"
  :written-by "Clark Barrett, Cesare Tinelli"
  :date "2010-05-12"
- :last-updated "2015-04-25"
+ :last-updated "2024-07-21"
  :update-history
  "Note: history only accounts for content changes, not release changes.
+  2024-07-21 Updated to Version 2.7.
   2015-04-25 Updated to Version 2.5.
   2011-06-03 Added :note field."
 
@@ -956,13 +1005,14 @@ Released for free under a Creative Commons Attribution 3.0 License
       <pre class="prettyprint lang-smtlib">
 (logic QF_UFLIA
 
- :smt-lib-version 2.6
- :smt-lib-release "2017-11-24"
+ :smt-lib-version 2.7
+ :smt-lib-release "2024-07-21"
  :written-by "Cesare Tinelli"
  :date "2011-06-11"
- :last-updated "2015-04-25"
+ :last-updated "2024-07-21"
  :update-history
  "Note: history only accounts for content changes, not release changes.
+  2024-07-21 Updated to Version 2.7.
   2015-04-25 Updated to Version 2.5.
  "
 
@@ -990,13 +1040,14 @@ Released for free under a Creative Commons Attribution 3.0 License
       <pre class="prettyprint lang-smtlib">
 (logic QF_UFLRA
 
- :smt-lib-version 2.6
- :smt-lib-release "2017-11-24"
+ :smt-lib-version 2.7
+ :smt-lib-release "2024-07-21"
  :written-by "Cesare Tinelli"
  :date "2011-06-11"
- :last-updated "2015-04-25"
+ :last-updated "2024-07-21"
  :update-history
  "Note: history only accounts for content changes, not release changes.
+  2024-07-21 Updated to Version 2.7.
   2015-04-25 Updated to Version 2.5.
  "
  
@@ -1029,13 +1080,14 @@ Released for free under a Creative Commons Attribution 3.0 License
       <pre class="prettyprint lang-smtlib">
 (logic QF_LRA
 
- :smt-lib-version 2.6
- :smt-lib-release "2017-11-24"
+ :smt-lib-version 2.7
+ :smt-lib-release "2024-07-21"
  :written-by "Cesare Tinelli"
  :date "2010-04-14"
- :last-updated "2015-04-25"
+ :last-updated "2024-07-21"
  :update-history
  "Note: history only accounts for content changes, not release changes.
+  2024-07-21 Updated to Version 2.7.
   2015-04-25 Updated to Version 2.5. 
   2011-06-03 Replaced ''(* c x), or (* x c)'' with ''c, (* c x), or (* x c)'' 
              in :extensions. (The missing case had been left out unintentionally.)
@@ -1070,13 +1122,14 @@ Released for free under a Creative Commons Attribution 3.0 License
       <pre class="prettyprint lang-smtlib">
 (logic QF_UFNRA
 
- :smt-lib-version 2.6
- :smt-lib-release "2017-11-24"
+ :smt-lib-version 2.7
+ :smt-lib-release "2024-07-21"
  :written-by "Cesare Tinelli"
  :date "2011-06-11"
- :last-updated "2015-04-25"
+ :last-updated "2024-07-21"
  :update-history
  "Note: history only accounts for content changes, not release changes.
+  2024-07-21 Updated to Version 2.7.
   2015-04-25 Updated to Version 2.5.
  "
  
@@ -1097,13 +1150,14 @@ Released for free under a Creative Commons Attribution 3.0 License
       <pre class="prettyprint lang-smtlib">
 (logic UFLRA
 
- :smt-lib-version 2.6
- :smt-lib-release "2017-11-24"
+ :smt-lib-version 2.7
+ :smt-lib-release "2024-07-21"
  :written-by "Cesare Tinelli"
  :date "2011-06-11"
- :last-updated "2015-04-25"
+ :last-updated "2024-07-21"
  :update-history
  "Note: history only accounts for content changes, not release changes.
+  2024-07-21 Updated to Version 2.7.
   2015-04-25 Updated to Version 2.5.
  "
  
@@ -1136,13 +1190,14 @@ Released for free under a Creative Commons Attribution 3.0 License
       <pre class="prettyprint lang-smtlib">
 (logic UFNIA
 
- :smt-lib-version 2.6
- :smt-lib-release "2017-11-24"
+ :smt-lib-version 2.7
+ :smt-lib-release "2024-07-21"
  :written-by "Cesare Tinelli"
  :date "2011-06-11"
- :last-updated "2015-04-25"
+ :last-updated "2024-07-21"
  :update-history
  "Note: history only accounts for content changes, not release changes.
+  2024-07-21 Updated to Version 2.7.
   2015-04-25 Updated to Version 2.5.
  "
 

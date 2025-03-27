@@ -71,6 +71,12 @@ Released for free under a Creative Commons Attribution 3.0 License
         <dd>
          Floating point numbers
         </dd>
+        <dt>
+         <a href="theories-HO-Core.shtml">HO-Core</a>
+        </dt>
+        <dd>
+         Higher-order maps
+        </dd>
         <dt><a href="theories-Ints.shtml">Ints</a></dt>
         <dd>
          Integer numbers

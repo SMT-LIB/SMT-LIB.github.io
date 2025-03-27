@@ -1,13 +1,16 @@
 (theory Strings
 
- :smt-lib-version 2.6
+ :smt-lib-version 2.7
  :written_by "Cesare Tinelli, Clark Barrett, and Pascal Fontaine"
- :date "2020-02-11"
- :last-updated "2020-08-06"
+ :date "2020-02-01"
+ :last-updated "2024-07-21"
  :update-history
  "Note: history only accounts for content changes, not release changes.
-  2020-08-06 Fixed an example in Strings constant definition.
+  2024-07-21 Updated to Version 2.7.
+  2024-14-07 Fixed typos and ambiguities in definitions of str.replace_re and str.replace_re_all
   2022-12-07 Fixed comment providing the description of str.replace_re.
+  2020-08-06 Fixed an example in Strings constant definition.
+  2020-02-09 Layout and minor fixes.
  "
 
  :notes
@@ -225,7 +228,7 @@
         (re.* RegLan RegLan) 
        )
 
- :note 
+ :notes 
  "Function str.to_re allows one to write _symbolic regular expressions_, 
   e.g., RegLan terms with subterms like (str.to_re x) where x is a variable. 
   Such terms have more expressive power than regular expressions. This is 
@@ -448,7 +451,7 @@
        a non-empty string literal l₂.
 
        Ex: ⟦""a\u02C1""⟧ = ⟦""a""⟧⟦""\u02C1""⟧ = 0x00061 0x002C1
-           ⟦""\u2CA""⟧ = 0x0005C ⟦""u2CXA""⟧           (not an escape sequence)
+           ⟦""\u2CA""⟧ = 0x0005C ⟦""u2CA""⟧            (not an escape sequence)
            ⟦""\u2CXA""⟧ = 0x0005C ⟦""u2CXA""⟧          (not an escape sequence)
            ⟦""\u{ACG}A""⟧ = 0x0005C ⟦""u{ACG}A""⟧      (not an escape sequence)
 
@@ -583,36 +586,45 @@
   * (str.replace_all String String String String)
 
     - ⟦str.replace_all⟧(w, w₁, w₂) = w      if ⟦str.contains⟧(w, w₁) = false 
-                                             or 
-                                             w₁ = ε
+                                              or 
+                                              w₁ = ε
 
     - ⟦str.replace_all⟧(w, w₁, w₂) = u₁w₂⟦str.replace_all⟧(u₂, w₁, w₂)
       where u₁ is the shortest word such that 
             w = u₁w₁u₂
-                                          if ⟦str.contains⟧(w, w₁) = true
-                                            and 
-                                            w₁ ≠ ε
+                                            if ⟦str.contains⟧(w, w₁) = true
+                                              and 
+                                              w₁ ≠ ε
 
-  * (str.replace_re String String String String)
+  * (str.replace_re String RegLan String String)
 
     - ⟦str.replace_re⟧(w, L, w₂) = w        if no substring of w is in L
 
     - ⟦str.replace_re⟧(w, L, w₂) = u₁w₂u₂ 
-      where u₁, w₁ are the shortest words such that 
+      where u₁, w₁ are the shortest words such that
             - w = u₁w₁u₂
             - w₁ ∈ L
-                                            if some substring of w is in L
+                                            if some non-empty substring of w is in L
 
-  * (str.replace_re_all String String String String)
+    Note that in the second case, the priority goes to minimizing the length of u₁.
+    That is, we must first choose the smallest possible u₁, and then, for that u₁,
+    we must choose the smallest possible w₁.  In particular, if ε ∈ L, then both
+    u₁ and w₁ must be ε, so the result is just w₂w.
 
-    - ⟦str.replace_re⟧(w, L, w₂) = w        if no substring of w is in L
+  * (str.replace_re_all String RegLan String String)
 
-    - ⟦str.replace_re⟧(w, L, w₂) = u₁w₂⟦str.replace_re⟧(u₂, L, w₂)
+    - ⟦str.replace_re_all⟧(w, L, w₂) = w    if no substring of w is in L or ε ∈ L
+
+    - ⟦str.replace_re_all⟧(w, L, w₂) = u₁w₂⟦str.replace_re_all⟧(u₂, L, w₂)
       where u₁, w₁ are the shortest words such that 
             - w = u₁w₁u₂
             - w₁ ∈ L
             - w₁ ≠ ε
-                                          if some substring of w is in L
+                                            if some non-empty substring of w is in L
+
+    Note that in the second case, the priority goes to minimizing the length of u₁.
+    That is, we must first choose the smallest possible u₁, and then, for that u₁,
+    we must choose the smallest possible w₁.
 
   * (re.comp RegLan RegLan)
 
