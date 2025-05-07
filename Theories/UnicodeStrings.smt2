@@ -1,7 +1,7 @@
 (theory Strings
 
  :smt-lib-version 2.7
- :written_by "Cesare Tinelli, Clark Barrett, and Pascal Fontaine"
+ :written by "Cesare Tinelli, Clark Barrett, and Pascal Fontaine"
  :date "2020-02-01"
  :last-updated "2024-07-21"
  :update-history
@@ -59,7 +59,7 @@
 
 ; string constants for _singleton_ strings, 
 ; i.e., strings consisting of exactly one character 
- :funs_description 
+ :funs-description 
  "All indexed identifiers, all of sort String, of the form 
 
     (_ char ⟨H⟩) 
@@ -121,7 +121,7 @@
  "
 
 ; String literals (string constants)
- :funs_description 
+ :funs-description 
  "All double-quote-delimited string literals consisting of printable US ASCII 
   characters, i.e., those with Unicode code point from 0x00020 to 0x0007E.
   We refer to these literals as _string constants_.
