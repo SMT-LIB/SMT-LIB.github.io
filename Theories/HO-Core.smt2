@@ -4,12 +4,12 @@
  :smt-lib-release "2025-02-05"
  :written-by "Clark Barrett, Pascal Fontaine, and Cesare Tinelli"
  :date "2025-02-05"
- :last-updated "2025-02-05"
+ :last-updated "2025-07-07"
  :update-history
 
  :sorts ( (-> 2 :right-assoc) )
 
- :funs ( (par (A B) (_ (-> A B :left-assoc) A B) ) )
+ :funs ( (par (A B) (@ (-> A B :left-assoc) A B) ) )
 
  :definition
  "For every expanded signature Sigma, the instance of HO-Core with that signature
@@ -18,7 +18,7 @@
     for all sorts s1, s2 in Sigma, (-> s1 s2) denotes the full space of
     total functions from the domain denoted by s1 to the domain denoted by s2
   - for all sorts s1, s2 in Sigma, 
-    (_ (-> s1 s2) s1 s2)
+    (@ (-> s1 s2) s1 s2)
     denotes the function that returns the result of applying its first argument
     to its second.
  "
