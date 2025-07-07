@@ -2,7 +2,7 @@
 
  :smt-lib-version 2.7
  :smt-lib-release "2024-07-21"
- :written_by "Cesare Tinelli"
+ :written-by "Cesare Tinelli"
  :date "2010-04-17"
  :last-updated "2024-07-21"
  :update-history

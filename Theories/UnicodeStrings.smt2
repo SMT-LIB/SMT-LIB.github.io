@@ -1,7 +1,7 @@
 (theory Strings
 
  :smt-lib-version 2.7
- :written by "Cesare Tinelli, Clark Barrett, and Pascal Fontaine"
+ :written-by "Cesare Tinelli, Clark Barrett, and Pascal Fontaine"
  :date "2020-02-01"
  :last-updated "2024-07-21"
  :update-history
