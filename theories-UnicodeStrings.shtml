@@ -113,7 +113,7 @@ Released for free under a Creative Commons Attribution 3.0 License
 
 ; string constants for _singleton_ strings, 
 ; i.e., strings consisting of exactly one character 
- :funs_description 
+ :funs-description 
  "All indexed identifiers, all of sort String, of the form 
 
     (_ char ⟨H⟩) 
