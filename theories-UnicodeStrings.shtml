@@ -175,7 +175,7 @@ Released for free under a Creative Commons Attribution 3.0 License
  "
 
 ; String literals (string constants)
- :funs_description 
+ :funs-description 
  "All double-quote-delimited string literals consisting of printable US ASCII 
   characters, i.e., those with Unicode code point from 0x00020 to 0x0007E.
   We refer to these literals as _string constants_.

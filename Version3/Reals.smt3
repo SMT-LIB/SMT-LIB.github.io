@@ -25,7 +25,7 @@
   ; External and Bridging symbols
   ;-------------------------------
   ; Int
-  (declare-type Int () :extern Ints::Int)
+  (declare-type Int () :external Ints)
 
   (declare-const to_real (-> Int Real) :builtin 
    "to_real as the standard injection of the integers into the reals.")

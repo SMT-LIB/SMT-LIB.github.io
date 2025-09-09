@@ -143,7 +143,7 @@
   ; External and Bridging symbols
   ;-------------------------------
   ; Real
-  (declare-type Real () :extern Reals::Real)
+  (declare-type Real () :external Reals)
 
   (declare-const to_int (-> Real Int) :builtin 
    "to_int denotes the function that maps each real number r 

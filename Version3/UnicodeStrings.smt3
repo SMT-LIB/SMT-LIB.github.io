@@ -41,17 +41,17 @@
   ;------------------
 
   ; Int
-  (declare-type Int () :extern Ints::Int)
+  (declare-type Int () :external Ints)
 
   ; (BitVec m)
   (declare-type BitVec ((! Int :var m :syntax ⟨int_value⟩ :restrict (> m 0)))
-   :extern FixedSizeBitVectors::BitVec)
+   :external FixedSizeBitVectors)
 
   (declare-const ⟨hexadecimal⟩
     (-> (! Int :var m :syntax ⟨int_value⟩ :restrict (> m 0) :implicit
          :restrict "m is 4 times the number of hexadecimal digits in the constant") 
         (BitVec m))
-    :extern FixedSizeBitVectors::⟨hexadecimal⟩)
+    :external FixedSizeBitVectors)
 
   ;---------------
   ; Builtin types

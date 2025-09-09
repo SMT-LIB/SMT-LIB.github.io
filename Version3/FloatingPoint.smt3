@@ -60,32 +60,32 @@
   ;------------------
 
   ; Int
-  (declare-type Int () :extern Ints::Int)
+  (declare-type Int () :external Ints)
 
-  (declare-const ⟨numeral⟩ Int :extern Ints::⟨numeral⟩)
-  (declare-const +1 (-> Int Int) :extern Ints::+1)
-  (declare-const + (-> Int Int Int) :extern Ints::+)
-  (declare-const - (-> Int Int Int) :extern Ints::-)
-  (declare-const < (-> Int Int Bool) :extern Ints::<)
-  (declare-const > (-> Int Int Bool) :extern Ints::>)
+  (declare-const ⟨numeral⟩ Int :external Ints)
+  (declare-const +1 (-> Int Int) :external Ints)
+  (declare-const + (-> Int Int Int) :external Ints)
+  (declare-const - (-> Int Int Int) :external Ints)
+  (declare-const < (-> Int Int Bool) :external Ints)
+  (declare-const > (-> Int Int Bool) :external Ints)
 
   ; Bitvector
-  (declare-type BitVec ((! Int :var m :restrict (> m 0)) :extern FixedSizeBitVectors::BitVec))
+  (declare-type BitVec ((! Int :var m :restrict (> m 0)) :external FixedSizeBitVectors))
  
   ; Real
-  (declare-type Real () :extern Reals::Real)
+  (declare-type Real () :external Reals)
 
   (declare-const ⟨hexadecimal⟩
     (-> (! Int :var m :syntax ⟨numeral⟩ :implicit
          :restrict "m is 4 times the number of hexadecimal digits in the constant") 
         (BitVec m))
-    :extern FixedSizeBitVectors::⟨hexadecimal⟩)
+    :external FixedSizeBitVectors)
 
   (declare-const ⟨binary⟩
     (-> (! Int :var m :syntax ⟨numeral⟩ :implicit 
          :restrict "m is the number of binary digits in the constant") 
         (BitVec m))
-    :extern FixedSizeBitVectors::⟨binary⟩)
+    :external FixedSizeBitVectors)
 
   ;---------------
   ; Builtin types

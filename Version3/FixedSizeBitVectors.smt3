@@ -23,18 +23,18 @@
   ; External symbols
   ;------------------
 
-  (declare-type Int () :extern Ints::Int)
+  (declare-type Int () :external Ints)
 
-  (declare-const ⟨numeral⟩ Int :extern Ints::⟨numeral⟩)
+  (declare-const ⟨numeral⟩ Int :external Ints)
 
-  (declare-const 0 Int :extern Ints::0)
-  (declare-const 1 Int :extern Ints::1)
-  (declare-const +1 (-> Int Int) :extern Ints::+1)
-  (declare-const + (-> Int Int Int) :extern Ints::+)
-  (declare-const - (-> Int Int Int) :extern Ints::-)
-  (declare-const * (-> Int Int Int) :extern Ints::*)
-  (declare-const < (-> Int Int Bool) :extern Ints::<)
-  (declare-const > (-> Int Int Bool) :extern Ints::>)
+  (declare-const 0 Int :external Ints)
+  (declare-const 1 Int :external Ints)
+  (declare-const +1 (-> Int Int) :external Ints)
+  (declare-const + (-> Int Int Int) :external Ints)
+  (declare-const - (-> Int Int Int) :external Ints)
+  (declare-const * (-> Int Int Int) :external Ints)
+  (declare-const < (-> Int Int Bool) :external Ints)
+  (declare-const > (-> Int Int Bool) :external Ints)
 
   ;---------------
   ; Builtin types
