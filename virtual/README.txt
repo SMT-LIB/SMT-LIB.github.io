@@ -10,3 +10,5 @@ Workflow:
 3. in the root directory
 3.1 compare the root directory (.) and the "new" directory (e.g. meld new .) as a sanity check
 3.2 port the changes from "new" to root (either using a comparison tool manually or copying all shtml files from the "new" directory to the root directory)
+4. git add all modified files
+5. git push
