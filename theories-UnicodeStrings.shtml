@@ -667,8 +667,7 @@ Released for free under a Creative Commons Attribution 3.0 License
 
   * (str.replace_re_all String RegLan String String)
 
-    - ⟦str.replace_re_all⟧(w, L, w₂) = w    if no substring of w is in L or ε ∈ L
-
+    - ⟦str.replace_re_all⟧(w, L, w₂) = w    if no non-empty substring of w is in L
     - ⟦str.replace_re_all⟧(w, L, w₂) = u₁w₂⟦str.replace_re_all⟧(u₂, L, w₂)
       where u₁, w₁ are the shortest words such that 
             - w = u₁w₁u₂
