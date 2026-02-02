@@ -57,6 +57,9 @@
         <h4>Editing</h4>
         <ul>
          <li>
+          The <a href="https://marketplace.visualstudio.com/items?itemName=hra687261.smt-lsp">SMT LSP VS Code extension</a> offering syntax highlighting and type-checking using the <a href="https://github.com/Gbury/dolmen">Dolmen</a> LSP server.
+         </li>
+         <li>
           Syntax highlighting for <a href="https://github.com/bohlender/vim-z3-smt2">VIM</a>.
          </li>
          <li>
@@ -70,6 +73,9 @@
         
         <h4>Parsing</h4>
 <ul>
+         <li>
+          <a href="https://github.com/Gbury/dolmen"><b>Dolmen</b></a>, an OCaml library for the parsing, type-checking and validation of SMT-LIB 2.6.
+         </li>
          <li>
           An <a href="https://github.com/julianthome/smtlibv2-grammar">ANTLR grammar</a> of SMT-LIB 2.6 scripts.
          </li>
