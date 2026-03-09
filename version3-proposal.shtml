@@ -742,7 +742,7 @@ is now defined as the polymorphic function
 </pre>
 of type
 <code class="prettyprint lang-smt3">(→ (→ A Bool) Bool)</code>
-where <code class="prettyprint lang-smt3">forall</code> is a type-variable.
+where <code class="prettyprint lang-smt3">A</code> is a type-variable.
 The old syntax, with expressions of the form 
 <pre class="prettyprint lang-smt3">
   (forall ((x₁ τ₁) ⋅⋅⋅ (xᵢ τᵢ)) φ) 
