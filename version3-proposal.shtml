@@ -565,8 +565,8 @@ and to assert formulas.
 (declare-type-var X)  ; declares a new type variable 
 (declare-type A ())   ; declares a new simple type (a nullary type constant) 
 (declare-type B ()) 
-(declare-const a A)   ; declares a constant of type A
-(declare-const f (→ A B))   ; declares a constant of type (→ A B)
+(declare-const a A)        ; declares a constant of type A
+(declare-const f (→ A B))  ; declares a constant of type (→ A B)
 (declare-const g (→ A B))
 (declare-const p (→ A B Bool))
 (declare-const id (→ X X)) ; a polymorphic function 
@@ -574,7 +574,7 @@ and to assert formulas.
 (assert (= b (f a))) 
 (assert (= f g))                                   ; higher-order assertion
 (assert (= p (lambda ((x A) (y B)) (= (g x) y))))  ; higher-order assertion
-(assert (forall ((x X)) (= x (id x))               ; polymorphic assertion
+(assert (forall ((x X)) (= x (id x))))             ; polymorphic assertion
 </pre>
 </p>
 
@@ -675,7 +675,9 @@ are now respective abbreviations of
   (define-const <i>f</i> (→ τ₁ ⋅⋅⋅ τᵢ τ) (lambda ((<i>x₁</i> τ₁) ⋅⋅⋅ ((<i>xᵢ</i> τᵢ)) <i>t</i>))
   (define-const-rec <i>f</i> (→ τ₁ ⋅⋅⋅ τᵢ τ) (lambda ((<i>x₁</i> τ₁) ⋅⋅⋅ ((<i>xᵢ</i> τᵢ)) <i>t</i>))
 </pre>
-where <code class="prettyprint lang-smt3">define-const</code>  and <code class="prettyprint lang-smt3">define-const-rec</code> are new commands.
+where 
+<code class="prettyprint lang-smt3">define-const-rec</code> 
+is a new command.
 </p>
 
 <p>In a similar vein, sorts are not primitive anymore and become types.
@@ -716,15 +718,14 @@ Note that <code class="prettyprint lang-smt3">declare-type</code> and <code clas
 <p>The primitive binders in Version 3 are 
 <ul>
 <li><code class="prettyprint lang-smt3">let</code>, the parallel version of local definitions 
-  (<code class="prettyprint lang-smt3">(let ((<i>x<sub>1</sub> t<sub>1</sub></i>) ⋅⋅⋅ (<i>x<sub>n</sub> t<sub>n</sub></i>)) <i>t</i>)</code>), as in Version 2.7;</li>
+  (<code class="prettyprint lang-smt3">(let ((<i>x<sub>1</sub> t<sub>1</sub></i>) ⋅⋅⋅ (<i>x<sub>n</sub> t<sub>n</sub></i>)) <i>t</i>)</code>);</li>
 <li><code class="prettyprint lang-smt3">lambda</code>, for function (λ) abstraction
-  (<code class="prettyprint lang-smt3">(lambda ((<i>x<sub>1</sub> τ<sub>1</sub></i>) ⋅⋅⋅ (<i>x<sub>n</sub> τ<sub>n</sub></i>)) <i>t</i>)</code>), a new binder;</li>
-<li><code class="prettyprint lang-smt3">forall</code>, for universal quantification of types in formulas  (<code class="prettyprint lang-smt3">(forall ((<i>τ<sub>1</sub></i> Type) ⋅⋅⋅ (<i>τ<sub>n</sub></i> Type)) <i>φ</i>)</code>), a new binder;.</li>
+  (<code class="prettyprint lang-smt3">(lambda ((<i>x<sub>1</sub> τ<sub>1</sub></i>) ⋅⋅⋅ (<i>x<sub>n</sub> τ<sub>n</sub></i>)) <i>t</i>)</code>).</li>
 
 </ul>
 Another new binder is <code class="prettyprint lang-smt3">choose</code>, for the Hilbert choice operator ε, although technically it is a second-order function that can be used with binder syntax.
 The <code class="prettyprint lang-smt3">let</code> binder is the same as in Version 2 with the addition that now it can be used to define higher-order variables. 
-The other binders above are new.
+The <code class="prettyprint lang-smt3">lambda</code> binder is an extension to functions of the corresponding binder of Version 2.7
 The
 <code class="prettyprint lang-smt3">match</code> binder for algebraic data types is defined in terms of
 <code class="prettyprint lang-smt3">let</code> as before.
@@ -735,12 +736,13 @@ are not primitive anymore and are instead defined as higher-order functions.
 The syntax that uses them as binders becomes syntactic sugar for terms based on <code class="prettyprint lang-smt3">lambda</code>.
 For instance, 
 <code class="prettyprint lang-smt3">forall</code>
-is now defined as the function
+is now defined as the polymorphic function
 <pre class="prettyprint lang-smt3">
-  (lambda ((A Type) (P (→ A bool))) (= P (lambda ((x A)) true)))))
+  (lambda ((P (→ A bool))) (= P (lambda ((x A)) true)))))
 </pre>
 of type
-<code class="prettyprint lang-smt3">(→ (! Type :var A :implicit) (→ A Bool) Bool))</code>.
+<code class="prettyprint lang-smt3">(→ (→ A Bool) Bool)</code>
+where <code class="prettyprint lang-smt3">forall</code> is a type-variable.
 The old syntax, with expressions of the form 
 <pre class="prettyprint lang-smt3">
   (forall ((x₁ τ₁) ⋅⋅⋅ (xᵢ τᵢ)) φ) 
