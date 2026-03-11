@@ -301,7 +301,8 @@ Concretely, dependent function types are expressed with the syntax
 illustrated in this example:
 
 <pre class="prettyprint lang-smt3">
-  (→ (! Int :var n) (BitVec n) (BitVec (+ n 1)))</pre>
+  (→ (! Int :var n) (BitVec n) (BitVec (+ n 1)))
+</pre>
 
 This expression denotes the type of a function that takes as input 
 an integer 
@@ -330,9 +331,13 @@ is a bound variable whose scope is
 An alternative syntax, more reminiscent of that of dependently type logics,
 might have been:
 
-<pre class="prettyprint lang-smt3">(Pi (<i>x</i> <i>A</i>) <i>B</i>)</pre>
+<pre class="prettyprint lang-smt3">
+  (Pi (<i>x</i> <i>A</i>) <i>B</i>)
+</pre>
 or
-<pre class="prettyprint lang-smt3">(Forall (<i>x</i> <i>A</i>) <i>B</i>)</pre>
+<pre class="prettyprint lang-smt3">
+  (Forall (<i>x</i> <i>A</i>) <i>B</i>)
+</pre>
 
 which perhaps makes it clearer that 
 <code class="prettyprint lang-smt3"><i>x</i></code> 
@@ -352,7 +357,8 @@ that can be associated to a function argument.
 For example,
 
 <pre class="prettyprint lang-smt3">
-  (→ (! Int :var n :implicit) (BitVec n) (BitVec n))</pre>
+  (→ (! Int :var n :implicit) (BitVec n) (BitVec n))
+</pre>
 
 makes the first argument implicit &mdash; in the sense that 
 it is not needed in applications of functions of that type. 
@@ -366,7 +372,8 @@ the definition of PVS-style predicate subtypes (aka, refinement types).
 For instance, in type
 
 <pre class="prettyprint lang-smt3">
-  (→ (! Int :var n :implicit :restrict (> n 0)) (BitVec n) (BitVec n))</pre>
+  (→ (! Int :var n :implicit :restrict (> n 0)) (BitVec n) (BitVec n))
+</pre>
 
 the implicit argument
 <code class="prettyprint lang-smt3">n</code>
@@ -381,7 +388,8 @@ output types, as for instance, in
 <pre class="prettyprint lang-smt3">
   (→ (! Int :var m :implicit :restrict (> m 0)) 
      (! Int :var n :implicit :restrict (> n m)) 
-     (BitVec m) (BitVec n) (BitVec (- n m))) </pre>
+     (BitVec m) (BitVec n) (BitVec (- n m)))
+</pre>
 
 Yet another attribute, 
 <code class="prettyprint lang-smt3">:syntax</code>, 
@@ -395,10 +403,11 @@ allows the introduction of <em>syntactic restrictions</em> on input terms:
 The additional restriction 
 <code class="prettyprint lang-smt3">:syntax &lt;numeral&gt;</code>
 specifies that the only permitted applications of functions 
-of the type above are those where 
+of the type above are those where the argument
 <code class="prettyprint lang-smt3">n</code> 
-is a concrete constant 
-(<code class="prettyprint lang-smt3">1</code>,
+is (αβ-reducible to) a concrete constant 
+(<code class="prettyprint lang-smt3">0</code>,
+<code class="prettyprint lang-smt3">1</code>,
 <code class="prettyprint lang-smt3">2</code>, ...)
 and not a symbolic term 
 (<code class="prettyprint lang-smt3">x</code>,
@@ -561,20 +570,20 @@ where <i>α</i> is a type variable.
 and to assert formulas.
 
 <pre class="prettyprint lang-smt3">
-; Example
-(declare-type-var X)  ; declares a new type variable 
-(declare-type A ())   ; declares a new simple type (a nullary type constant) 
-(declare-type B ()) 
-(declare-const a A)        ; declares a constant of type A
-(declare-const f (→ A B))  ; declares a constant of type (→ A B)
-(declare-const g (→ A B))
-(declare-const p (→ A B Bool))
-(declare-const id (→ X X)) ; a polymorphic function 
+  ; Example
+  (declare-type-var X)  ; declares a new type variable 
+  (declare-type A ())   ; declares a new simple type (a nullary type constant) 
+  (declare-type B ()) 
+  (declare-const a A)        ; declares a constant of type A
+  (declare-const f (→ A B))  ; declares a constant of type (→ A B)
+  (declare-const g (→ A B))
+  (declare-const p (→ A B Bool))
+  (declare-const id (→ X X)) ; a polymorphic function 
 
-(assert (= b (f a))) 
-(assert (= f g))                                   ; higher-order assertion
-(assert (= p (lambda ((x A) (y B)) (= (g x) y))))  ; higher-order assertion
-(assert (forall ((x X)) (= x (id x))))             ; polymorphic assertion
+  (assert (= b (f a))) 
+  (assert (= f g))                                   ; higher-order assertion
+  (assert (= p (lambda ((x A) (y B)) (= (g x) y))))  ; higher-order assertion
+  (assert (forall ((x X)) (= x (id x))))             ; polymorphic assertion
 </pre>
 </p>
 
@@ -582,10 +591,10 @@ and to assert formulas.
 Constants for polymorphic/dependent types can be declared 
 as in the examples below:
 <pre class="prettyprint lang-smt3">
-(declare-type Collection (Type))
-(declare-type Pair (Type Type)) 
-(declare-type BitVec (Int)) 
-(declare-type Vector (Type Int)) 
+  (declare-type Collection (Type))
+  (declare-type Pair (Type Type)) 
+  (declare-type BitVec (Int)) 
+  (declare-type Vector (Type Int)) 
 </pre>
 
 All these constants type types and/or values as input and construct a type.
@@ -603,55 +612,164 @@ If <code class="prettyprint lang-smt3">X</code> is a type variable,
 the type <pre class="prettyprint lang-smt3">
   (→ (! Int :var n) (Vector X n))
 </pre>
-is both polymorphic, in <code class="prettyprint lang-smt3">X</code>, and 
-dependent, on <code class="prettyprint lang-smt3">n</code>.
+is both polymorphic (in 
+<code class="prettyprint lang-smt3">X</code>), 
+and dependent, (on 
+<code class="prettyprint lang-smt3">n</code>).
 </p>
 
-<p>Note that since <code class="prettyprint lang-smt3">declare-type</code> is essentially a constant declaration but the at level of kinds, the command <code class="prettyprint lang-smt3">(declare-type Vector (Type Int))</code>, say, could be understood as an abbreviation of <code class="prettyprint lang-smt3">(declare-const Vector (→ Type Int Type))</code>, although the latter syntax is not actually allowed.
+<p>
+Note that since 
+<code class="prettyprint lang-smt3">declare-type</code>
+is essentially a constant declaration but the at level of kinds, 
+the command 
+<code class="prettyprint lang-smt3">(declare-type Vector (Type Int))</code>,
+say, could be understood as an abbreviation of 
+<code class="prettyprint lang-smt3">
+ (declare-const Vector (→ Type Int Type))</code>, 
+although the latter syntax is not actually allowed.
 </p> 
 
-<h4>Restrictions on parameters in a type</h4>
+<h4>Semantic restrictions on types</h4>
 
-<p>While semantic restrictions on types yield the full power of predicate subtyping, their intended use in SMT-LIB 3 is to document precisely the input domain over which a partial function or type constant is defined.
-<em>So they are meant to be used as formal documentation, not as the definition of a subtype.</em>
-The type system SMT-LIB 3 remains without subtypes which means that semantic restrictions on types can be completely ignored for type checking purposes.
-That said, solvers can use type restriction information to provide more informative messages in case of scripts that use partial functions outside of their domain of definition.
-As an example, the integer division operator in Version 3 is defined as follows
+<p>
+While semantic restrictions on types yield the full power 
+of predicate subtyping, their intended use in SMT-LIB 3 is 
+to document precisely the input domain over which a partial function or 
+type constant is defined.
+<em>So they are meant to be used as formal documentation,
+not as the definition of a subtype.</em>
+The type system SMT-LIB 3 remains without subtypes which means that 
+semantic restrictions on types can be completely ignored 
+for type checking purposes.
+That said, solvers can use type restriction information to provide 
+more informative messages in case of scripts that use 
+partial functions outside of their domain of definition.
+As an example, the integer division operator in Version 3 is defined 
+as follows
 <pre class="prettyprint lang-smt3">
   (declare-const div (→ Int (! Int :var n :restrict (distinct n 0)) Int) 
 </pre>
-A solver could use the knowledge of the <em>official</em> restriction above for instance to issue a warning when it returns a model that gives value 0 to a term that occurs as the second argument of a <code class="prettyprint lang-smt3">div</code> application in an assertion. 
-Alternatively, it could try to determine statically, before solving an input problem, if all applications of partial functions in the problem are provably to values within the function's domain, and issue a warning otherwise.
+A solver could use the knowledge of the <em>official</em> restriction above
+for instance to issue a warning when it returns a model that gives value 0 
+to a term that occurs as the second argument of a
+<code class="prettyprint lang-smt3">div</code>
+application in an assertion. 
+Alternatively, it could try to determine statically, 
+before solving an input problem, if all applications of partial functions
+in the problem are provably to values within the function's domain, and
+issue a warning otherwise.
 </p>
 
-<p>As another example, the actual bit vector type in the Version 3 bit vector theory is defined as follows:
+<p>
+Semantic restrictions can be introduced in function declarations and
+definitions, and can apply also to the returned value,
+as shown in the following example.
+
 <pre class="prettyprint lang-smt3">
-  (declare-type BitVec ((! Int :var m :restrict (> m 0)))
+  (declare-const f 
+    (-> (! Int :var m1 :restrict (> m1 0)) 
+        (! Int :var m2 :restrict (> m2 m1)) 
+        (! Int :var n :restrict (exists ((x Int)) (= n (* 2 x)))))
+  )
 </pre>
-Since the parameter <code class="prettyprint lang-smt3">m</code> expresses the size of the vector, the added restriction limits the value of <code class="prettyprint lang-smt3">m</code> to the positive integers.
-(One could argue that the type constant is well defined also for <code class="prettyprint lang-smt3">m = 0</code> but this is a discussion for another time).
+or, equivalently
+<pre class="prettyprint lang-smt3">
+  (declare-fun f ((m1 Int :restrict (> m1 0)) (m2 Int :restrict (> m2 m1)))
+    (! Int :var n :restrict (exists ((x Int)) (= n (* 2 x))))
+)
+</pre>
+
+Both command introduce a function 
+<code class="prettyprint lang-smt3">f</code> 
+that takes two integers as input and returns an integer.
+The semantic restrictions indicate that the function is not arbitrary:
+whenever the first argument is greater than 0 and the second argument is
+greater than the first, the returned value is an even integer.
 </p>
 
-<p>Note that syntactic restrictions on types are orthogonal to semantic ones and have a different purpose:
-to restrict the set of expressible terms and formulas in a benchmark so as to achieve decidability of the satisfiability problem or some other computational objective &mdash; as done, for instance, in the various BV logics of SMT-LIB 2.
-Concretely, in modules corresponding to SMT-LIB logics (see later), the parameter <code class="prettyprint lang-smt3">m</code> of the bit vector type above is further constrained  to be a positive numeral, as opposed to an arbitrary <code class="prettyprint lang-smt3">Int</code> term, as follows:
+<p>
+As another example, the actual bit vector type 
+in the Version 3 bit vector theory is defined as follows:
+<pre class="prettyprint lang-smt3">
+  (declare-type BitVec ((! Int :var m :restrict (>= m 0)))
+</pre>
+Since the parameter
+<code class="prettyprint lang-smt3">m</code>
+expresses the size of the vector, the added restriction limits the value of 
+<code class="prettyprint lang-smt3">m</code>
+to the positive integers.
+</p>
+
+
+<h4>Syntactic restrictions on types</h4>
+
+<p>
+Syntactic restrictions on types are orthogonal to semantic ones and
+have a different purpose: to restrict the set of expressible terms and
+formulas in a benchmark so as to achieve decidability 
+of the satisfiability problem or some other computational objective &mdash; 
+as done, for instance, in the various BV logics of SMT-LIB 2.
+Concretely, in modules corresponding to SMT-LIB logics (see later), 
+the parameter
+<code class="prettyprint lang-smt3">m</code> of the bit vector type above 
+is further constrained  to be a numeral, as opposed to an arbitrary
+<code class="prettyprint lang-smt3">Int</code>
+integer term, as follows:
 
 <pre class="prettyprint lang-smt3">
-  (declare-type BitVec ((! Int :var m :restrict (> m 0) :syntax &lt;pos_numeral&gt;))
+  (declare-type BitVec ((! Int :var m :restrict (>= m 0) :syntax &lt;numeral&gt;)))
 </pre>
 
-This means that, in those logics, the <code class="prettyprint lang-smt3">BitVec</code> constant can be applied only to positive numerals.
-The same mechanism is applied in logics of linear integer arithmetic to restrict applications of the multiplication operator to linear multiplications.
+This means that, in those logics, the 
+<code class="prettyprint lang-smt3">BitVec</code> 
+constant can be applied only to terms that evaluate (that is, αβ-reduce) 
+to numerals.
+The same mechanism is applied in logics of linear integer arithmetic 
+to restrict applications of the multiplication operator 
+to linear multiplications.
+For instance, in linear integer arithmetic, multiplication could be defined 
+as follows (the actual definition is more elaborate):
+
+<pre class="prettyprint lang-smt3">
+  (define-fun-rec * ((x Int :syntax &lt;signed numeral&gt;) (y Int)) 
+    (ite (= x 0) 0
+      (ite (< x 0) (* (- x) y) 
+        (+ x (* ((- x 1) y)))))
+   :left-assoc)
+</pre>
+
+where  
+<code class="prettyprint lang-smt3">&lt;signed numeral&gt;</code>
+denotes the set of numerals and negated positive numerals
+(<code class="prettyprint lang-smt3">(- 1)</code>,
+<code class="prettyprint lang-smt3">(- 2)</code>,
+...).
+Note that the first argument in the recursive calls in the definition of  
+<code class="prettyprint lang-smt3">*</code>
+are terms that reduce to a term in 
+<code class="prettyprint lang-smt3">&lt;signed numeral&gt;</code>
+whenever the value of argument
+<code class="prettyprint lang-smt3">x</code>
+is a term in that set.
 </p>
+
+<p>
+Contrary to semantic restrictions, syntactic restrictions must be enforced
+by compliant SMT solvers.
+</p>
+
 
 <h3>Commands</h3>
 
-<p>The SMT-LIB 3 language contains almost all commands in Version 2
+<p>The SMT-LIB 3 language contains almost all commands in Version 2.7
 as well as an additional number of new constructs and commands.
-A large number of them, however, are defined in terms of the core language above.
-This includes all the commands from Version 2, none of which change semantics in practice in Version 3.
-Most of them become syntactic sugar of <em>core</em> Version 3 commands and 
-some of them will be deprecated and eventually phased out.
+A large number of them, however, are defined in terms of the core language
+above.
+This includes all the commands from Version 2.7, none of which change 
+semantics in practice in Version 3.
+Most of them become syntactic sugar of <em>core</em> Version 3 commands.
+Some of them will be deprecated and eventually phased out.
 For instance,
 <code class="prettyprint lang-smt3">declare-const</code> 
 is now a core command while 
@@ -668,20 +786,26 @@ with i > 0 is now an abbreviation of
 Similarly,
 <pre class="prettyprint lang-smt3">
   (define-fun <i>f</i> ((<i>x₁</i> τ₁) ⋅⋅⋅ ((<i>xᵢ</i> τᵢ)) τ <i>t</i>)
+</pre>
+and
+<pre class="prettyprint lang-smt3">
   (define-fun-rec <i>f</i> ((<i>x₁</i> τ₁) ⋅⋅⋅ ((<i>xᵢ</i> τᵢ)) τ <i>t</i>)
 </pre> 
 are now respective abbreviations of 
 <pre class="prettyprint lang-smt3">
   (define-const <i>f</i> (→ τ₁ ⋅⋅⋅ τᵢ τ) (lambda ((<i>x₁</i> τ₁) ⋅⋅⋅ ((<i>xᵢ</i> τᵢ)) <i>t</i>))
+</pre>
+and
+<pre class="prettyprint lang-smt3">
   (define-const-rec <i>f</i> (→ τ₁ ⋅⋅⋅ τᵢ τ) (lambda ((<i>x₁</i> τ₁) ⋅⋅⋅ ((<i>xᵢ</i> τᵢ)) <i>t</i>))
 </pre>
 where 
 <code class="prettyprint lang-smt3">define-const-rec</code> 
-is a new command.
+is a new core command.
 </p>
 
 <p>In a similar vein, sorts are not primitive anymore and become types.
-Correspondingly, 
+Correspondingly,
 <code class="prettyprint lang-smt3">declare-sort</code> 
 is now a special case of the new core command 
 <code class="prettyprint lang-smt3">declare-type</code>.
@@ -707,8 +831,8 @@ Note that <code class="prettyprint lang-smt3">declare-type</code> and <code clas
 
 <pre class="prettyprint lang-smt3">
   (declare-type Vector (Type (! Int :var m :restrict (>= m 0)))
-  (define-type RVector ((n Int :restrict (> n 0))) (Vector Real n))
-  (define-type RV8 () (RVector 8))
+  (define-type NonEmptyRealVector ((n Int :restrict (> n 0))) (Vector Real n))
+  (define-type RealVector8 () (RealVector 8))
 </pre>
 
 </p>
@@ -717,33 +841,70 @@ Note that <code class="prettyprint lang-smt3">declare-type</code> and <code clas
 
 <p>The primitive binders in Version 3 are 
 <ul>
-<li><code class="prettyprint lang-smt3">let</code>, the parallel version of local definitions 
-  (<code class="prettyprint lang-smt3">(let ((<i>x<sub>1</sub> t<sub>1</sub></i>) ⋅⋅⋅ (<i>x<sub>n</sub> t<sub>n</sub></i>)) <i>t</i>)</code>);</li>
-<li><code class="prettyprint lang-smt3">lambda</code>, for function (λ) abstraction
-  (<code class="prettyprint lang-smt3">(lambda ((<i>x<sub>1</sub> τ<sub>1</sub></i>) ⋅⋅⋅ (<i>x<sub>n</sub> τ<sub>n</sub></i>)) <i>t</i>)</code>).</li>
-
+<li>
+<code class="prettyprint lang-smt3">let</code>, 
+the parallel version of local definitions 
+(<code class="prettyprint lang-smt3">(let ((<i>x<sub>1</sub> t<sub>1</sub></i>) ⋅⋅⋅ (<i>x<sub>n</sub> t<sub>n</sub></i>)) <i>t</i>)</code>);
+</li>
+<li>
+<code class="prettyprint lang-smt3">lambda</code>, 
+for function (λ) abstraction
+(<code class="prettyprint lang-smt3">(lambda ((<i>x<sub>1</sub> τ<sub>1</sub></i>) ⋅⋅⋅ (<i>x<sub>n</sub> τ<sub>n</sub></i>)) <i>t</i>)</code>).
+</li>
 </ul>
-Another new binder is <code class="prettyprint lang-smt3">choose</code>, for the Hilbert choice operator ε, although technically it is a second-order function that can be used with binder syntax.
-The <code class="prettyprint lang-smt3">let</code> binder is the same as in Version 2 with the addition that now it can be used to define higher-order variables. 
-The <code class="prettyprint lang-smt3">lambda</code> binder is an extension to functions of the corresponding binder of Version 2.7
+
+The 
+<code class="prettyprint lang-smt3">let</code> 
+binder is the same as in Version 2 with the addition that now it can be used to define higher-order variables. 
+The <code class="prettyprint lang-smt3">lambda</code> 
+binder is an extension to functions of the corresponding binder of Version 2.7.
+</p>
+
+<p>
+The other binders are the following:
+<ul>
+<li>
+<code class="prettyprint lang-smt3">match</code>, 
+for cases analysis of algebraic datatypes; 
+</li>
+<li>
+<code class="prettyprint lang-smt3">forall</code>, 
+the universal quantifier;
+</li>
+<li>
+<code class="prettyprint lang-smt3">exists</code>, 
+the existential quantifier;
+</li>
+<li>
+<code class="prettyprint lang-smt3">choose</code>, 
+the choise operator.
+</li>
+</ul>
+They are non-primitive as they can be defined in terms of the primitive ones.
 The
-<code class="prettyprint lang-smt3">match</code> binder for algebraic data types is defined in terms of
-<code class="prettyprint lang-smt3">let</code> as before.
+<code class="prettyprint lang-smt3">match</code> 
+has the same syntax as in Version 2.7 and is defined in terms of
+<code class="prettyprint lang-smt3">let</code>, 
+also as in Version 2.7.
 The
-<code class="prettyprint lang-smt3">forall</code> and
-<code class="prettyprint lang-smt3">exists</code> quantifiers from Version 2, however,
-are not primitive anymore and are instead defined as higher-order functions.
-The syntax that uses them as binders becomes syntactic sugar for terms based on <code class="prettyprint lang-smt3">lambda</code>.
+<code class="prettyprint lang-smt3">forall</code> 
+and
+<code class="prettyprint lang-smt3">exists</code> 
+quantifiers have the same syntax as in Version 2, however,
+they are not primitive anymore and are instead defined as higher-order functions.
+The binder syntax is now syntactic sugar for terms based on 
+<code class="prettyprint lang-smt3">lambda</code>.
 For instance, 
 <code class="prettyprint lang-smt3">forall</code>
 is now defined as the polymorphic function
 <pre class="prettyprint lang-smt3">
-  (lambda ((P (→ A bool))) (= P (lambda ((x A)) true)))))
+  (lambda ((p (→ A bool))) (= p (lambda ((x A)) true)))))
 </pre>
 of type
 <code class="prettyprint lang-smt3">(→ (→ A Bool) Bool)</code>
-where <code class="prettyprint lang-smt3">A</code> is a type-variable.
-The old syntax, with expressions of the form 
+where 
+<code class="prettyprint lang-smt3">A</code> is a type-variable.
+The binder syntax, with expressions of the form 
 <pre class="prettyprint lang-smt3">
   (forall ((x₁ τ₁) ⋅⋅⋅ (xᵢ τᵢ)) φ) 
 </pre>
@@ -751,7 +912,14 @@ is maintained but it is understood as an abbreviation of
 <pre class="prettyprint lang-smt3">
   (forall (lambda ((x₁ τ₁) ⋅⋅⋅ (xᵢ τᵢ)) φ)) 
 </pre>
-Similarly, the new binder syntax
+The 
+<code class="prettyprint lang-smt3">exists</code>
+binder is defined similarly.
+The
+<code class="prettyprint lang-smt3">choose</code>
+binder, for the Hilbert choice operator ε, is new.
+It too is a second-order function that can be used with a binder syntax.
+The expression
 <pre class="prettyprint lang-smt3">
   (choose (x τ) φ)
 </pre>
@@ -759,13 +927,88 @@ abbreviates
 <pre class="prettyprint lang-smt3">
   (choose (lambda ((x τ)) φ))</pre>
 </p>
+where the function
+<code class="prettyprint lang-smt3">choose</code>
+has the polymorphic type
+<code class="prettyprint lang-smt3">(→ (→ A bool) A)</code>.
+The function is defined axiomatically in terms of 
+<code class="prettyprint lang-smt3">exists</code>, 
+as usual.
 
 
-<h4>Polymorphic definitions and assertions</h4>
+<h3>Polymorphism in declarations, definitions and assertions</h3>
 
-[To do. Polymorphic functions can be introduced in declarations and in constant and let definitions, but they cannot be passed as arguments in function applications (let-polymorphism). More generally, the input type of each function symbol has to be a monotype.
-Asserted formulas have to be in prenex form with respect to universal type quantifiers.  
- ]
+Exactly as in Version 2.7, polymorphic functions can be introduced 
+only globally, with the commands for declaring or defining constants.
+It is not possible to have (let-introduced) polymorphic variables
+or to pass polymorphic functions as argument to other functions.
+In contrast, it is possible to make polymorphic assertions.
+This is illustrated by the following example,
+where we (illegally) name the type variable α for emphasis:
+
+<pre class="prettyprint lang-smt3">
+  (declare-type-var α)
+  (declare-const f (→ α α))
+
+  (assert (forall ((a α)) (= (f a) a)))
+
+  (define-fun g1 ((a α) (p (→ α Bool))) Bool (h a)) 
+  (define-fun g2 ((a α) (p (→ α Bool))) Bool (h 1)) 
+
+  (assert 
+    (let ((id (lambda ((x α)) x)))
+      (= 1 (id 1))
+    )
+  )
+</pre>
+</p>
+
+<p>
+Function
+<code class="prettyprint lang-smt3">f</code>
+is polymorphic.
+Its type, in math notation, is ∀α.(α → α).
+So it stands for the family of all functions
+whose type is a monomorphic instance of (α → α)
+(<code class="prettyprint lang-smt3">(-> Bool Bool)</code>,
+<code class="prettyprint lang-smt3">(-> Int Int)</code>, 
+...).
+Correspondingly,
+the first assertion stands for a family of assertions, again
+one for each monomorphic instance of (α → α).
+</p>
+
+<p>
+Function
+<code class="prettyprint lang-smt3">g1</code> 
+is also polymorphic, with type ∀α.(α → (α → Bool) → Bool).
+However, its input predicate
+<code class="prettyprint lang-smt3">p</code> 
+is not polymorphic.
+For each monomorphic instance (τ → (τ → Bool) → Bool) of 
+(α → (α → Bool) → Bool),
+the input function 
+<code class="prettyprint lang-smt3">h</code> 
+is of type τ → Bool, not ∀α.(α → Bool).
+This means, for example that function
+<code class="prettyprint lang-smt3">g2</code>
+has in fact an ill-typed body 
+since its instance of type (String → (String → Bool) → Bool),
+say, applies its input function to a value whose type is not String.
+</p>
+
+<p>
+The last assert is ill-typed in a similar way, 
+since the variable 
+<code class="prettyprint lang-smt3">id</code>
+has type α → α, not ∀α.(α → α).
+In more technical terms then, Version 3's type system does not allow
+let-polymorphism either.
+Only globally defined symbols can be polymorphic.
+</p>
+
+
+
 
 <h3>New language constructs</h3>
 
@@ -818,7 +1061,7 @@ has type
 <code class="prettyprint lang-smt3">(→ (! Type :var X) (Array Int X))</code>,
 it cannot be re-declared later to have any of these types:
 <pre class="prettyprint lang-smt3">
-(→ (! Type :var Y) (Array Int Int))
+  (→ (! Type :var Y) (Array Int Int))
 (→ (! Type :var Y) (Array Y Int))
 (→ (! Type :var X) (Array Int (Array Int X)))
 </pre>
@@ -849,7 +1092,7 @@ The main difference is that function types are first-class in Version 3 and so a
 
 <p> Consider for instance the following module:
 <pre class="prettyprint lang-smt3">
-(define-module M (
+  (define-module M (
   (declare-type A ())
   (declare-type B ()) 
   (declare-const a A)
@@ -968,7 +1211,7 @@ The meaning of multiple semantic restrictions is the conjunction of the individu
 <p>For polymorphic types, additional restrictions are expressible by instantiating type parameters. 
 This can be done indirectly in module interfaces by defining a new type constant as an instance of some polymorphic type, and then exporting the new constant.
 <pre class="prettyprint lang-smt3">
-(define-module M (
+  (define-module M (
   ...
   (define-type IntArray ((A Type)) (Array Int A))
   ...
@@ -1785,13 +2028,13 @@ of the old ones in any meaningful way.
     (-> (! Type :var A :implicit) A A)
     (lambda ((A Type) (a A)) a))
 
-  ;apply
-  (define-const apply
+  ; @
+  (define-const @
     (-> (! Type :var A :implicit)
         (! Type :var B :implicit)
         (-> A B) A B)
     (lambda ((A Type) (B Type) (f (-> A B))) f)
-    :left-assoc ; (apply g a b) = (apply (apply g a) b) 
+    :left-assoc ; (@ g a b) = (@ (@ g a) b) 
   )
 
  
@@ -1841,7 +2084,7 @@ of the old ones in any meaningful way.
 <button type="button" class="collapsible">Ints</button>
 <div class="coll_content">
   <pre class="prettyprint lang-smt3">
-(define-module Ints (
+  (define-module Ints (
   (set-info :smt-lib-version 3.0)
   (set-info :smt-lib-release "2020-XX-XX")
   (set-info :written-by "Pascal Fontaine and Cesare Tinelli")
@@ -2000,7 +2243,7 @@ of the old ones in any meaningful way.
 <button type="button" class="collapsible">Reals</button>
 <div class="coll_content">
   <pre class="prettyprint lang-smt3">
-(define-module Reals (
+  (define-module Reals (
   (set-info :smt-lib-version 3.0)
   (set-info :smt-lib-release "2020-XX-XX")
   (set-info :written-by "Pascal Fontaine and Cesare Tinelli")
@@ -2929,7 +3172,7 @@ of the old ones in any meaningful way.
 <button type="button" class="collapsible">Unicode Strings</button>
 <div class="coll_content">
   <pre class="prettyprint lang-smt3">
-(define-module Strings (
+  (define-module Strings (
   (set-info :smt-lib-version 3.0)
   (set-info :smt-lib-release "2020-XX-XX")
   (set-info :written-by "Pascal Fontaine and Cesare Tinelli")
@@ -3551,7 +3794,7 @@ For example,
 </code>   
 could become an abbreviation of
 <pre class="prettyprint lang-smt3">
-(define-module QF_UF
+  (define-module QF_UF
  (
   (import (Core))
   (open Core) 
@@ -3603,7 +3846,7 @@ This way,
 </code>   
 would be and abbreviation of
 <pre class="prettyprint lang-smt3">
-(import (Core) 
+  (import (Core) 
  :except-consts ( 
   ; no quantifiers
   (forall (par (A) (→ (→ A bool) Bool)))
@@ -3619,7 +3862,7 @@ would be and abbreviation of
 
 Similarly, for the logic LIA <code class="prettyprint lang-smt3">(set-logic LIA)</code> would be and abbreviation of
 <pre class="prettyprint lang-smt3">
-(define-module LIA 
+  (define-module LIA 
  (
   (import (Core Ints))
   (open Core)
