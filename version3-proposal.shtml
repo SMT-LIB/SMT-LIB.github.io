@@ -970,8 +970,8 @@ is polymorphic.
 Its type, in math notation, is ∀α.(α → α).
 So it stands for the family of all functions
 whose type is a monomorphic instance of (α → α)
-(<code class="prettyprint lang-smt3">(-> Bool Bool)</code>,
-<code class="prettyprint lang-smt3">(-> Int Int)</code>, 
+(<code class="prettyprint lang-smt3">(→ Bool Bool)</code>,
+<code class="prettyprint lang-smt3">(→ Int Int)</code>, 
 ...).
 Correspondingly,
 the first assertion stands for a family of assertions, again
@@ -985,12 +985,13 @@ is also polymorphic, with type ∀α.(α → (α → Bool) → Bool).
 However, its input predicate
 <code class="prettyprint lang-smt3">p</code> 
 is not polymorphic.
-For each monomorphic instance (τ → (τ → Bool) → Bool) of 
-(α → (α → Bool) → Bool),
+For each monomorphic instance of 
+<code class="prettyprint lang-smt3">g1</code> 
+of type (τ → (τ → Bool) → Bool),
 the input function 
 <code class="prettyprint lang-smt3">h</code> 
 is of type τ → Bool, not ∀α.(α → Bool).
-This means, for example that function
+This means, that function
 <code class="prettyprint lang-smt3">g2</code>
 has in fact an ill-typed body 
 since its instance of type (String → (String → Bool) → Bool),
@@ -1003,7 +1004,7 @@ since the variable
 <code class="prettyprint lang-smt3">id</code>
 has type α → α, not ∀α.(α → α).
 In more technical terms then, Version 3's type system does not allow
-let-polymorphism either.
+let-polymorphism.
 Only globally defined symbols can be polymorphic.
 </p>
 
