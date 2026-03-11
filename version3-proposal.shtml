@@ -1009,7 +1009,53 @@ Only globally defined symbols can be polymorphic.
 </p>
 
 
+<h3>Overloading</h3>
 
+
+Within an SMT-LIB 3 script, some symbols can be <em>overloaded</em> 
+by redeclaring them, others cannot. 
+Specifically, type constants and type variables cannot be overloaded.
+In particular, they cannot be redeclared as a type constant, 
+type variable, value constant or local variable.
+In contrast, value constants can always be redeclared.
+We say that a constant <i>f</i> has a, possibly polymorphic, 
+<em>principal type</em> τ in a script if the script contains 
+a declaration or definition of <i>f</i> with type τ. 
+A constant has more than one principal type in a context if and only if 
+it is overloaded.
+
+As in previous versions, Version 3 enforces a type discipline 
+that allows simple bottom-up typing. If a constant <i>f</i> is overloaded, 
+the type of each occurrence of <i>f</i> in a term is determined as follows:
+
+<ol>
+<li> 
+If <i>f</i> occurs in a function position, as in (<i>f t₁ ··· tₙ</i>), 
+the type of <i>f</i> is the one in the most recent declaration of <i>f</i> 
+that makes (<i>f t₁ ··· tₙ</i>) well typed;
+</li>
+<li>
+If <i>f</i> occurs as an argument, as in (<i>t₁ ··· f ··· tₙ</i>), 
+its type is the one in the most recent declaration of <i>f</i>.
+</li>
+</ol>
+
+This disambiguation policy can be overridden by explicitly ascribing 
+to <i>f</i> one of its types using the
+<code class="prettyprint lang-smt3">as</code>
+operator, in an expression of the form 
+<code class="prettyprint lang-smt3">(as <i>f</i> τ)</code>
+where τ is the intended type of that occurrence, that is, 
+an instance of a principal type of <i>f</i>. 
+Specifically, the <i>f</i> selected by 
+<code class="prettyprint lang-smt3">(as <i>f</i> τ)</code>
+is be the most recently declared <i>f</i> whose type has τ as an instance.
+
+[More]
+
+The different use of <code class="prettyprint lang-smt3">as</code> in Version 3 represents one of the few changes that are not backward compatible with Version 2.7.
+However, this is not a serious concern since <code class="prettyprint lang-smt3">as</code> has been used mostly for 0-arity constants where difference between the new and the old use disappears.
+</p>
 
 <h3>New language constructs</h3>
 
@@ -1023,106 +1069,40 @@ This is done by extending the command language to allow the definition of theory
 <h4>Modules</h4>
 
 <p>
-Modules are a general construct to structure scripts in units with their own name space and provide a basic form of encapsulation and information hiding. 
+Modules are a general construct to structure scripts in units 
+with their own name space and provide a basic form of encapsulation and
+information hiding. 
 For the medium term, modules will not be allowed in user scripts.
-The hope, however, is that with time they will be supported by SMT-solvers and so will eventually be available to regular users.
+The hope, however, is that with time they will be supported by SMT solvers 
+and so will eventually be available to regular users.
 For now, they will be used only to define SMT-LIB theories and logics. 
+
+Here is an example of a small module:
 <pre class="prettyprint lang-smt3">
-; Example
 (define-module M (
-  (declare-type A ())
-  (declare-type B ()) 
-  (declare-const a A)
-  (declare-const f (→ A B))  
-  ; The scope (visibility) of the symbols A, B, a, and f is limited to module M
+  (declare-type-var A)
+  (declare-type ping ()) 
+  (declare-type pong ()) 
+  (declare-const a ping)
+  (declare-const f (→ A pong))  
+  ; The scope (visibility) of the symbols 
+  ; A, ping, pong, a, and f is limited to module M
   )
 )
-; A, B, a, and f are not accessible here
+; A, ping, pong, a, and f are not accessible here
 </pre>
-</p>
 
+A module is introduced by the 
+<code class="prettyprint lang-smt3">define-module</code>
+command which takes two arguments: a symbol, 
+which constitutes the name of the module, and a list of SMT-LIB commands.
+The set of commands allowed in a module is restricted.
+The main ones are
+<code class="prettyprint lang-smt3">assert</code>
+and all the commands that introduce new types and new constants.
+</p>
 
 <p>
-  Within a module, overloading of constant symbols is fully allowed.
-  <!-- The rationale is that we do not distinguish now between user-defined
-       and theory symbols.
-    -->
-The same constant can be declared multiple times as long as it has a different type every time.
-More precisely, since we have polymorphic constants, a constant 
-<code class="prettyprint lang-smt3">c</code>
-can be given a new type
-<code class="prettyprint lang-smt3">τ</code>
-(with a declare or define command) only if 
-<code class="prettyprint lang-smt3">τ</code>
-has no instances in common with any of the current types of 
-<code class="prettyprint lang-smt3">c</code>.
-For instance, if 
-<code class="prettyprint lang-smt3">c</code>
-has type
-<code class="prettyprint lang-smt3">(→ (! Type :var X) (Array Int X))</code>,
-it cannot be re-declared later to have any of these types:
-<pre class="prettyprint lang-smt3">
-  (→ (! Type :var Y) (Array Int Int))
-(→ (! Type :var Y) (Array Y Int))
-(→ (! Type :var X) (Array Int (Array Int X)))
-</pre>
-because all of them have instances in common with 
-<code class="prettyprint lang-smt3">(→ (! Type :var X) (Array Int X))</code>.
-In contrast, it would be fine to re-declare <code class="prettyprint lang-smt3">c</code> with type <code class="prettyprint lang-smt3">Int</code>, say.
-In the latter case, <code class="prettyprint lang-smt3">c</code> would become an overloaded symbol with two (principal) types:
-<code class="prettyprint lang-smt3">(→ (! Type :var X) (Array Int X))</code>
-and
-<code class="prettyprint lang-smt3">Int</code>.
-(In fact, it would be fine even to redeclare <code class="prettyprint lang-smt3">c</code> with type <code class="prettyprint lang-smt3">(Array Int Int)</code>, say, since the second <code class="prettyprint lang-smt3">c</code> would have arity 0 instead of 1, making its type not an instance of the function <code class="prettyprint lang-smt3">(→ (! Type :var X) (Array Int X))</code>).
-It is an error to have multiple declarations of the same constant that violate the policy above.
-</p>
-
-<p>Note that (permitted) overloading of a constant 
-<code class="prettyprint lang-smt3">c</code>
-can make the constant or some of its applications ambiguous, 
-in the sense of SMT-LIB 2.7 that the type of
-<code class="prettyprint lang-smt3">c</code>
-or terms of the form
-<code class="prettyprint lang-smt3">(c t₁ ⋅⋅⋅ tᵢ) </code>
-cannot be uniquely determined by bottom-up type inference.
-In those cases, the ascription operator 
-<code class="prettyprint lang-smt3">as</code>
-must be used to disambiguate the constant, as in Version 2.7.
-The main difference is that function types are first-class in Version 3 and so ascription now specifies the whole type for a function symbol (e.g., <code class="prettyprint lang-smt3">(as f (→ Int Bool))</code> instead of just its return type (e.g., <code class="prettyprint lang-smt3">(as f Bool)</code>).
-</p>
-
-<p> Consider for instance the following module:
-<pre class="prettyprint lang-smt3">
-  (define-module M (
-  (declare-type A ())
-  (declare-type B ()) 
-  (declare-const a A)
-  (declare-const a B)
-  (declare-const b B)
-  (declare-const f (→ B A))
-  (declare-const f (→ A A)) 
-  (declare-const g (→ B A))
-  (declare-const g (→ B B))
-  )
-)
-</pre>
-</p>
-
-<p>The constants <code class="prettyprint lang-smt3">a</code>, <code class="prettyprint lang-smt3">f</code>, and <code class="prettyprint lang-smt3">g</code>, for being overloaded, are ambiguous when used as an argument in an application, e.g., <code class="prettyprint lang-smt3">(= a b), or (= f g)</code>.
-Also ambiguous are applications of <code class="prettyprint lang-smt3">g</code> (e.g., <code class="prettyprint lang-smt3">(g b)</code>). 
-However, applications of <code class="prettyprint lang-smt3">f</code> (e.g., <code class="prettyprint lang-smt3">(f b)</code>) are not.
-As a consequence, the uses of <code class="prettyprint lang-smt3">as</code> in the assertions below are all necessary.
-
-<pre class="prettyprint lang-smt3">
- (assert (= (as a A) (f b))) 
- (assert (= (as a B) b)) 
- (assert (= b ((as g (→ B B)) b))) 
- (assert (= (as f (→ B A)) (as g (→ B A))))
-</pre>
-
-The different use of <code class="prettyprint lang-smt3">as</code> in Version 3 represents one of the few changes that are not backward compatible with Version 2.7.
-However, this is not a serious concern since <code class="prettyprint lang-smt3">as</code> has been used mostly for 0-arity constants where difference between the new and the old use disappears.
-</p>
 
 <h4>Module Interfaces</h4>
 
