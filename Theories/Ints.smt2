@@ -4,7 +4,7 @@
  :smt-lib-release "2024-07-21"
  :written-by "Cesare Tinelli"
  :date "2010-04-17"
- :last-updated "2024-07-21"
+ :last-updated "2026-01-16"
  :update-history
  "Note: history only accounts for content changes, not release changes.
   2026-01-16 Added exponentiation.

@@ -72,7 +72,7 @@ Released for free under a Creative Commons Attribution 3.0 License
   signatures with free sort and function symbols, but with the following 
   restrictions:
   - all terms of sort Int are linear, that is, have no occurrences of the
-    function symbols *, /, div, mod, and abs, except as specified in the 
+    function symbols *, **, /, div, mod, and abs, except as specified in the 
     :extensions attributes;
   - all array terms have sort (Array Int Int).
  "
@@ -212,7 +212,7 @@ Released for free under a Creative Commons Attribution 3.0 License
  "Closed formulas built over an arbitrary expansion of the
   Ints signature with free constant symbols, but whose terms of sort Int 
   are all linear, that is, have no occurrences of the function symbols
-  *, /, div, mod, and abs, except as specified the :extensions attribute.
+  *, **, /, div, mod, and abs, except as specified the :extensions attribute.
  "
 
  :extensions
@@ -362,7 +362,7 @@ Released for free under a Creative Commons Attribution 3.0 License
   Ints and ArraysEx signatures with free sort and function symbols, but
   with the following restrictions:
   - all terms of sort Int are linear, that is, have no occurrences of the
-    function symbols *, /, div, mod, and abs, except as specified in the 
+    function symbols *, **, /, div, mod, and abs, except as specified in the 
     :extensions attributes;
   - all array terms have sort (Array Int Int).
  "
@@ -765,7 +765,7 @@ Released for free under a Creative Commons Attribution 3.0 License
  "Closed quantifier-free formulas built over an arbitrary expansion of the
   Ints signature with free constant symbols, but whose terms of sort Int 
   are all linear, that is, have no occurrences of the function symbols
-  /, div, mod, and abs, and no occurrences of the function symbol *,
+  **, /, div, mod, and abs, and no occurrences of the function symbol *,
   except as specified in the :extensions attribute.
  "
 
@@ -798,9 +798,10 @@ Released for free under a Creative Commons Attribution 3.0 License
 
  :theories ( Ints )
 
- :language 
+ :language
  "Closed quantifier-free formulas built over an arbitrary expansion of the
-  Ints signature with free constant symbols.
+  Ints signature with free constant symbols, but whose terms of sort Int 
+  have no occurrences of the function symbol **.
  "
 )
 
@@ -1023,7 +1024,7 @@ Released for free under a Creative Commons Attribution 3.0 License
   Ints signatures with free sort and function symbols, but with the 
   following restrictions:
   - all terms of sort Int are linear, that is, have no occurrences of the
-    function symbols *, /, div, mod, and abs, except as specified in the 
+    function symbols *, **, /, div, mod, and abs, except as specified in the 
     :extensions attributes;
  "
 
@@ -1205,7 +1206,8 @@ Released for free under a Creative Commons Attribution 3.0 License
 
  :language 
  "Closed formulas built over an arbitrary expansion of the Ints signature
-  with free sort and function symbols."
+  with free sort and function symbols, but whose terms of sort Int 
+  have no occurrences of the function symbol **."
 )
 
 </pre>
