@@ -1099,10 +1099,17 @@ which constitutes the name of the module, and a list of SMT-LIB commands.
 The set of commands allowed in a module is restricted.
 The main ones are
 <code class="prettyprint lang-smt3">assert</code>
-and all the commands that introduce new types and new constants.
+and all the commands that introduce new types and constants.
 </p>
 
 <p>
+The scope, that is, the visibility, of symbols introduced in a module 
+is limited to the module. 
+Such symbols can be accessed outside the module only if they are exported 
+in the module’s interface and only with a qualified name of the form 
+⟨module name⟩::⟨symbol⟩ (e.g., 
+<code class="prettyprint lang-smt3">M::a</code>).
+</p>
 
 <h4>Module Interfaces</h4>
 
@@ -1113,91 +1120,168 @@ Interfaces are used to construct modules that correspond to logics in the sense 
 
 The interface is specified with two attributes in a module definition:  
 <ul>
-  <li><code class="prettyprint lang-smt3">:types</code> whose value is the list of exported type constants with their associated kind, and</li>
-  <li><code class="prettyprint lang-smt3">:consts</code> whose value is the list of exported constants with their associated type.</li>
+  <li><code class="prettyprint lang-smt3">:type-vars</code> 
+    whose value is the list of exported type variables,</li>
+  <li><code class="prettyprint lang-smt3">:types</code> 
+    whose value is the list of exported type constants 
+    with their associated input kind or type, if any, and</li>
+  <li><code class="prettyprint lang-smt3">:consts</code> 
+    whose value is the list of exported constants 
+    with their associated type.</li>
 </ul>
-(The type/kind constant <code class="prettyprint lang-smt3">→</code> does not need to be exported because it a primitive symbol of the underlying logic.)
+(The type/kind constant 
+<code class="prettyprint lang-smt3">→</code> 
+does not need to be exported because it a primitive symbol 
+of the underlying logic.)
 </p>
 
 <pre class="prettyprint lang-smt3">
-  ; Example
   (define-module M
    (
+    (declare-type-var X)   (declare-type-var Y)
     (declare-type A ())    (declare-type B ())     (declare-type C ()) 
+    (declare-type Pair (Type Type))    
     (declare-const a A)    (declare-const b B)
     (declare-const f (→ A B))
     (declare-const g (→ B A)) 
     (define-const  h (→ A A) (lambda ((x A)) (g (f x))))
     (declare-const c (→ A C))
+    (declare-const d (→ X Y X))
    )
-   :types ( (A Type) (B Type) )
-   :consts ( (a A) (f (→ A B)) (h (→ A A)) )
+   :type-vars (X)
+   :types ( A B (Pair (Type Type)) )
+   :consts ( (a A) (f (→ A B)) (h (→ A A)) (d (→ X X X)))
   )
 </pre>
 
-<p>In the example above, only two of the type constants and three of the constants are exported.
-Note that the types of the exported constants must be constructible from the exported type constants for the interface to be well formed.
-Also note that any relationship among the exported constants established in the module through non-exported constants (or through assertions) is maintained when the module is imported. 
+<p>
+In the example above, only one of the type variables,
+three of the type constants and four of the constants are exported.
+The list of exported type constants contain a constant directly
+if it is nullary (as in the case of
+<code class="prettyprint lang-smt3">A</code>
+and
+<code class="prettyprint lang-smt3">B</code>), 
+otherwise it contains a pair consisting of the constant 
+and they list of kind or types of its inputs
+(as in the case of
+<code class="prettyprint lang-smt3">Pair</code>).
+
+Note that the types of the exported constants must be constructible 
+from the exported type variables and constants for the interface 
+to be well formed.
+However, these types can be restricted to be instances of 
+the constant's principal type.
+
+Also note that any relationship among the exported constants established
+in the module through non-exported constants (or through assertions) is 
+maintained when the module is imported. 
 For example, the formula 
 <pre class="prettyprint lang-smt3">
-  (forall ((x1 A) (x2 A)) (=> (= (f x1) (f x2)) (= (h x1) (h x2)))
-)</pre>
-is valid not just in the module <code class="prettyprint lang-smt3">M</code> above but also in any module that imports <code class="prettyprint lang-smt3">M</code>.
-Concretely, this means that importing a module has always the effect of declaring and asserting <em>everything</em> in the module. 
-The only effect of the interface is to prohibit in the importing module any direct reference to non-exported symbols.
-</p>
-
-<p>The <code class="prettyprint lang-smt3">:types</code> attribute is optional.
-Its absence causes <em>all</em> type constants in the module to be exported.
-In contrast, giving it value <code class="prettyprint lang-smt3">()</code> causes <em>no</em> type constants to be exported.
-The same policy applies to <code class="prettyprint lang-smt3">:consts</code>.
-</p>
-
-<p>The reason constants are listed in a module's interface with an associated type is that its is possible to assign them a more restricted type than the one they have in the module.
-For instance, the array <code class="prettyprint lang-smt3">select</code> function, which has type
-<pre class="prettyprint lang-smt3">
-  (→ (! Type :var I :implicit) (! Type :var E :implicit) (Array I E) I E) 
+  (forall ((x1 A) (x2 A)) (=> (= (f x1) (f x2)) (= (h x1) (h x2))))
 </pre>
-in the module declaring it, could be exported as follows: 
+is valid not just in the module 
+<code class="prettyprint lang-smt3">M</code> 
+above but also in any module that imports 
+<code class="prettyprint lang-smt3">M</code>.
+Concretely, this means that importing a module has always the effect 
+of declaring and asserting <em>everything</em> in the module. 
+The only effect of the interface is to prohibit in the importing module 
+any direct reference to non-exported symbols.
+</p>
+
+<p>
+All three interface attributes are optional.
+The absence of the 
+<code class="prettyprint lang-smt3">:types</code>
+attribute, say, causes all <em>all</em> type constants 
+in the module are exported in their full generality.
+In contrast, giving it value 
+<code class="prettyprint lang-smt3">()</code>
+causes <em>no</em> type constants to be exported.
+The same policy applies to 
+<code class="prettyprint lang-smt3">:type-vars</code>
+and
+<code class="prettyprint lang-smt3">:consts</code>.
+</p>
+
+<p>
+The reason constants are listed in a module's interface 
+with an associated type is that its is possible to assign them 
+a more restricted type than the one they have in the module.
+For instance, the array 
+<code class="prettyprint lang-smt3">select</code>
+function, which has type
 <pre class="prettyprint lang-smt3">
-  :types ( (Bool Type) (Int Type) (Array (→ Type Type Type)) ... ) 
-  :consts ( (select (→ (! Type :implicit) (! Type :var E :implicit) (Array Int E) Int E))
-            (select (→ (! Type :var I :implicit) (! Type :implicit) (Array I Bool) I Bool))
+  (→ (Array I E) I E) 
+</pre>
+in the module declaring it, where 
+<code class="prettyprint lang-smt3">I</code>
+and
+<code class="prettyprint lang-smt3">E</code>
+are type variables, could be exported as follows: 
+
+<pre class="prettyprint lang-smt3">
+  :type-varss ( I E ) 
+  :types ( Bool Int (Array (Type Type)) ... ) 
+  :consts ( (select (→ (Array Int E) Int E))
+            (select (→ (Array I Bool) I Bool))
             ... ; constants other than select 
           )
 </pre>
-This would limit the application of <code class="prettyprint lang-smt3">select</code> only to values of the listed types.
-Note that the interface above is not exporting two <code class="prettyprint lang-smt3">select</code> functions;
-it is exporting the same polymorphic function but with two (disjunctive) restrictions on its instances. 
+This would limit the application of 
+<code class="prettyprint lang-smt3">select</code> 
+only to values of the listed types.
+Note that the interface above is not exporting two 
+<code class="prettyprint lang-smt3">select</code>
+functions;
+rather, it is exporting the same polymorphic function
+but with two (disjunctive) restrictions on its instances. 
 </p>
 
-<p>The exported type constants can be restricted in similar way, disallowing in the importing modulo any terms whose types does not conform to the restrictions.
-For example, a module having a type constant <code class="prettyprint lang-smt3">Seq</code> (for generic sequences of len <code class="prettyprint lang-smt3">n</code>) of kind:
+<p>
+The exported type constants can be restricted in similar way, 
+disallowing in the importing modulo any terms 
+whose types does not conform to the restrictions.
+For example, a module having a type constant 
+<code class="prettyprint lang-smt3">Seq</code> 
+(for generic sequences of len 
+<code class="prettyprint lang-smt3">n</code>) 
+of kind:
 <code class="prettyprint lang-smt3">
   (→ (! Int :var n :restrict (>= n 0)) Type Type)
 </code>
 could export it as follows:
 <pre class="prettyprint lang-smt3">
   :types 
-  ( (Seq (→ (! Int :var n :syntax &lt;numeral&gt; :restrict (even n)) Type Type)
+  ( (Seq (! Int :var n :syntax &lt;numeral&gt; :restrict (even n)) Type)
     ... 
   )
 </pre>
-which (cumulatively) restricts the application of <code class="prettyprint lang-smt3">Seq</code> only to positive even numerals.
-The general rule is that the restrictions imposed on an exported symbol in a module interface are <em>in addition</em> to any restrictions already imposed on the symbol within the module.
-The meaning of multiple syntactic restrictions is the intersection of the languages denoted by the individual restrictions.
-The meaning of multiple semantic restrictions is the conjunction of the individual restrictions.
+which (cumulatively) restricts the application of 
+<code class="prettyprint lang-smt3">Seq</code>
+only to even numerals.
+The general rule is that the restrictions imposed on an exported symbol 
+in a module interface are <em>in addition</em> to any restrictions 
+already imposed on the symbol within the module.
+The meaning of multiple syntactic restrictions is the intersection 
+of the languages denoted by the individual restrictions.
+The meaning of multiple semantic restrictions is the conjunction
+of the individual restrictions.
 </p>
 
-<p>For polymorphic types, additional restrictions are expressible by instantiating type parameters. 
-This can be done indirectly in module interfaces by defining a new type constant as an instance of some polymorphic type, and then exporting the new constant.
+<p>For polymorphic types, additional restrictions are expressible 
+by instantiating type parameters. 
+This can be done indirectly in module interfaces by defining 
+a new type constant as an instance of some polymorphic type, and 
+then exporting the new constant.
 <pre class="prettyprint lang-smt3">
   (define-module M (
   ...
   (define-type IntArray ((A Type)) (Array Int A))
   ...
   )
- :types ( (IntArray (→ Type Type)) )
+ :types ( (IntArray (Type)) )
  :consts ( ... )
 )
 </pre>
@@ -1206,11 +1290,19 @@ disallow any array other than two dimensional arrays with integer indices.
 
 </p>
 
-<p>A natural question is why add restrictions on an exported symbol (type constant or constant) in the interface of a module and not directly inside the module when the symbol is declared.
-The reason is that a module can import a symbol from another module and export a restricted version of it.
-This approach is followed in defining modules that correspond to SMT-LIB 2 logics.
-Such modules import symbols from theory modules in their full generality and then export them with restrictions.
-For instance, a linear integer arithmetic module would import the arithmetic symbols from the module defining the integers and export the multiplication symbol with the additional restriction that at least one of its arguments is a (concrete) integer value:
+<p>A natural question is why add restrictions on an exported symbol 
+(type constant or constant) in the interface of a module and 
+not directly inside the module when the symbol is declared.
+The reason is that a module can import a symbol from another module and 
+export a restricted version of it.
+This approach is followed in defining modules that correspond 
+to SMT-LIB 2 logics.
+Such modules import symbols from theory modules in their full generality 
+and then export them with restrictions.
+For instance, a linear integer arithmetic module would import 
+the arithmetic symbols from the module defining the integers and export 
+the multiplication symbol with the additional restriction 
+that at least one of its arguments is a (concrete) integer value:
 <pre class="prettyprint lang-smt3">
   :consts 
   ( (* (→ (! Int :syntax &lt;int_value&gt;) Int Int))
@@ -1223,33 +1315,45 @@ For instance, a linear integer arithmetic module would import the arithmetic sym
 
 <h4>Module Imports</h4>
 
-<p>Modules can be imported into another module or at the top level in an SMT-LIB 3 script with the new command <code class="prettyprint lang-smt3">import</code>
+<p>Modules can be imported into another module or at the top level 
+in an SMT-LIB 3 script with the new command
+<code class="prettyprint lang-smt3">import-modules</code>
 which lists all the modules to be imported.
+
+
 At most one import command is allowed in a module. 
-Moreover, the command has to occur before any command that modifies the context
-(declarations, assertions, ...).
-At the top level, later import commands are allowed only if interleaved with <code class="prettyprint lang-smt3">reset</code> commands.
-Because two modules can import the same module, it is possible to effectively import a module directly and indirectly several times.
-The effect of multiple imports is cumulative for symbols and disjunctive for their restrictions:
-if the same symbol is first imported with a restriction R₁ and then with a restriction R₂ then the disjunction of R₁ and R₂ is considered.
+Moreover, the command has to occur before any command that modifies 
+the context (declarations, assertions, ...).
+At the top level, later import commands are allowed only if interleaved
+with 
+<code class="prettyprint lang-smt3">reset</code>
+commands.
 
 <pre class="prettyprint lang-smt3">
-  ; Example
-  [To do]
-</pre>   
+  (import-modules (M1 M2)) 
+  ...
+  (reset)
+  (import-modules (M3)) 
+  ...
+</pre>
 </p>
 
 <h4>Qualified names</h4>
 
 <p>Every module automatically defines a name space corresponding to it.
-The name space is reflected in the generation of qualified names for the symbols
-exported by a module. 
-Qualified names have the form <i>M::n</i> where <i>M</i> is the module's name and <i>n</i> is the name of a symbol declared in <i>M</i> and exported by <i>M</i>.
-Note that using <code class="prettyprint lang-smt3">::</code> as a separator in qualified names does not break backward compatibility because <code class="prettyprint lang-smt3">::</code> is not allowed in Version 2.7 identifiers.
+The name space is reflected in the generation of qualified names 
+for the symbols exported by a module. 
+Qualified names have the form <i>M::s</i> where <i>M</i> is 
+the module's name and <i>s</i> is a symbol exported by <i>M</i>.
+Note that using 
+<code class="prettyprint lang-smt3">::</code>
+as a separator in qualified names does not break backward compatibility 
+because
+<code class="prettyprint lang-smt3">::</code> 
+is not allowed in Version 2.7 identifiers.
 
 <pre class="prettyprint lang-smt3">
-  ; Example
-  (import (Ints Reals))
+  (import-modules (Ints Reals))
 
   (declare-const n Ints::Int)
   (declare-const x Reals::Real)
@@ -1270,24 +1374,12 @@ In that case, qualified names can be constructing using the alias as the prefix 
 -->
 </p>
 
-<p>A new command <code class="prettyprint lang-smt3">open</code> can be used to allow unqualified names for the (exported) symbols of an imported module.
+<p>The new command
+<code class="prettyprint lang-smt3">open-module</code> can be used 
+to allow unqualified names for the (exported) symbols of an imported module.
 
 <pre class="prettyprint lang-smt3">
   ; Example 1
-  (import (Ints Reals))
-  (open Ints)
-  (open Reals)
-  (declare-const n Int)           ; Int is an alias of Ints::Int
-  (declare-const x Real)          ; Real is an alias of Reals::Real
-  (define-const i Int (+ n 2))    ; + and 2 are aliases of Ints::+ and Ints::2
-  (define-const y Real (+ x 4.3)) ; + and 4.3 are aliases of Reals::+ and Reals::4.3
-</pre>
-
-Note how opening two modules creates the possibility of overloading of at the level of the importing module, as is the case with <code class="prettyprint lang-smt3">open</code> in the example above.
-
-
-<pre class="prettyprint lang-smt3">
-  ; Example 2
   (define-module M1 (
   (declare-type A ())
   (declare-type B ())
@@ -1300,19 +1392,22 @@ Note how opening two modules creates the possibility of overloading of at the le
  :types (A B)
  :consts ((a A) (f (→ A B)))
 )
-(import (M1))
+(import-modules (M1))
 ; all exported symbols of M1 are now visible with their fully qualified name
 ; all assertions in M1 are now in the assertion context.
 (declare-const a1 M1::A) ; declares a1 in the top-level namespace
 (assert (= a1 M1::a))    ; adds this equality to the assertion context
-(open M1) 
+(open-module M1) 
 ; now all symbols of M1 can be used without qualification
 (declare-const b2 B) 
 (assert (= b2 (f a))) ; B, f and a are from M1
 </pre>
 
-<p>The effect of opening a module <i>M</i> is to create a local alias for each symbol exported by <i>M</i>. 
-In the example above, <code class="prettyprint lang-smt3">(open M1)</code> can be understood as an abbreviation of 
+<p>The effect of opening a module <i>M</i> is to create a local alias 
+for each symbol exported by <i>M</i>. 
+In Example 1 above, 
+<code class="prettyprint lang-smt3">(open-module M1)</code> 
+can be understood as an abbreviation of 
 </p>
 
 <pre class="prettyprint lang-smt3">
@@ -1322,207 +1417,54 @@ In the example above, <code class="prettyprint lang-smt3">(open M1)</code> can b
   (define-const f (→ A B) M1::f)
 </pre>
 
-<p>A module <i>M</i> importing a module <i>N</i> can export the symbols exported by <i>N</i> as if they were its own. 
+
+Opening one of more modules creates the possibility of overloading 
+at the level of the importing module, as in the example below.
+That overloading is resolved with the same policy as 
+for overloading caused by local declarations.
+Since the policy is based on the order in which two constants
+with the same name are introduced,
+the order in which two modules are open is then meaningful. 
+
+<pre class="prettyprint lang-smt3">
+  ; Example 2
+  (import-modules (Ints Reals))
+  (open-module Ints)
+  (open-module Reals)
+  (declare-const n Int)           ; Int is an alias of Ints::Int
+  (declare-const x Real)          ; Real is an alias of Reals::Real
+  (define-const i Int (+ n 2))    ; + and 2 are aliases of Ints::+ and Ints::2
+  (define-const y Real (+ x 4.3)) ; + and 4.3 are aliases of Reals::+ and Reals::4.3
+</pre>
+
+<p>A module <i>M</i> importing a module <i>N</i> can export the symbols
+exported by <i>N</i> as if they were its own. 
 It has the option, however, to export them with stronger restrictions.
-The name used in <i>M</i>'s interface to export <i>N</i>'s symbols can be its fully qualified name (with the prefix <i>N::</i>) or its short version if <i>N</i> is opened in <i>M</i>.
+The name used in <i>M</i>'s interface to export <i>N</i>'s symbols can be
+its fully qualified name (with the prefix <i>N::</i>) or its short version
+if <i>N</i> is opened in <i>M</i>.
 </p>
-
-<pre class="prettyprint lang-smt3">
-  ; Example
-  [To do]
-</pre>   
-
-<!--
-  <p>
-Import commands can import symbols selectively from a module.
-The non-imported symbols are not visible at all outside the module.
-</p>
-
-<p>
-The main effect of opening a module
-<code class="prettyprint lang-smt3">M</code>
-at some level <em>l</em> is to introduce 
-to level <em>l</em> all the unqualified names available in 
-<code class="prettyprint lang-smt3">M</code>.
-This includes the symbols declared or defined in 
-<code class="prettyprint lang-smt3">M</code>
-as well as 
-the imported symbols of the modules opened by 
-<code class="prettyprint lang-smt3">M</code>.
-</p>
-<pre class="prettyprint lang-smt3">
-  ; Example
-  (define-module M1 (
-   (declare-type A 0)  
-   (declare-const a A) 
-   ...
-   ))
-  (define-module M2 (
-   (import (M1))
-   (open M1)
-   (declare-type B 0) 
-   (declare-const b B) 
-   ; From this point on symbols a, A, b and B are all usable without qualification
-   ))
-
-  (import (M2))
-  ; From this point on symbols M1::a, M1::A, M2::b, and M2::B are all visible
-
-  (open M2)
-  ; From this point on symbols a, A, b, and B are all visible without qualification
-  ; The qualified names M1::a, M1::A, M2::b, and M2::B are all still usable as well
-</pre>
-
-<p>
-The restriction mechanism of import is mindful of polymorphic types and constants
-in the sense that it allows one to specify which <em>instances</em>
-of a type or symbol to import.
-</p>
-<pre class="prettyprint lang-smt3">
-; Example
-(declare-type D 0)
-
-(define-module Pairs (
- (import (Core))
- (declare-type A 0)  (declare-type B 0)  (declare-type C 0) 
- (declare-type Pair 2) ; type constant defining a family of (monomorphic) types: 
-                       ; { (Pair τ₁ τ₂) | τ₁, τ₂ are monomorphic types } 
- (declare-const a A)
- (declare-const p1 (par (X Y) (→ (Pair X Y) X)))
- (declare-const p2 (par (X Y) (→ (Pair X Y) Y)))
- (declare-const pair (par (X Y) (→ X Y (Pair X Y))))
- ; p1, p2 and pair are polymorphic constants, each defining a family 
- ; of (monomorphic) constants:
- ; { p1 : (→ (Pair τ₁ τ₂) τ₁) | τ₁, τ₂ are monomorphic types }
- ; { p3 : (→ (Pair τ₁ τ₂) τ₂) | τ₁, τ₂ are monomorphic types }
- ; { pair : (→ τ₁ τ₂ (Pair τ₁ τ₂)) |  τ₁, τ₂ are monomorphic types }
-))
-(import (Pairs) :types (A (Pair B B) (par (Y) (Pair A Y)))
-                :consts ((pair (par (X Y) (→ X Y (Pair X Y))))
-                         (p2 (par (X Y) (→ (Pair X Y) Y))))
-) 
-(open Pairs) ; only the imported type and constant symbols are opened
-
-; The constructible monomorphic types at this point of this script are A, (Pair B B)
-; and any instance of type (par (Y) (Pair A Y)) over the type constants 
-; declared or imported until now (i.e., D, A, B, and Pair). These types include 
-; (Pair A A), (Pair A B), (Pair A D), (Pair A (Pair A A)), (Pair A (Pair A B)), and
-; so on. They do _not_ include C and, for instance, types like (Pair C A) and so on. 
-
-; The available (typed) constants are all the instances of 
-; pair : (par (X Y) (→ X Y (Pair X Y))) and
-; p2 : (par (X Y) (→ (Pair X Y) Y))) 
-; over the types constructible at this point.
-
-; Later declarations or imports of new type constants extend the set of constructible 
-; types and available constants correspondingly.
-(declare-type E 0)
-; Now, for instance, (Pair A E) is constructible while (Pair E A) is not.
-; Similarly, p2 : (→ (Pair A E) E) is now an available constant.
-</pre>
-<p>
-It is an error to use in a command a type that is outside the set of constructible 
-types at that point.
-Similarly, it is an error to use a constant not available at that point.
-Note that the type 
-<code class="prettyprint lang-smt3">Pair</code>
-is not imported in its full generality. 
-Instead, only its instances 
-<code class="prettyprint lang-smt3">(Pair B B)</code>
-and
-<code class="prettyprint lang-smt3">(par (Y) (Pair A Y))</code>
-are imported.
-Similar considerations apply to the imported constants.
-</p>
-<p>
-Because import commands can in effect import infinitely many symbols, it is convenient 
-to be able to add exceptions.
-</p>
-<pre class="prettyprint lang-smt3">
-; Example
-(define-module Pairs
- ...
-)
-(import (Pairs) :types (A B (par (X Y) (Pair X Y)))
-                :except-types ((Pair A B) (par (X) (Pair X X)))
-) 
-(open Pairs)
-; The constructible types are all the instances of (par (X Y) (Pair X Y)) 
-; over the type constants A, B and Pair that do not have instances in common
-; with (Pair A B) or (par (X) (Pair X X))).
-
-; So, for example, (Pair B A) and (Pair A (Pair A A)) are constructible. However, 
-; (Pair A B), (Pair A A) and (par (U V) (Pair (Pair U V) (Pair V U))) are not.
-</pre>
-
-<p>
-Technically, the semantics of type imports is defined as follows.
-The set of imported types consists of the set T₁ of all the instances of the types in the 
-<code class="prettyprint lang-smt3">:types</code>
-attribute minus the set T₂ of all types that, seen as terms possibly with free variables, 
-unify with one of the types in the 
-<code class="prettyprint lang-smt3">:except-types</code>
-attribute.
-</p>
-<p>
-When the
-<code class="prettyprint lang-smt3">:types</code>
-attribute is missing in an import command, everything from the module is imported.
-More precisely, the set T₁ above is defined as if the command had
-<code class="prettyprint lang-smt3">:types ((par (X) X))</code>.
-When 
-<code class="prettyprint lang-smt3">:except-types</code>
-is missing, T₂ is empty.
-This is equivalent to having 
-<code class="prettyprint lang-smt3">:types ()</code>.
-Note that both
-<code class="prettyprint lang-smt3">:types ()</code>
-and
-<code class="prettyprint lang-smt3">:except-types ((par (X) X))</code>
-have the effect of making the set of imported types empty.
-A similar convention applies to 
-<code class="prettyprint lang-smt3">:consts</code>
-and
-<code class="prettyprint lang-smt3">:except-consts</code>.
-</p>
-
-<p>
-The import command can list more than one module. 
-In that case, the sets T₁ and T₂ above are defined with respect to the union 
-of the type constants from each listed module.  
- </p>
-<pre class="prettyprint lang-smt3">
-; Example
-(define-module Sets (
- (import (Core))
- (declare-type Set 1) 
- ...))
-(define-module Pairs (
- (declare-type Pairs 2) 
-  ...))
-(define-module Ints (
- (declare-type Int 0) 
-  ...))
-(import (Ints Pairs Sets) 
- :types ( Int (Set Int) (par (X) (Set X)) (par (X Y) (Pair X Y)) )
- :except-types ( (par (X) (Set (Set X))) (par (X Y) (Pair (Set X) (Set Y))) )
- :except-consts ( (* (→ Int Int Int)) (- (par (X) (→ (Set X) (Set X) (Set X)))) )
-)
-; Neither nested sets nor pairs of sets are allowed.
-; All constants from the three modules are imported except for integer multiplication
-; and set difference.  
-</pre>   
--->
-
-<p>An important point is that all module imports declare their symbols at the top level, which means that qualified names are never nested.
-Importing a module <i>M</i> at the top level that in turn imports a module <i>N</i> internally has the effect of first importing <i>N</i> at the top level and then <i>M</i>.
-However, since <i>M</i> is the module being <em>directly</em> imported at the top level, the only symbols of <i>N</i> visible (that is, usable in later commands) are those re-exported by <i>M</i>, if any.
-If <i>M</i> opens <i>N</i>, the module prefix of the fully qualified names of the re-exported symbols of <i>N</i> is indifferently <i>M::</i> or <i>N::</i>.
-Concretely, if <i>s</i> is a type constant or constant exported by <i>N</i> and then re-exported by <i>M</i>,  
+ 
+<p>An important point is that all module imports declare their symbols 
+at the top level, which means that qualified names are never nested.
+Importing a module <i>M</i> at the top level that in turn imports 
+a module <i>N</i> internally has the effect of first importing <i>N</i> 
+at the top level and then <i>M</i>.
+However, since <i>M</i> is the module being <em>directly</em> imported 
+at the top level, the only symbols of <i>N</i> visible 
+(that is, usable in later commands) are those re-exported by <i>M</i>, 
+if any.
+If <i>M</i> opens <i>N</i>, the module prefix of the fully qualified names
+of the re-exported symbols of <i>N</i> is indifferently <i>M::</i> or 
+<i>N::</i>.
+Concretely, if <i>s</i> is a type constant or constant exported 
+by <i>N</i> and then re-exported by <i>M</i>,  
 it is accessible at the top level as <i>N::s</i> or as <i>M::s</i>, 
 or simply as <i>s</i> once <i>M</i> has been opened;
 it is <em>not</em> accessible as <i>M::N::c</i>.
-(The latter would be the case if <i>N</i>'s definition itself was inside <i>M</i>'s which is, however, not allowed since all modules are defined at the top level.)
+(The latter would be the case if <i>N</i>'s definition itself was inside
+<i>M</i>'s which is, however, not allowed since all modules are defined 
+at the top level.)
 </p>
 
 <h4>Import Graph</h4>
@@ -1531,7 +1473,9 @@ it is <em>not</em> accessible as <i>M::N::c</i>.
 We say that <i>N</i> is imported <em>indirectly</em> by <i>M</i> if <i>N</i> is imported, directly or indirectly, by a module imported by <i>M</i>.
 Circular import dependencies are disallowed, that is, a module cannot import itself, directly or indirectly. 
 In other words, the "directly imports" relation always defines a direct acyclic graph over modules.
-Without interleaving calls to the <code class="prettyprint lang-smt3">reset</code> command, a module <i>N</i> can be imported directly at most once but can be imported indirectly many times as a result of importing several modules that in turn import <i>N</i>.
+Without interleaving calls to the 
+<code class="prettyprint lang-smt3">reset</code> 
+command, a module <i>N</i> can be imported directly at most once but can be imported indirectly many times as a result of importing several modules that in turn import <i>N</i>.
 Another consequence on the import structure is that a module's symbol can be imported in a module multiple times and with different restrictions.
 The effect of two imports of symbols from the same module is additive: 
 symbols imported with the second import that had not already been imported with the first are added to the top level;
@@ -1540,25 +1484,64 @@ If the same dependent constant <i>c</i> is imported once with a (restricted) typ
 (Note that <i>c</i> is not overloaded in this case because type <code class="prettyprint lang-smt3">τ₁</code> and <code class="prettyprint lang-smt3">τ₂</code> both are restrictions of the same principal type that <i>c</i> has in the module it originally was introduced in.) 
 </p>
 
+<p>
 <pre class="prettyprint lang-smt3">
-  ; Example
-  [To do]
+(define-module M0 (
+  (declare-type-var X)
+  (declare-type-var Y)
+  (declare-const p (→ X Y Bool))
+  ; X, Y and p are exported in full generality
+)
+
+(define-module M1 (
+  (import-modules (M0))
+  (open-module M0)
+  (declare-type A ())
+  :type-vars (Y)
+  :consts (p (→ A Y Bool))
+)
+
+(define-module M2 (
+  (import-modules (M0))
+  (open-module M0)
+  (declare-type B ())
+  :type-vars (X)
+  :consts (p (→ X B Bool))
+)
+
+(define-module M3 (
+  (import-modules (M1 M2))
+  (open-module M1)
+  (open-module M2)
+  ...
+)
 </pre>   
-  
-<h4>Inductive Data Types</h4>
 
-Algebraic data types of SMT 2.7 are generalized to inductive data types and their definition gets a new syntax. 
-The old syntax is accepted but deprecated and will be eventually phases out.
-<br>
+Module 
+<code class="prettyprint lang-smt3">M3</code>
+above imports (the same) constant  
+<code class="prettyprint lang-smt3">p</code> 
+twice.
+The net effect is that 
+<code class="prettyprint lang-smt3">p</code>
+has two principal (polymorphic) types in 
+<code class="prettyprint lang-smt3">p</code>:
+<code class="prettyprint lang-smt3">(→ A Y Bool)</code>
+and
+<code class="prettyprint lang-smt3">(→ X B Bool)</code>.
+</p>
 
-The new syntax is best explained with a few examples.
-The old syntax:
+
+<h4>Algebraic Data Types</h4>
+
+<p>
+Algebraic data types in SMT-LIB 3 are unchanged from version 2.7,
+both in syntax and semantics.
+
 <pre class="prettyprint lang-smt3">
-  (declare-datatypes ((Size 0) (BinTree 0) (Option 1) (List 1) (Pair 2))
+  (declare-datatypes ((Size 0) (Option 1) (List 1) (Pair 2))
     ( ; Size
       ((small) (medium) (large))
-      ; BinTree
-      ((empty) (node (left BinTree) (right BinTree)))
       ; Option
       (par (V) ((none) (some (val V)) ))
       ; List
@@ -1567,85 +1550,29 @@ The old syntax:
       (par (A B) ((pair (first A) (second B))))
     )
   )
-</pre>
-stands for new syntax:
-<pre class="prettyprint lang-smt3">
-  (define-inductive-types 
-    ((Size ()) (BinTree ()) (Option (Type)) (List (Type)) (Pair (Type Type)))
-    ( ; Size
-      ( (small Size)
-        (medium Size)
-        (large Size)
-      )
-      ; BinTree
-      ( (empty BinTree)
-        (node (-> (! BinTree :selector left) (! BinTree :selector right) BinTree))
-      )
-      ; Option
-      ( (none (→ (! Type :var A)   ; Type input is explicit for this constant
-                 (Option A)))    
-        (some (→ (! Type :var A :implicit) 
-                 (! A :selector val) (Option A)))
-      )
-      ; List
-      ( (nil (→ (! Type :var E)    ; Type input is explicit
-                (List E))) 
-        (cons (→ (! Type :var E :implicit) 
-                   (! E :selector head) (! (List E) :selector tail)) (List E))
-      )
-      ; Pair
-      ( (pair (→ (! Type :var A :implicit) (! Type :var B :implicit) 
-                 (A :selector first) (B :selector second) (Pair A B))))
-      )
-    )
+
+  (declare-datatype BinTree (par (X)
+      ((leaf) (node (left BinTree) (val X) (right BinTree)))
   )
 </pre>
 
-
-<p>The command <code class="prettyprint lang-smt3">define-inductive-types</code> takes two arguments: 
-<ol>
-<li>a list of pairs of consisting of a type constant (the name of the inductive type) and a possibly empty list of the form <code class="prettyprint lang-smt3">(Type ... Type)</code> for each type constant, indicating the number of type parameters it takes;
-</li>
-<li>a corresponding list of value constants for each inductive type.
-</li>
-</ol>
-The value constants for an inductive type are themselves grouped in a list.
-Each element of this list is a pair of a constant and its type.
-
-The type is given with the same syntax as any other (possibly functional) type.
-An optional <code class="prettyprint lang-smt3">:selector</code> attribute for one of the arguments of the constant can be used to name the corresponding selector.  
+In the commands above only difference is that now we refer to the local symbols introduced by the 
+<code class="prettyprint lang-smt3">par</code>
+binder 
+(such as <code class="prettyprint lang-smt3">V</code>),
+as <em>type variables</em> instead of sort parameters.
 </p>
 
 <p>
-Several constraints on the type definition ensure the generality and the well-foundedness of the type.
-<ul>
-<li>If a datatype <i>D</i> being defined has n parameters, each constant of that datatype must return a value whose type has the form <code class="prettyprint lang-smt3">(<i>D X₁ ... Xᵢ</i>)</code> where <i>X₁ ... Xᵢ</i> are i distinct type variables. Consequently, the constant must have those type variables as (implicit or explicit) input parameters.
-<li>An inductive type can be parametrized by other types but not values. So it can be polymorphic but not dependent in general. 
-  <!-- This is a temporary restriction that may be lifted at a later time. -->
-</li>
-<li>If a datatype D being defined has n parameters, each constant of that datatype must return a value whose type has the form (D X₁ ... Xᵢ) where X₁ ... Xᵢ are i distinct type variables. Consequently, the constant must have those type variables as (implicit or explicit) input parameters.
-</li>
-<li>The constants of the the same datatype must have distinct names.
-However, the same name can be used for two constants of distinct inductive types.
-</li>
-<li>An inductive type can be parametrized by other types but not values. So it can be polymorphic but not dependent in general. This is a temporary restriction that may be lifted at a later time.
-</li>
-<li>No <em>nested</em> types are allowed. 
-  That is, the type of a constant's argument for an inductive type <i>D</i> cannot be a type term that nests <i>D</i> within another type constant. 
-  For instance, it is not possible to define a parametric inductive type <code class="prettyprint lang-smt3">(Tree A)</code> with a constant of type 
-  <code class="prettyprint lang-smt3">(→ A (List (Tree A)) (Tree A))</code> or
-  <code class="prettyprint lang-smt3">(→ A (Array Int (Tree A)) (Tree A))</code> 
-  because  <code class="prettyprint lang-smt3">(Tree A)</code> occurs nested in <code class="prettyprint lang-smt3">List</code> (resp. <code class="prettyprint lang-smt3">Array</code>).
-</li>
-<li>The same well-foundedness constraints as in 2.7 (which enable the type inhabited).
-</li>
-</ul>
+A consequence of maintaining the old syntax from Version 2.7 is that,
+while algebraic datatypes can be polymorphic, they cannot be dependent
+(on values).
+This restriction is intentional but could be lifted in future releases
+of Version 3.
 </p>
 
-<p>Note that specifying selectors is not mandatory anymore.
-The reason is that thanks to the <code class="prettyprint lang-smt3">match</code> binder they can eliminated from any formulas without loss of generality.
-</p>
-
+<!-- 
+<h5>Namespaces</h5>
 <p>Each inductive type <i>D</i> implicitly creates its own namespace similarly to modules. 
   The fully qualified name for a constant or selector <i>f</i> for a inductive type <i>D</i> is <code class="prettyprint lang-smt3"><i>D</i>::<i>f</i></code>.
 For instance, for the constant the <code class="prettyprint lang-smt3">Pair</code> type defined above id <code class="prettyprint lang-smt3">Pair::pair</code> and the selectors are <code class="prettyprint lang-smt3">Pair::first</code> and <code class="prettyprint lang-smt3">Pair::second</code>.
@@ -1658,98 +1585,140 @@ Short names can be used after <em>opening</em> the type, as with modules, with t
 
 The same rule on overloading apply as for modules.
 </p>
-
-<p>Two new commands are provided as abbreviation of the <code class="prettyprint lang-smt3">define-inductive-types</code>.
-The first one, <code class="prettyprint lang-smt3">define-inductive-type</code>, can be used to define a single inductive type, as in:
-
-<pre class="prettyprint lang-smt3">
-  (define-inductive-type (List (Type)) 
-    ( (nil (→ (! Type :var E) (List E))) 
-      (cons (→ (! Type :var E :implicit) 
-               (! E :sel head) (! (List E) :sel tail)) (List E))
-    )
-  )
-</pre>
-
-The previous command is understood as an abbreviation of:
-
-<pre class="prettyprint lang-smt3">
-  (define-inductive-types ( (List (Type)) ) 
-    ( ( (nil (→ (! Type :var E) (List E))) 
-        (cons (→ (! Type :var E :implicit) 
-                 (! E :sel head) (! (List E) :sel tail)) (List E))
-      )
-    )
-  )
-</pre>
-
-The second new command, provides a light-weight syntax for datatypes that have only constant constants, as in:
-
-<pre class="prettyprint lang-smt3">
-  (define-enumeration-type Size (small medium large))
-</pre>
-
-which abbreviates the more verbose
-
-<pre class="prettyprint lang-smt3">
-  (define-inductive-types ( (Size ()) )
-    ( ((small Size) (medium Size) (large Size)) )
-  )
-</pre>
-</p>
+-->
 
 <h5>Testers and recursors</h5>
 
 <p>
-Every inductive type definition induces an implicit definition of <em>testers</em> for each constant as well as general <em>recursor</em> for the type.
-For example, for the <code class="prettyprint lang-smt3">List</code> type introduced above there would be the following tester functions 
+Every inductive type definition induces an implicit definition of <em>testers</em> for each constant as well as general <em>recursor</em> 
+for the type.
+For example, for the 
+<code class="prettyprint lang-smt3">List</code>
+type introduced above there would be the following tester functions 
 
 <pre class="prettyprint lang-smt3">
-  (List::is-nil (→ (! Type :var E :implicit) (List E) Bool))
-  (List::is-cons (→ (! Type :var E :implicit) (List E) Bool))
+  (is-nil (→ (List E) Bool))
+  (is-cons (→ (List E) Bool))
 </pre>
 
-as well as the recursor <code class="prettyprint lang-smt3">List::reduce</code> defined as if it had been introduced as follows
+where
+<code class="prettyprint lang-smt3">E</code>
+is a type variable.
+
+Note that the syntax for testers is different from SMT-LIB 2.7,
+where those two functions would have an index name:
+ <code class="prettyprint lang-smt3">(_ is nil)</code>
+and
+<code class="prettyprint lang-smt3">(_ is cons)</code>.
+The index name form is still allowed as syntactic sugar
+for backward compatibility but is deprecated.
+
+Recursors are a new feature in SMT-LIB 3.
+Using again as an example the 
+<code class="prettyprint lang-smt3">List</code>
+datatype introduced above,
+its definition also defines automatically
+the recursor 
+<code class="prettyprint lang-smt3">reduce</code>
+of type 
+<code class="prettyprint lang-smt3">(→ Y (→ X (List X) Y Y) (List X) Y)</code>
+where 
+<code class="prettyprint lang-smt3">X</code>
+and 
+<code class="prettyprint lang-smt3">Y</code>
+are type variables.
+The
+<code class="prettyprint lang-smt3">List</code>
+recursor behaves as if it had been directly defined as follows
 
 <pre class="prettyprint lang-smt3">
+  (declare-type-var X)
+  (declare-type-var Y)
   (define-fun-rec reduce 
-    ( (A Type :implicit) (B Type :implicit)
-      (b B) (comb (→ A (List A) B B))) (l (List A)) ) B
+    ( (y0 Y) (comb (→ X (List X) Y Y)) (l (List X)) )
+    Y
     (match l 
-      ( (nil b)
-        ((cons h t) (comb h t (reduce b comb t)))
+      ( (nil y0)
+        ((cons h t) (comb h t (reduce y0 comb t)))
       )
     ) 
   )
 </pre>
+
+The recursor above reduces any list
+<code class="prettyprint lang-smt3">l</code> of type 
+<code class="prettyprint lang-smt3">(List X)</code>
+to a value of type 
+<code class="prettyprint lang-smt3">Y</code>
+with the aid of a value 
+<code class="prettyprint lang-smt3">y0</code> 
+of type 
+<code class="prettyprint lang-smt3">B</code>
+for the case where
+<code class="prettyprint lang-smt3">l</code>
+is empty, and of a function
+<code class="prettyprint lang-smt3">comb</code>
+that computes the reduction in the non-empty case from the head
+<code class="prettyprint lang-smt3">h</code>
+and tail
+<code class="prettyprint lang-smt3">t</code>
+of
+<code class="prettyprint lang-smt3">l</code>
+and the (recursively computed) reduction of
+<code class="prettyprint lang-smt3">t</code>.  
+
+Analogously, the recursor for the 
+<code class="prettyprint lang-smt3">BinTree</code>
+datatype defined above would defined as follow
+<pre class="prettyprint lang-smt3">
+  (define-fun-rec reduce 
+    ( (y0 Y) (comb (→ (BinTree X) X (BinTree X) Y Y Y)) (t (Tree X)) )
+    Y
+    (match t 
+      ( (Leaf y0)
+        ((node t1 v t2) (comb t1 v t2 (reduce y0 comb t1) (reduce y0 comb t2)))
+      )
+    )
+  )
+</pre>
 </p>
 
-For example, the recursor <code class="prettyprint lang-smt3">List::reduce</code> reduces any list <code class="prettyprint lang-smt3">l</code> of type <code class="prettyprint lang-smt3">(List A)</code> to a value of type <code class="prettyprint lang-smt3">B</code> with the aid of a value <code class="prettyprint lang-smt3">b</code> of type <code class="prettyprint lang-smt3">B</code> for the case where <code class="prettyprint lang-smt3">l</code> is empty, and of a function <code class="prettyprint lang-smt3">comb</code> that computes the reduction in the non-empty case
-from the head <code class="prettyprint lang-smt3">h</code> and tail <code class="prettyprint lang-smt3">t</code> of <code class="prettyprint lang-smt3">l</code> and the (recursively computed) reduction of <code class="prettyprint lang-smt3">t</code>.  
+<p>The rationale of having automatically define recursors supported directly
+by the SMT solver is that a wealth of functions over a recursive datatype
+can be defined, non-recursively, by the user in terms of 
+<code class="prettyprint lang-smt3">reduce</code>.
+This in principle should facilitate reasoning about functions 
+over datatypes as the solver can concentrate on reasoning about 
+<code class="prettyprint lang-smt3">reduce</code>.
 
-A wealth of functions over lists can be defined in terms of <code class="prettyprint lang-smt3">List::reduce</code>, including the following:
+For the 
+<code class="prettyprint lang-smt3">List</code>
+datatype, the functions that can be defined with 
+<code class="prettyprint lang-smt3">reduce</code>
+include the following:
 
 <pre class="prettyprint lang-smt3">
+  (declare-type-var A)
+  (declare-type-var B)
   (define-const sum ((l (List Int))) Int
-    (List::reduce 0 (lambda ((n Int) (t (List Int)) (s Int)) (+ n s)) l) 
+    (reduce 0 (lambda ((n Int) (t (List Int)) (s Int)) (+ n s)) l) 
   )
-  (define-fun len ((A Type :implicit) (l (List A))) Int
-    (List::reduce 0 (lambda ((a A) (t (List A)) (n Int)) (+1 n)) l)
+  (define-fun len ((l (List A))) Int
+    (reduce 0 (lambda ((a A) (t (List A)) (n Int)) (+1 n)) l)
   )
-  (define-fun append ((A Type :implicit) (l1 (List A))) (l2 (List A)) (List A)
-    (List::reduce l2 (lambda ((a A) (t (List A)) (r (List A))) (cons a r)) l1)
+  (define-fun append ((l1 (List A))) (l2 (List A)) (List A)
+    (reduce l2 (lambda ((a A) (t (List A)) (r (List A))) (cons a r)) l1)
   )
-  (define-fun reverse ((A Type :implicit) (l (List A))) (List A)
-    (List::reduce (nil A) 
+  (define-fun reverse ((l (List A))) (List A)
+    (reduce (as nil (List A)) 
       (lambda ((a A) (t (List A)) (r (List A))) (append r (cons a (nil A)))) l)
   )
-  (define-fun filter ((A Type :implicit) (p (-> A Bool)) (l (List A))) (List A)
-    (List::reduce (nil A) 
+  (define-fun filter ((p (-> A Bool)) (l (List A))) (List A)
+    (reduce (as nil (List A)) 
       (lambda ((a A) (t (List A)) (r (List A))) (ite (p a) (cons a r) r)) l)
   )
-  (define-fun map ((A Type :implicit) (B Type :implicit) 
-                   (f (→ A B)) (l (List A))) (List A)
-    (List::reduce (nil A) 
+  (define-fun map ((f (→ A B)) (l (List A))) (List A)
+    (reduce (as nil (List A)) 
       (lambda ((a A) (t (List A)) (r (List B))) (ite (p a) (cons a r) r)) l)
   )
 </pre>
@@ -1786,7 +1755,7 @@ Types constants and constants in module can be declared as external with an <cod
  (declare-const 0 Int :extern Ints::0)
  (declare-const +1 (→ Int Int) :extern Ints::+1)
  (define-fun len ((A Type :implicit) (l (List A))) Int
-   (List::reduce 0 (lambda ((a A) (t (List A)) (n Int)) (+1 n)) l)
+   (reduce 0 (lambda ((a A) (t (List A)) (n Int)) (+1 n)) l)
 )
 ...
  )
