@@ -1718,18 +1718,18 @@ include the following:
   ; List reverse
   (define-fun reverse ((l (List A))) (List A)
     (reduce (as nil (List A)) 
-      (lambda ((a A) (t (List A)) (r (List A))) (append r (cons a (nil A)))) l)
+      (lambda ((a A) (t (List A)) (r (List A))) (append r (cons a (as nil (List A))))) l)
   )
-  ; List of element of input list that satisfy input predicate
+  ; List of elements of input list that satisfy input predicate
   (define-fun filter ((p (-> A Bool)) (l (List A))) (List A)
     (reduce (as nil (List A)) 
       (lambda ((a A) (t (List A)) (r (List A))) (ite (p a) (cons a r) r)) l)
   )
   (declare-type-var B)
   ; List map function
-  (define-fun map ((f (→ A B)) (l (List A))) (List A)
+  (define-fun map ((f (→ A B)) (l (List A))) (List B)
     (reduce (as nil (List A)) 
-      (lambda ((a A) (t (List A)) (r (List B))) (ite (p a) (cons a r) r)) l)
+      (lambda ((a A) (t (List A)) (r (List B))) (cons (f a) r)) l)
   )
 </pre>
 </p>
@@ -1739,7 +1739,7 @@ include the following:
 
 <p>When defining new theories there is sometimes the need for two theories 
 to refer to each other's symbols. 
-This need cannot be addressed with imports because it would create 
+This cannot be done with imports because it would create 
 a circular dependency.
 <!-- This would force one to define two theories together as one single module. -->
 To address this issue while keeping theories in separate modules the language allows the definition of <em>external</em> types and constants in a module.
