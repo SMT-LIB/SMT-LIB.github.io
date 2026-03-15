@@ -1417,7 +1417,6 @@ can be understood as an abbreviation of
   (define-const f (→ A B) M1::f)
 </pre>
 
-
 Opening one of more modules creates the possibility of overloading 
 at the level of the importing module, as in the example below.
 That overloading is resolved with the same policy as 
@@ -1675,9 +1674,9 @@ datatype defined above would defined as follow
   (define-fun-rec reduce 
     ( (y0 Y) (comb (→ (BinTree X) X (BinTree X) Y Y Y)) (t (Tree X)) )
     Y
-    (match t 
-      ( (leaf y0)
-        ((node t1 v t2) (comb t1 v t2 (reduce y0 comb t1) (reduce y0 comb t2)))
+    (match t ( 
+      (leaf y0)
+      ((node t1 v t2) (comb t1 v t2 (reduce y0 comb t1) (reduce y0 comb t2)))
       )
     )
   )
@@ -1746,55 +1745,76 @@ To address this issue while keeping theories in separate modules the language al
 </p>
 
 <p>
-More generally, one imports a module <i>A</i> in a module <i>B</i> if <i>B</i> is meant to be an extension of <i>A</i>.
-If, on the other hand, <i>A</i> and <i>B</i> are conceptually separate modules where, however, one module may need to use a type or a constant in the other, then they can be introduced as external.
-Types constants and constants in module can be declared as external with an <code class="prettyprint lang-smt3">:extern</code> attribute which connects them to symbols exported by another module. 
+More generally, one imports a module <i>A</i> in a module <i>B</i> 
+if <i>B</i> is meant to be an extension of <i>A</i>.
+If, on the other hand, <i>A</i> and <i>B</i> are conceptually 
+separate modules where, however, one module may need to use a type or
+a constant in the other, then they can be introduced as external.
+Types constants and constants in module can be declared as external with an
+<code class="prettyprint lang-smt3">:extern</code>
+attribute which connects them to symbols exported by another module. 
 </p>
 
 <pre class="prettyprint lang-smt3">
-; Example
-(define-module Lists (
-  (declare-datatypes ((List 1))
-    ((nil (→ (! Type :var A) (List A)))
-     (cons (→ (! Type :var A :implicit) 
-              (! A :selector car) (! (List A) :selector cdr)) (List A))
+  (define-module Lists (
+    (declare-datatype BinTree (par (X)
+        ((nil) (cons (head X) (tail (List X))))
+      )
     )
-  )  
-  ...
- (declare-type Int () :extern Ints::Int)
- (declare-const 0 Int :extern Ints::0)
- (declare-const +1 (→ Int Int) :extern Ints::+1)
- (define-fun len ((A Type :implicit) (l (List A))) Int
-   (reduce 0 (lambda ((a A) (t (List A)) (n Int)) (+1 n)) l)
-)
-...
- )
- :types ((→ (! Type E) (List E)))
- :consts ((len (→ (Type :var E :implicit) (List E) Ints::Int)) 
-          ...
-         )
-)
+    ...
+    (declare-type Int () :extern Ints::Int)
+    (declare-const 0 Int :extern Ints::0)
+    (declare-const +1 (→ Int Int) :extern Ints::+1)
+    (define-fun len ((l (List A))) Int
+      (reduce 0 (lambda ((a A) (t (List A)) (n Int)) (+1 n)) l)
+    )
+    ...
+   )
+   :type-vars (E)
+   :types ((List E))
+   :consts ((len (→ (List E) Ints::Int)) 
+   ...
+  )
 </pre>
 
-<p>Using the <code class="prettyprint lang-smt3">:extern</code> attribute, the type <code class="prettyprint lang-smt3">Int</code> in the module <code class="prettyprint lang-smt3">Lists</code> above is declared to be external and a proxy for <code class="prettyprint lang-smt3">Ints::Int</code>. 
-The constants <code class="prettyprint lang-smt3">0</code> and <code class="prettyprint lang-smt3">+1</code> are introduced similarly.
+<p>Using the 
+<code class="prettyprint lang-smt3">:extern</code> 
+attribute, the type 
+<code class="prettyprint lang-smt3">Int</code> 
+in the module 
+<code class="prettyprint lang-smt3">Lists</code>
+above is declared to be external and a proxy for 
+<code class="prettyprint lang-smt3">Ints::Int</code>. 
+The constants 
+<code class="prettyprint lang-smt3">0</code>
+and
+<code class="prettyprint lang-smt3">+1</code>
+are introduced similarly.
+</p>
 
-In general, symbols declared as <code class="prettyprint lang-smt3">:extern</code> in a module <i>M</i> <em>cannot</em> be exported by <i>M</i>.
-This entails that if <i>M</i> exports a symbol <i>s</i> that depends on external symbols from a module <i>N</i>, a module importing <i>M</i> can use <i>s</i> in a command only if it imports <i>N</i> too.
-[To do: define precisely what it means for a symbol to depend on external ones.]
+<p>In general, symbols declared as
+<code class="prettyprint lang-smt3">:extern</code>
+in a module <i>M</i> <em>cannot</em> be exported by <i>M</i>.
+This entails that if <i>M</i> exports a symbol <i>s</i> that depends on
+external symbols from a module <i>N</i>, a module importing <i>M</i> 
+can use <i>s</i> in a command only if it imports <i>N</i> too.
+[To do: define precisely what it means for a symbol to depend 
+on external ones.]
+</p>
 
+<p>
 In the example above, since <code class="prettyprint lang-smt3">Lists</code> exports a function whose type and definition depend on external symbols from module <code class="prettyprint lang-smt3">Ints</code>, any module importing <code class="prettyprint lang-smt3">Lists</code> must also import <code class="prettyprint lang-smt3">Ints</code> so that the reference to the external symbols in <code class="prettyprint lang-smt3">Lists</code> can be resolved.
 
 <pre class="prettyprint lang-smt3">
   ; Example 1
-  (import (Lists))
-  ; Since Lists::len depends on Ints, it cannot be used here
+  (import-modules (Lists))
+  ; Illegal import since Lists::len depends on Ints.
   ...
 </pre>
 
 <pre class="prettyprint lang-smt3">
   ; Example 2
-  (import (Ints Lists))
+  (import-modules (Ints Lists))
   ; Lists::len can be used here
   ...
 </pre>
@@ -1802,26 +1822,32 @@ In the example above, since <code class="prettyprint lang-smt3">Lists</code> exp
 
 <h3>Syntactic categories for <code class="prettyprint lang-smt3">:syntax</code> restrictions</h3>
 
-[To do: definition of &lt;int_value&gt; &lt;pos_numeral&gt; and so on via an attribute grammar.
-Syntax categories can be defined in modules and should be exported like types and constants.].
+<p>[To do: definition of &lt;int_value&gt; &lt;pos_numeral&gt; and 
+so on via an attribute grammar.
+Syntax categories can be defined in modules and should be exported 
+like types and constants.]
+</p>
 
 <h3>SMT-LIB 3 Theories</h3>
 
 <p>The standard SMT-LIB 3 theories are now defined just as modules.
-A first draft of the new definition for some of the standard theories in Version 2.7 is available below.
+A first draft of the new definition for some of the standard theories
+in Version 2.7 is available below.
 Note that the modules are still at the pre-proposal stage. 
 They are incomplete and subject to change.
 However, they should offer a pretty good idea of the expressive
 power of SMT-LIB 3.
 The theories are defined intentionally to be rather rich.
-Any restriction on theory signature and language is left to modules that define restricted logics.  
+Any restriction on theory signature and language is left to modules 
+that define restricted logics.  
 </p>
 
 <p>In the current formalization, the theories below are essentially
 conservative extensions of the corresponding SMT-LIB 2.7 theories,
-that is, they have more symbols and richer types but do not change the semantics
-of the old ones in any meaningful way.
+that is, they have more symbols and richer types but do not change 
+the semantics of the old ones in any meaningful way.
 </p>
+
 <button type="button" class="collapsible">Core</button>
 <div class="coll_content">
  <pre class="prettyprint lang-smt3">
@@ -1829,175 +1855,121 @@ of the old ones in any meaningful way.
 
 (define-module Core ( 
   (set-info :smt-lib-version 3.0)
-  (set-info :smt-lib-release "2020-XX-XX")
+  (set-info :smt-lib-release "2026-XX-XX")
   (set-info :written-by "Pascal Fontaine and Cesare Tinelli")
-  (set-info :date "2020-04-24")
-  (set-info :last-updated "2020-04-24")
+  (set-info :date "2026-03-15")
+  (set-info :last-updated "2026-03-15")
   (set-info :update-history
    "TODO.
    "
   )
 
-  ;---------------
-  ; Builtin types
-  ;--------------- 
   ; Booleans
-  (declare-type Bool () :builtin
-   "The (binary) set {true, false}")
+  (declare-datatype Bool ((true) (false)))
 
-  ; Could be defined as a datatype in alternative
+  (declare-type-var A)
+  (declare-type-var B)
+  (declare-type-var C)
 
   ;-------------------
-  ; Builtin constants
+  ; Builtin symbols
   ;------------------- 
-   ; Equality  
-  (declare-const = (-> (! Type :var A :implicit) 
-                       A A Bool)
+
+  ; Arrow types
+  (declare-type -> (Type) 
+   :right-assoc
+   :builtin "Function type constructor.")
+
+  ; Equality  
+  (declare-const = (-> A A Bool)
    :chainable 
    :builtin 
    "= denotes the identity function, which returns true iff 
     its two arguments are identical.")
 
-  ;-----------------------
-  ; Axiomatized constants
-  ;----------------------- 
-  ; true, false
-  (define-const true Bool)
-  (declare-const false Bool)
-  ; ite
-  (declare-const ite 
-    (-> (! Type :var A :implicit) 
-           Bool A A A))
-  ; ite is if-then-else
-  (assert (forall ((A Type)) (= (ite true) (lambda ((x A) (y A)) x))))
-  (assert (forall ((A Type)) (= (ite false) (lambda ((x A) (y A)) y))))
-  ; true and false are distinct
-  (assert (= (= true false) false))
-
   ;-------------------
   ; Defined constants
   ;------------------- 
+  ; Apply
+  (define-fun @ ((f (-> A B)) (a A)) B
+    (f a)
+   :left-assoc) ; (@ f a b) = (@ (@ f a) b)
+  ; Identity
+  (define-const iden ((a A)) A
+    a)
+  ; if-the-else 
+  (define-fun ite ((b Bool) (a1 A) (a2 A)) A
+    (match b (true a1) (false a2))) 
   ; not
-  (define-const not (-> Bool Bool) 
-    (lambda ((b Bool)) (ite b false true)))
+  (define-fun not ((b Bool)) Bool
+    (ite b false true)))
+  ; !=
+  (define-fun != ((a1 A) (a2 A)) Bool 
+    (not (= a1 a2)))
   ; distinct
-  (define-const distinct (-> (! Type :var A :implicit) A A Bool) 
-    (lambda ((A Type :implicit) (x A) (y A)) (not (= x y))) :pairwise)
+  (define-fun distinct ((a1 A) (a2 A)) Bool 
+    (!= a1 a2)
+   :pairwise)
   ; or
-  (define-const or (-> Bool Bool Bool) 
-    (lambda ((b1 Bool) (b2 Bool)) (ite b1 true b2)) :left-assoc)
+  (define-fun or ((b1 Bool) (b2 Bool)) Bool
+    (ite b1 true b2)) 
+   :left-assoc)
   ; and
-  (define-const and (-> Bool Bool Bool) 
-    (lambda ((b1 Bool) (b2 Bool)) (ite b1 b2 false)) :left-assoc)
+  (define-fun and ((b1 Bool) (b2 Bool)) bool
+    (ite b1 b2 false))
+   :left-assoc)
   ; implies
-  (define-const => (-> Bool Bool Bool) 
-    (lambda ((b1 Bool) (b2 Bool)) (ite b1 b2 true)) :right-assoc)
+  (define-fun => ((b1 Bool) (b2 Bool)) Bool
+    (ite b1 b2 true))
+   :right-assoc)
+  ; iff
+  (define-fun <=> ((b1 Bool) (b2 Bool)) Bool
+    (= b1 b2))
+   :right-assoc)
   ; xor
-  (define-const xor (-> Bool Bool Bool) 
-    (lambda ((b1 Bool) (b2 Bool)) (distinct b1 b2)) :left-assoc)
+  (define-fun xor ((b1 Bool) (b2 Bool)) Bool 
+    (!= b1 b2))
+   :left-assoc)
   ; forall
-  (define-const forall 
-    (-> (! Type :var A :implicit)
-        (-> A Bool) Bool)
-    (lambda ((A Type :implicit) (P (-> A Bool)))
-      (= P (lambda ((x A)) true))))
-  ; Note: This forall quantifies only over individuals, not over types.
-  ;       A forall quantifier over types is provided as a primitive binder.
+  (define-fun forall ((p (-> A Bool))) Bool
+      (= p (lambda ((x A)) true)))
 
   (set-info :notation 
    "(forall ((x τ)) φ) abbreviates 
-    (forall (lambda ((x₁ τ₁)) φ))
+    (forall (lambda ((x τ)) φ))
   
     (forall ((x₁ τ₁) ⋅⋅⋅ (xᵢ τᵢ)) φ) abbreviates 
     (forall ((x₁ τ₁)) ⋅⋅⋅ (forall ((xᵢ τᵢ)) φ))
-
-    (forall ((τ₁ Type) ⋅⋅⋅ (τⱼ Type) (x₁ τ₁) ⋅⋅⋅ (xᵢ τᵢ)) φ) abbreviates 
-    (forall ((τ₁ Type) ⋅⋅⋅ (τⱼ Type))
-      (forall ((x₁ τ₁)) ⋅⋅⋅ (forall ((xᵢ τᵢ)) φ)))
    ")
   ; exists
-  (define-const exists 
-    (-> (! Type :var A :implicit) 
-        (-> A Bool) Bool) 
-    (lambda ((A Type :implicit) (P (-> A Bool)))
-      (distinct P (lambda ((x A)) false))))
+  (define-fun exists ((p (-> A Bool))) Bool
+    (!= p (lambda ((x A)) false)))
   ;
   (set-info :notation 
    "(exists ((x τ)) φ) abbreviates 
-    (exists (lambda ((x₁ τ₁)) φ))
+    (exists (lambda ((x τ)) φ))
 
     (exists ((x₁ τ₁) ⋅⋅⋅ (xᵢ τᵢ)) φ) abbreviates 
     (exists ((x₁ τ₁)) ⋅⋅⋅ (exists ((xᵢ τᵢ)) φ))
    ")
-
   ; Hilbert's choice (ε)
-  (declare-const choose 
-    (-> (! Type :var A :implicit)
-        (-> A Bool) A))
+  (declare-const choose (-> A Bool) A)
   ;
   ; choose is axiomatically defined  
-  (assert (forall ((A Type) (P (-> A Bool))) 
-    (= (exists P) (P (choose P)))))
+  (assert (forall ((p (-> A Bool))) (<=> (exists p) (p (choose p)))))
   ;
   (set-info :notation 
    "(choose (x τ) φ)  abbreviates  (choose (lambda ((x τ)) φ))
    ")
 
-  ;-------------
-  ; Bool values
-  ;-------------
-  ; The set of values of type Bool is {true, false}.
-  (define-syntax (⟨bool_value⟩)
-    ; production rules
-    ((⟨bool_value⟩ (true false))))
-
-  (define-values Bool ⟨bool_value⟩)
-
   ; compose
-  (define-fun compose
-   ((A Type :implicit)
-    (B Type :implicit)
-    (C Type :implicit)
-    (f (-> B C))
-    (g (-> A B))
-   )
-   (-> A C)
-   (lambda ((a A)) (f (g a)))
-   :note 
+  (define-fun compose ((f (-> B C)) (g (-> A B))) (-> A C)
+    (lambda ((a A)) (f (g a)))
+    :note 
     "compose is not declared left-associative on purpose otherwise
      there would be ambiguity between (compose f g h) where f g and h 
      are functions to be composed and (compose f g a) where a is 
-     the input of g."
- )
-
-; ; pipe
-;   (define-const pipe
-;     (-> (! Type :var A :implicit)
-;         (! Type :var B :implicit)
-;         A (-> A B) B)
-;     (lambda ((A Type) (B Type) (a A) (f (-> A B)))
-;       (f a))
-;     :left-assoc  ; this is actually problematic without type inference:
-;     ; (pipe a f g) = (pipe (pipe a f) g)      ((pipe a f) g)
-;     ; (pipe a f g) = (pipe (pipe a f) g) 
-;     )
-
-
-; identity
-  (define-const iden
-    (-> (! Type :var A :implicit) A A)
-    (lambda ((A Type) (a A)) a))
-
-  ; @
-  (define-const @
-    (-> (! Type :var A :implicit)
-        (! Type :var B :implicit)
-        (-> A B) A B)
-    (lambda ((A Type) (B Type) (f (-> A B))) f)
-    :left-assoc ; (@ g a b) = (@ (@ g a) b) 
-  )
-
- 
+     the input of g.")
 
   ;-----------------------
   ; Abstract value syntax
@@ -2009,6 +1981,9 @@ of the old ones in any meaningful way.
     ( (⟨bool_value⟩ (true false))
       (⟨abstract_value⟩ ((! ⟨symbol⟩ :restrict "starts with @")))))
 
+  ;-------------
+  ; Bool values
+  ;-------------
   (define-values () Bool ⟨bool_value⟩)
 
 
@@ -2016,7 +1991,6 @@ of the old ones in any meaningful way.
   ; Import Attributes
   ;-------------------
 
-     ; FOL
   (set-info :FOL
    "The import attribute :FOL restricts Core
       to the first-order applicative fragment:
@@ -2046,7 +2020,7 @@ of the old ones in any meaningful way.
   <pre class="prettyprint lang-smt3">
   (define-module Ints (
   (set-info :smt-lib-version 3.0)
-  (set-info :smt-lib-release "2020-XX-XX")
+  (set-info :smt-lib-release "2026-XX-XX")
   (set-info :written-by "Pascal Fontaine and Cesare Tinelli")
   (set-info :date "2020-05-01")
   (set-info :last-updated "2020-05-01")
@@ -2205,7 +2179,7 @@ of the old ones in any meaningful way.
   <pre class="prettyprint lang-smt3">
   (define-module Reals (
   (set-info :smt-lib-version 3.0)
-  (set-info :smt-lib-release "2020-XX-XX")
+  (set-info :smt-lib-release "2026-XX-XX")
   (set-info :written-by "Pascal Fontaine and Cesare Tinelli")
   (set-info :date "2020-07-01")
   (set-info :last-updated "2020-07-01")
@@ -2441,7 +2415,7 @@ of the old ones in any meaningful way.
 
 (define-module FixedSizeBitVectors (
   (set-info :smt-lib-version 3.0)
-  (set-info :smt-lib-release "2020-XX-XX")
+  (set-info :smt-lib-release "2026-XX-XX")
   (set-info :written-by "Pascal Fontaine and Cesare Tinelli")
   (set-info :date "2020-05-01")
   (set-info :last-updated "2020-07-01")
@@ -3134,7 +3108,7 @@ of the old ones in any meaningful way.
   <pre class="prettyprint lang-smt3">
   (define-module Strings (
   (set-info :smt-lib-version 3.0)
-  (set-info :smt-lib-release "2020-XX-XX")
+  (set-info :smt-lib-release "2026-XX-XX")
   (set-info :written-by "Pascal Fontaine and Cesare Tinelli")
   (set-info :date "2020-07-01")
   (set-info :last-updated "2020-07-01")
