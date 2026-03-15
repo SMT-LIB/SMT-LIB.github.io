@@ -1525,7 +1525,7 @@ twice.
 The net effect is that 
 <code class="prettyprint lang-smt3">p</code>
 has two principal (polymorphic) types in 
-<code class="prettyprint lang-smt3">p</code>:
+<code class="prettyprint lang-smt3">M3</code>:
 <code class="prettyprint lang-smt3">(→ A Y Bool)</code>
 and
 <code class="prettyprint lang-smt3">(→ X B Bool)</code>.
@@ -1552,7 +1552,7 @@ both in syntax and semantics.
   )
 
   (declare-datatype BinTree (par (X)
-      ((leaf) (node (left BinTree) (val X) (right BinTree)))
+      ((leaf) (node (left (BinTree X) (val X) (right (BinTree X)))
   )
 </pre>
 
@@ -1594,7 +1594,7 @@ Every inductive type definition induces an implicit definition of <em>testers</e
 for the type.
 For example, for the 
 <code class="prettyprint lang-smt3">List</code>
-type introduced above there would be the following tester functions 
+type defined above there would be the following tester functions 
 
 <pre class="prettyprint lang-smt3">
   (is-nil (→ (List E) Bool))
@@ -1606,11 +1606,12 @@ where
 is a type variable.
 
 Note that the syntax for testers is different from SMT-LIB 2.7,
-where those two functions would have an index name:
+where those two functions would have an indexed name:
  <code class="prettyprint lang-smt3">(_ is nil)</code>
 and
-<code class="prettyprint lang-smt3">(_ is cons)</code>.
-The index name form is still allowed as syntactic sugar
+<code class="prettyprint lang-smt3">(_ is cons)</code>,
+respectively.
+The indexed-name form is still allowed as syntactic sugar
 for backward compatibility but is deprecated.
 
 Recursors are a new feature in SMT-LIB 3.
@@ -1635,8 +1636,8 @@ recursor behaves as if it had been directly defined as follows
   (declare-type-var X)
   (declare-type-var Y)
   (define-fun-rec reduce 
-    ( (y0 Y) (comb (→ X (List X) Y Y)) (l (List X)) )
-    Y
+    ( (y0 Y) (comb (→ X (List X) Y Y)) (l (List X)) ) ; input vars
+    Y                                                 ; output type
     (match l 
       ( (nil y0)
         ((cons h t) (comb h t (reduce y0 comb t)))
@@ -1653,7 +1654,7 @@ to a value of type
 with the aid of a value 
 <code class="prettyprint lang-smt3">y0</code> 
 of type 
-<code class="prettyprint lang-smt3">B</code>
+<code class="prettyprint lang-smt3">Y</code>
 for the case where
 <code class="prettyprint lang-smt3">l</code>
 is empty, and of a function
@@ -1675,7 +1676,7 @@ datatype defined above would defined as follow
     ( (y0 Y) (comb (→ (BinTree X) X (BinTree X) Y Y Y)) (t (Tree X)) )
     Y
     (match t 
-      ( (Leaf y0)
+      ( (leaf y0)
         ((node t1 v t2) (comb t1 v t2 (reduce y0 comb t1) (reduce y0 comb t2)))
       )
     )
@@ -1683,9 +1684,12 @@ datatype defined above would defined as follow
 </pre>
 </p>
 
-<p>The rationale of having automatically define recursors supported directly
-by the SMT solver is that a wealth of functions over a recursive datatype
-can be defined, non-recursively, by the user in terms of 
+<p>
+For each datatype, the recursor can be defined automatically
+based on the datatype's constructors and their type.
+The rationale for having recursors supported directly by the SMT solver 
+is that a wealth of functions over a recursive datatype can be defined, 
+non-recursively, by the user in terms of 
 <code class="prettyprint lang-smt3">reduce</code>.
 This in principle should facilitate reasoning about functions 
 over datatypes as the solver can concentrate on reasoning about 
@@ -1698,25 +1702,31 @@ datatype, the functions that can be defined with
 include the following:
 
 <pre class="prettyprint lang-smt3">
-  (declare-type-var A)
-  (declare-type-var B)
+  ; Sum over the elements of an Int list
   (define-const sum ((l (List Int))) Int
     (reduce 0 (lambda ((n Int) (t (List Int)) (s Int)) (+ n s)) l) 
   )
+  ; Length of a list
+  (declare-type-var A)
   (define-fun len ((l (List A))) Int
     (reduce 0 (lambda ((a A) (t (List A)) (n Int)) (+1 n)) l)
   )
+  ; List concatenation
   (define-fun append ((l1 (List A))) (l2 (List A)) (List A)
     (reduce l2 (lambda ((a A) (t (List A)) (r (List A))) (cons a r)) l1)
   )
+  ; List reverse
   (define-fun reverse ((l (List A))) (List A)
     (reduce (as nil (List A)) 
       (lambda ((a A) (t (List A)) (r (List A))) (append r (cons a (nil A)))) l)
   )
+  ; List of element of input list that satisfy input predicate
   (define-fun filter ((p (-> A Bool)) (l (List A))) (List A)
     (reduce (as nil (List A)) 
       (lambda ((a A) (t (List A)) (r (List A))) (ite (p a) (cons a r) r)) l)
   )
+  (declare-type-var B)
+  ; List map function
   (define-fun map ((f (→ A B)) (l (List A))) (List A)
     (reduce (as nil (List A)) 
       (lambda ((a A) (t (List A)) (r (List B))) (ite (p a) (cons a r) r)) l)
