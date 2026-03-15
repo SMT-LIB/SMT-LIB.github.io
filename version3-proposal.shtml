@@ -1850,9 +1850,8 @@ the semantics of the old ones in any meaningful way.
 
 <button type="button" class="collapsible">Core</button>
 <div class="coll_content">
- <pre class="prettyprint lang-smt3">
+ <pre class="prettyprint lang-smt3"><code>
 ; Core SMT-LIB theory
-
 (define-module Core ( 
   (set-info :smt-lib-version 3.0)
   (set-info :smt-lib-release "2026-XX-XX")
@@ -1860,20 +1859,18 @@ the semantics of the old ones in any meaningful way.
   (set-info :date "2026-03-15")
   (set-info :last-updated "2026-03-15")
   (set-info :update-history
-   "TODO.
-   "
-  )
-
-  ; Booleans
-  (declare-datatype Bool ((true) (false)))
+   "TODO.")
 
   (declare-type-var A)
   (declare-type-var B)
   (declare-type-var C)
 
-  ;-------------------
+  ;-----------------
   ; Builtin symbols
-  ;------------------- 
+  ;----------------- 
+
+  ; Booleans
+  (declare-datatype Bool ((true) (false)))
 
   ; Arrow types
   (declare-type -> (Type) 
@@ -1932,15 +1929,14 @@ the semantics of the old ones in any meaningful way.
    :left-assoc)
   ; forall
   (define-fun forall ((p (-> A Bool))) Bool
-      (= p (lambda ((x A)) true)))
-
+    (= p (lambda ((x A)) true)))
+  ;
   (set-info :notation 
    "(forall ((x τ)) φ) abbreviates 
     (forall (lambda ((x τ)) φ))
   
     (forall ((x₁ τ₁) ⋅⋅⋅ (xᵢ τᵢ)) φ) abbreviates 
-    (forall ((x₁ τ₁)) ⋅⋅⋅ (forall ((xᵢ τᵢ)) φ))
-   ")
+    (forall ((x₁ τ₁)) ⋅⋅⋅ (forall ((xᵢ τᵢ)) φ))")
   ; exists
   (define-fun exists ((p (-> A Bool))) Bool
     (!= p (lambda ((x A)) false)))
@@ -1950,18 +1946,14 @@ the semantics of the old ones in any meaningful way.
     (exists (lambda ((x τ)) φ))
 
     (exists ((x₁ τ₁) ⋅⋅⋅ (xᵢ τᵢ)) φ) abbreviates 
-    (exists ((x₁ τ₁)) ⋅⋅⋅ (exists ((xᵢ τᵢ)) φ))
-   ")
+    (exists ((x₁ τ₁)) ⋅⋅⋅ (exists ((xᵢ τᵢ)) φ))")
   ; Hilbert's choice (ε)
   (declare-const choose (-> A Bool) A)
-  ;
-  ; choose is axiomatically defined  
+  ; choose is defined axiomatically   
   (assert (forall ((p (-> A Bool))) (<=> (exists p) (p (choose p)))))
   ;
   (set-info :notation 
-   "(choose (x τ) φ)  abbreviates  (choose (lambda ((x τ)) φ))
-   ")
-
+   "(choose (x τ) φ)  abbreviates  (choose (lambda ((x τ)) φ))")
   ; compose
   (define-fun compose ((f (-> B C)) (g (-> A B))) (-> A C)
     (lambda ((a A)) (f (g a)))
@@ -1976,15 +1968,15 @@ the semantics of the old ones in any meaningful way.
   ;-----------------------
   (define-syntax 
     ; non-terminals
-    ( ⟨abstract_value⟩ ⟨bool_value⟩ )
+    ( <:abstract_value:> <:bool_value:></:bool_value:> )
     ; production rules
-    ( (⟨bool_value⟩ (true false))
-      (⟨abstract_value⟩ ((! ⟨symbol⟩ :restrict "starts with @")))))
+    ( (<:bool_value:> (true false))
+      (<:abstract_value:> ((! <:symbol:> :restrict "starts with @")))))
 
   ;-------------
   ; Bool values
   ;-------------
-  (define-values () Bool ⟨bool_value⟩)
+  (define-values <:bool_value:> () Bool)
 
 
   ;-------------------
@@ -2011,9 +2003,9 @@ the semantics of the old ones in any meaningful way.
    "The import attribute :no-new-functions disallows the declaration 
     of constants of arrow type.")
 ))
-
- </pre>
- (<a href="Version3/Ints.smt3">raw file</a>)
+</code>
+</pre>
+<!-- (<a href="Version3/Ints.smt3">raw file</a>) -->
 </div>
 <button type="button" class="collapsible">Ints</button>
 <div class="coll_content">
