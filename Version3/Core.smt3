@@ -1,195 +1,135 @@
 ; Core SMT-LIB theory
-
 (define-module Core ( 
   (set-info :smt-lib-version 3.0)
-  (set-info :smt-lib-release "2020-XX-XX")
+  (set-info :smt-lib-release "2026-XX-XX")
   (set-info :written-by "Pascal Fontaine and Cesare Tinelli")
-  (set-info :date "2020-04-24")
-  (set-info :last-updated "2020-04-24")
+  (set-info :date "2026-03-15")
+  (set-info :last-updated "2026-03-15")
   (set-info :update-history
-   "TODO.
-   "
-  )
+   "TODO.")
 
-  ;---------------
-  ; Builtin types
-  ;--------------- 
+  (declare-type-var A)
+  (declare-type-var B)
+  (declare-type-var C)
+
+  ;-----------------
+  ; Builtin symbols
+  ;----------------- 
+
   ; Booleans
-  (declare-type Bool () :builtin
-   "The (binary) set {true, false}")
+  (declare-datatype Bool ((true) (false)))
 
-  ; Could be defined as a datatype in alternative
+  ; Arrow types
+  (declare-type -> (Type) 
+   :right-assoc
+   :builtin "Function type constructor.")
 
-  ;-------------------
-  ; Builtin constants
-  ;------------------- 
-   ; Equality  
-  (declare-const = (-> (! Type :var A :implicit) 
-                       A A Bool)
+  ; Equality  
+  (declare-const = (-> A A Bool)
    :chainable 
    :builtin 
    "= denotes the identity function, which returns true iff 
     its two arguments are identical.")
 
-  ;-----------------------
-  ; Axiomatized constants
-  ;----------------------- 
-  ; true, false
-  (define-const true Bool)
-  (declare-const false Bool)
-  ; ite
-  (declare-const ite 
-    (-> (! Type :var A :implicit) 
-           Bool A A A))
-  ; ite is if-then-else
-  (assert (forall ((A Type)) (= (ite true) (lambda ((x A) (y A)) x))))
-  (assert (forall ((A Type)) (= (ite false) (lambda ((x A) (y A)) y))))
-  ; true and false are distinct
-  (assert (= (= true false) false))
-
   ;-------------------
   ; Defined constants
   ;------------------- 
+  ; Apply
+  (define-fun @ ((f (-> A B)) (a A)) B
+    (f a)
+   :left-assoc) ; (@ f a b) = (@ (@ f a) b)
+  ; Identity
+  (define-const iden ((a A)) A
+    a)
+  ; if-the-else 
+  (define-fun ite ((b Bool) (a1 A) (a2 A)) A
+    (match b (true a1) (false a2))) 
   ; not
-  (define-const not (-> Bool Bool) 
-    (lambda ((b Bool)) (ite b false true)))
+  (define-fun not ((b Bool)) Bool
+    (ite b false true))
+  ; !=
+  (define-fun != ((a1 A) (a2 A)) Bool 
+    (not (= a1 a2)))
   ; distinct
-  (define-const distinct (-> (! Type :var A :implicit) A A Bool) 
-    (lambda ((A Type :implicit) (x A) (y A)) (not (= x y))) :pairwise)
+  (define-fun distinct ((a1 A) (a2 A)) Bool 
+    (!= a1 a2)
+   :pairwise)
   ; or
-  (define-const or (-> Bool Bool Bool) 
-    (lambda ((b1 Bool) (b2 Bool)) (ite b1 true b2)) :left-assoc)
+  (define-fun or ((b1 Bool) (b2 Bool)) Bool
+    (ite b1 true b2) 
+   :left-assoc)
   ; and
-  (define-const and (-> Bool Bool Bool) 
-    (lambda ((b1 Bool) (b2 Bool)) (ite b1 b2 false)) :left-assoc)
+  (define-fun and ((b1 Bool) (b2 Bool)) bool
+    (ite b1 b2 false)
+   :left-assoc)
   ; implies
-  (define-const => (-> Bool Bool Bool) 
-    (lambda ((b1 Bool) (b2 Bool)) (ite b1 b2 true)) :right-assoc)
+  (define-fun => ((b1 Bool) (b2 Bool)) Bool
+    (ite b1 b2 true)
+   :right-assoc)
+  ; iff
+  (define-fun <=> ((b1 Bool) (b2 Bool)) Bool
+    (= b1 b2)
+   :right-assoc)
   ; xor
-  (define-const xor (-> Bool Bool Bool) 
-    (lambda ((b1 Bool) (b2 Bool)) (distinct b1 b2)) :left-assoc)
+  (define-fun xor ((b1 Bool) (b2 Bool)) Bool 
+    (!= b1 b2)
+   :left-assoc)
   ; forall
-  (define-const forall 
-    (-> (! Type :var A :implicit)
-        (-> A Bool) Bool)
-    (lambda ((A Type :implicit) (P (-> A Bool)))
-      (= P (lambda ((x A)) true))))
-  ; Note: This forall quantifies only over individuals, not over types.
-  ;       A forall quantifier over types is provided as a primitive binder.
-
+  (define-fun forall ((p (-> A Bool))) Bool
+    (= p (lambda ((x A)) true)))
+  ;
   (set-info :notation 
    "(forall ((x τ)) φ) abbreviates 
-    (forall (lambda ((x₁ τ₁)) φ))
+    (forall (lambda ((x τ)) φ))
   
     (forall ((x₁ τ₁) ⋅⋅⋅ (xᵢ τᵢ)) φ) abbreviates 
-    (forall ((x₁ τ₁)) ⋅⋅⋅ (forall ((xᵢ τᵢ)) φ))
-
-    (forall ((τ₁ Type) ⋅⋅⋅ (τⱼ Type) (x₁ τ₁) ⋅⋅⋅ (xᵢ τᵢ)) φ) abbreviates 
-    (forall ((τ₁ Type) ⋅⋅⋅ (τⱼ Type))
-      (forall ((x₁ τ₁)) ⋅⋅⋅ (forall ((xᵢ τᵢ)) φ)))
-   ")
+    (forall ((x₁ τ₁)) ⋅⋅⋅ (forall ((xᵢ τᵢ)) φ))")
   ; exists
-  (define-const exists 
-    (-> (! Type :var A :implicit) 
-        (-> A Bool) Bool) 
-    (lambda ((A Type :implicit) (P (-> A Bool)))
-      (distinct P (lambda ((x A)) false))))
+  (define-fun exists ((p (-> A Bool))) Bool
+    (!= p (lambda ((x A)) false)))
   ;
   (set-info :notation 
    "(exists ((x τ)) φ) abbreviates 
-    (exists (lambda ((x₁ τ₁)) φ))
+    (exists (lambda ((x τ)) φ))
 
     (exists ((x₁ τ₁) ⋅⋅⋅ (xᵢ τᵢ)) φ) abbreviates 
-    (exists ((x₁ τ₁)) ⋅⋅⋅ (exists ((xᵢ τᵢ)) φ))
-   ")
-
+    (exists ((x₁ τ₁)) ⋅⋅⋅ (exists ((xᵢ τᵢ)) φ))")
   ; Hilbert's choice (ε)
-  (declare-const choose 
-    (-> (! Type :var A :implicit)
-        (-> A Bool) A))
-  ;
-  ; choose is axiomatically defined  
-  (assert (forall ((A Type) (P (-> A Bool))) 
-    (= (exists P) (P (choose P)))))
+  (declare-const choose (-> A Bool) A)
+  ; choose is defined axiomatically   
+  (assert (forall ((p (-> A Bool))) (<=> (exists p) (p (choose p)))))
   ;
   (set-info :notation 
-   "(choose (x τ) φ)  abbreviates  (choose (lambda ((x τ)) φ))
-   ")
-
-  ;-------------
-  ; Bool values
-  ;-------------
-  ; The set of values of type Bool is {true, false}.
-  (define-syntax (⟨bool_value⟩)
-    ; production rules
-    ((⟨bool_value⟩ (true false))))
-
-  (define-values Bool ⟨bool_value⟩)
-
+   "(choose (x τ) φ)  abbreviates  (choose (lambda ((x τ)) φ))")
   ; compose
-  (define-fun compose
-   ((A Type :implicit)
-    (B Type :implicit)
-    (C Type :implicit)
-    (f (-> B C))
-    (g (-> A B))
-   )
-   (-> A C)
-   (lambda ((a A)) (f (g a)))
-   :note 
+  (define-fun compose ((f (-> B C)) (g (-> A B))) (-> A C)
+    (lambda ((a A)) (f (g a)))
+    :note 
     "compose is not declared left-associative on purpose otherwise
      there would be ambiguity between (compose f g h) where f g and h 
      are functions to be composed and (compose f g a) where a is 
-     the input of g."
- )
-
-; ; pipe
-;   (define-const pipe
-;     (-> (! Type :var A :implicit)
-;         (! Type :var B :implicit)
-;         A (-> A B) B)
-;     (lambda ((A Type) (B Type) (a A) (f (-> A B)))
-;       (f a))
-;     :left-assoc  ; this is actually problematic without type inference:
-;     ; (pipe a f g) = (pipe (pipe a f) g)      ((pipe a f) g)
-;     ; (pipe a f g) = (pipe (pipe a f) g) 
-;     )
-
-
-; identity
-  (define-const iden
-    (-> (! Type :var A :implicit) A A)
-    (lambda ((A Type) (a A)) a))
-
-  ;apply
-  (define-const apply
-    (-> (! Type :var A :implicit)
-        (! Type :var B :implicit)
-        (-> A B) A B)
-    (lambda ((A Type) (B Type) (f (-> A B))) f)
-    :left-assoc ; (apply g a b) = (apply (apply g a) b) 
-  )
-
- 
+     the input of g.")
 
   ;-----------------------
   ; Abstract value syntax
   ;-----------------------
   (define-syntax 
     ; non-terminals
-    ( ⟨abstract_value⟩ ⟨bool_value⟩ )
+    ( <.abstract_value.> <.bool_value.> )
     ; production rules
-    ( (⟨bool_value⟩ (true false))
-      (⟨abstract_value⟩ ((! ⟨symbol⟩ :restrict "starts with @")))))
+    ( (<.bool_value.> (true false))
+      (<.abstract_value.> ((! <.symbol.> :restrict "starts with @")))))
 
-  (define-values () Bool ⟨bool_value⟩)
+  ;-------------
+  ; Bool values
+  ;-------------
+  (define-values <.bool_value.> () Bool)
 
 
   ;-------------------
   ; Import Attributes
   ;-------------------
 
-     ; FOL
   (set-info :FOL
    "The import attribute :FOL restricts Core
       to the first-order applicative fragment:

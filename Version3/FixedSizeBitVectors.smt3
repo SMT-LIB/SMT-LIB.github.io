@@ -1,11 +1,11 @@
-;; **Make sure that all operators in QF_BV.smt2 have been added**
+; [to be completed]
 
 (define-module FixedSizeBitVectors (
   (set-info :smt-lib-version 3.0)
-  (set-info :smt-lib-release "2020-XX-XX")
+  (set-info :smt-lib-release "2026-XX-XX")
   (set-info :written-by "Pascal Fontaine and Cesare Tinelli")
-  (set-info :date "2020-05-01")
-  (set-info :last-updated "2020-07-01")
+  (set-info :date "2026-03-15")
+  (set-info :last-updated "2026-03-15")
   (set-info :update-history
    "TODO.
    "
@@ -23,25 +23,36 @@
   ; External symbols
   ;------------------
 
-  (declare-type Int () :external Ints)
-
-  (declare-const ⟨numeral⟩ Int :external Ints)
-
-  (declare-const 0 Int :external Ints)
-  (declare-const 1 Int :external Ints)
-  (declare-const +1 (-> Int Int) :external Ints)
-  (declare-const + (-> Int Int Int) :external Ints)
-  (declare-const - (-> Int Int Int) :external Ints)
-  (declare-const * (-> Int Int Int) :external Ints)
-  (declare-const < (-> Int Int Bool) :external Ints)
-  (declare-const > (-> Int Int Bool) :external Ints)
+  (declare-type Int () :extern Ints::Int)
+  (declare-consts <.numeral.> Int :extern Ints::<.numeral.>)
+  (declare-const +1 (-> Int Int) :extern Ints::+1)
+  (declare-const + (-> Int Int Int) :extern Ints::+)
+  (declare-const - (-> Int Int Int) :extern Ints::-)
+  (declare-const * (-> Int Int Int) :extern Ints::*)
+  (declare-const < (-> Int Int Bool) :extern Ints::<)
+  (declare-const > (-> Int Int Bool) :extern Ints::>)
 
   ;---------------
   ; Builtin types
   ;---------------
 
+  (define-type Range ((lo Int) (hi Int :restrict (< lo hi))) 
+    (! Int :var n :restrict (<= lo n (-1 hi)))
+  )
+  ; The elements of (Range 0 3) are 0, 1, 2.  
+
+  (define-type Bit () (Range 0 1))
+
+  (declare-type BitVec ((m Int :restrict (> m 0))) 
+    (-> (Range 0 m) Bit))
+
+  (define-fun bit ((m Int :implicit :restrict (> m 0)) 
+                   (bv (BitVec m)) (i (Range 0 m))) Bit 
+    (bv i))
+
+
   ; definition as a dependent type 
-  (declare-type BitVec ((! Int :var m :restrict (<= 0 m)))
+  (declare-type BitVec ((! Int :var m :restrict (>= m 0)))
    :builtin 
    "(BitVec m) denotes the set of all bitvectors of size m >= 0.
    More precisely, it denotes the set of finite functions
@@ -125,8 +136,8 @@
   (declare-const bvempty (BitVec 0))
 
   ; Bitvector literals in binary form (such as #b10110)
-  (declare-const ⟨binary⟩
-    (-> (! Int :var m :syntax ⟨numeral⟩ :implicit 
+  (declare-const <.binary.>
+    (-> (! Int :var m :syntax <.numeral.> :implicit 
          :restrict "m is the number of binary digits in the constant") 
         (BitVec m))
    :builtin
@@ -142,8 +153,8 @@
    ")
 
   ; Bitvector literals in hexadecimal form (such as #xB93AD)
-  (declare-const ⟨hexadecimal⟩
-    (-> (! Int :var m :syntax ⟨numeral⟩ :implicit
+  (declare-const <.hexadecimal.>
+    (-> (! Int :var m :syntax <.numeral.> :implicit
          :restrict "m is 4 times the number of hexadecimal digits in the constant") 
         (BitVec m))
    :builtin
@@ -151,17 +162,16 @@
     represented in hexadecimal (base 16) by h.
     For example, #xFF is equivalent to #b11111111.
    ")
-
-				     
+		     
   ;--------------------
   ; Sequence operators
   ;--------------------
 
   ; concat
   (declare-const concat 
-    (-> (! Int :var i :syntax ⟨numeral⟩ :implicit :restrict (<= 0 i)) 
-        (! Int :var j :syntax ⟨numeral⟩ :implicit :restrict (<= 0 j)) 
-        (! Int :var k :syntax ⟨numeral⟩ :implicit :restrict (= k (+ i j))) 
+    (-> (! Int :var i :syntax <.numeral.> :implicit :restrict (<= 0 i)) 
+        (! Int :var j :syntax <.numeral.> :implicit :restrict (<= 0 j)) 
+        (! Int :var k :syntax <.numeral.> :implicit :restrict (= k (+ i j))) 
         (BitVec i) (BitVec j)
         (BitVec k))
    :builtin
@@ -173,10 +183,10 @@
 
   ; extract
   (declare-const extract
-    (-> (! Int :var m :syntax ⟨numeral⟩ :implicit :restrict (< 0 m)) 
-        (! Int :var i :syntax ⟨numeral⟩ :restrict (< i m)) 
-        (! Int :var j :syntax ⟨numeral⟩ :restrict (<= 0 j i))
-        (! Int :var k :syntax ⟨numeral⟩ :implicit :restrict (= k (+1 (- i j))))
+    (-> (! Int :var m :syntax <.numeral.> :implicit :restrict (< 0 m)) 
+        (! Int :var i :syntax <.numeral.> :restrict (< i m)) 
+        (! Int :var j :syntax <.numeral.> :restrict (<= 0 j i))
+        (! Int :var k :syntax <.numeral.> :implicit :restrict (= k (+1 (- i j))))
         (BitVec m) (BitVec k))
    :builtin
    "For all terms t of type (BitVec m),
@@ -193,9 +203,9 @@
   ; repeat
   ; (repeat i x) means concatenate i copies of x
   (define-fun-rec repeat 
-    ((i Int :syntax ⟨numeral⟩ :restrict (<= 0 i)) 
-     (m Int :syntax ⟨numeral⟩ :implicit :restrict (<= 0 m)) 
-     (n Int :syntax ⟨numeral⟩ :implicit :restrict (= n (* m i))) 
+    ((i Int :syntax <.numeral.> :restrict (<= 0 i)) 
+     (m Int :syntax <.numeral.> :implicit :restrict (<= 0 m)) 
+     (n Int :syntax <.numeral.> :implicit :restrict (= n (* m i))) 
      (x (BitVec m))
     ) 
     (BitVec n)
@@ -208,7 +218,7 @@
 
   ; bvnot
   (declare-const bvnot
-    (-> (! Int :var m :syntax ⟨numeral⟩ :implicit :restrict (<= 0 m)) 
+    (-> (! Int :var m :syntax <.numeral.> :implicit :restrict (<= 0 m)) 
         (BitVec m) (BitVec m))
    :builtin
    "- For all terms s of type (BitVec 0),
@@ -219,7 +229,7 @@
 
   ; bvand
   (declare-const bvand
-    (-> (! Int :var m :syntax ⟨numeral⟩ :implicit :restrict (<= 0 m)) 
+    (-> (! Int :var m :syntax <.numeral.> :implicit :restrict (<= 0 m)) 
         (BitVec m) (BitVec m) (BitVec m))
    :left-assoc
    :builtin
@@ -231,7 +241,7 @@
 
   ; bvor
   (declare-const bvor
-    (-> (! Int :var m :syntax ⟨numeral⟩ :implicit :restrict (<= 0 m)) 
+    (-> (! Int :var m :syntax <.numeral.> :implicit :restrict (<= 0 m)) 
         (BitVec m) (BitVec m) (BitVec m)) 
    :left-assoc
    :builtin
@@ -243,27 +253,27 @@
 
   ; bvnand
   (define-const bvnand
-    (-> (! Int :var m :syntax ⟨numeral⟩ :implicit :restrict (<= 0 m)) 
+    (-> (! Int :var m :syntax <.numeral.> :implicit :restrict (<= 0 m)) 
          (BitVec m) (BitVec m) (BitVec m)) 
-    (lambda ((m Int :syntax ⟨numeral⟩ :implicit :restrict (<= 0 m))
+    (lambda ((m Int :syntax <.numeral.> :implicit :restrict (<= 0 m))
              (s (BitVec m)) (t (BitVec m))) 
       (bvnot (bvand s t)))
   )
 
   ; bvnor
   (define-const bvnor
-    (-> (! Int :var m :syntax ⟨numeral⟩ :implicit :restrict (<= 0 m)) 
+    (-> (! Int :var m :syntax <.numeral.> :implicit :restrict (<= 0 m)) 
         (BitVec m) (BitVec m) (BitVec m)) 
-    (lambda ((m Int :syntax ⟨numeral⟩ :implicit :restrict (<= 0 m)) 
+    (lambda ((m Int :syntax <.numeral.> :implicit :restrict (<= 0 m)) 
              (s (BitVec m)) (t (BitVec m))) 
       (bvnot (bvor s t)))
   )
 
   ; bvxor
   (define-const bvxor
-    (-> (! Int :var m :syntax ⟨numeral⟩ :implicit :restrict (<= 0 m)) 
+    (-> (! Int :var m :syntax <.numeral.> :implicit :restrict (<= 0 m)) 
         (BitVec m) (BitVec m) (BitVec m)) 
-    (lambda ((m Int :syntax ⟨numeral⟩ :implicit :restrict (<= 0 m)) 
+    (lambda ((m Int :syntax <.numeral.> :implicit :restrict (<= 0 m)) 
              (s (BitVec m)) (t (BitVec m))) 
       (bvor (bvand s (bvnot t)) (bvand (bvnot s) t)))
    :left-assoc
@@ -271,18 +281,18 @@
 
   ; bvxnor
   (define-const bvxnor
-    (-> (! Int :var m :syntax ⟨numeral⟩ :implicit :restrict (<= 0 m)) 
+    (-> (! Int :var m :syntax <.numeral.> :implicit :restrict (<= 0 m)) 
         (BitVec m) (BitVec m) (BitVec m)) 
-    (lambda ((m Int :syntax ⟨numeral⟩ :implicit :restrict (<= 0 m)) 
+    (lambda ((m Int :syntax <.numeral.> :implicit :restrict (<= 0 m)) 
              (s (BitVec m)) (t (BitVec m))) 
       (bvor (bvand s t) (bvand (bvnot s) (bvnot t))))
   )
 
   ;bvcomp
   (declare-const bvcomp
-    (-> (! Int :var m :syntax ⟨numeral⟩ :implicit :restrict (<= 0 m)) 
+    (-> (! Int :var m :syntax <.numeral.> :implicit :restrict (<= 0 m)) 
         (BitVec m) (BitVec m) (BitVec 1))
-    (lambda ((m Int :var m :syntax ⟨numeral⟩ :implicit :restrict (<= 0 m))
+    (lambda ((m Int :var m :syntax <.numeral.> :implicit :restrict (<= 0 m))
              (s (BitVec m)) (t (BitVec m)))
       (to_bv (= s t)))
   )
@@ -302,7 +312,7 @@
 
   ; bvneg
   (declare-const bvneg
-    (-> (! Int :var m :syntax ⟨numeral⟩ :implicit :restrict (<= 0 m)) 
+    (-> (! Int :var m :syntax <.numeral.> :implicit :restrict (<= 0 m)) 
         (BitVec m) (BitVec m))
    :builtin
    "- For all terms s of type (BitVec 0),
@@ -313,7 +323,7 @@
 
   ; bvadd
   (declare-const bvadd
-    (-> (! Int :var m :syntax ⟨numeral⟩ :implicit :restrict (<= 0 m)) 
+    (-> (! Int :var m :syntax <.numeral.> :implicit :restrict (<= 0 m)) 
         (BitVec m) (BitVec m) (BitVec m)) 
    :left-assoc
    :builtin
@@ -325,7 +335,7 @@
 
   ; bvmul
   (declare-const bvmul
-    (-> (! Int :var m :syntax ⟨numeral⟩ :implicit :restrict (<= 0 m)) 
+    (-> (! Int :var m :syntax <.numeral.> :implicit :restrict (<= 0 m)) 
         (BitVec m) (BitVec m) (BitVec m)) 
    :left-assoc
    :builtin
@@ -337,7 +347,7 @@
 
   ; bvudiv
   (declare-const bvudiv
-    (-> (! Int :var m :syntax ⟨numeral⟩ :implicit :restrict (<= 0 m)) 
+    (-> (! Int :var m :syntax <.numeral.> :implicit :restrict (<= 0 m)) 
         (BitVec m) (BitVec m) (BitVec m)) 
    :builtin
    "- For all terms s, t of type (BitVec 0),
@@ -350,7 +360,7 @@
 
   ; bvurem
   (declare-const bvurem
-    (-> (! Int :var m :syntax ⟨numeral⟩ :implicit :restrict (<= 0 m)) 
+    (-> (! Int :var m :syntax <.numeral.> :implicit :restrict (<= 0 m)) 
         (BitVec m) (BitVec m) (BitVec m)) 
    :builtin
    "- For all terms s, t of type (BitVec 0),
@@ -363,9 +373,9 @@
 
   ; bvsub
   (define-const bvsub
-    (-> (! Int :var m :syntax ⟨numeral⟩ :implicit :restrict (<= 0 m)) 
+    (-> (! Int :var m :syntax <.numeral.> :implicit :restrict (<= 0 m)) 
         (BitVec m) (BitVec m) (BitVec m))
-    (lambda ((m Int :syntax ⟨numeral⟩ :implicit :restrict (<= 0 m)) 
+    (lambda ((m Int :syntax <.numeral.> :implicit :restrict (<= 0 m)) 
              (s (BitVec m)) (t (BitVec m))) 
       (bvadd s (bvneg t)))
    )
@@ -376,7 +386,7 @@
 
   ; bvsdiv
   (declare-const bvsdiv
-      (-> (! Int :var m :syntax ⟨numeral⟩ :implicit :restrict (<= 0 m)) 
+      (-> (! Int :var m :syntax <.numeral.> :implicit :restrict (<= 0 m)) 
           (BitVec m) (BitVec m) (BitVec m)) 
    :builtin
    "- For all terms s, t of type (BitVec 0),
@@ -396,7 +406,7 @@
 
   ; bvsrem
   (declare-const bvsrem
-      (-> (! Int :var m :syntax ⟨numeral⟩ :implicit :restrict (<= 0 m)) 
+      (-> (! Int :var m :syntax <.numeral.> :implicit :restrict (<= 0 m)) 
           (BitVec m) (BitVec m) (BitVec m)) 
    :builtin
    "- For all terms s, t of type (BitVec 0),
@@ -417,7 +427,7 @@
 ;;;; REVISE DEFINITION [what is (bv0 m) ?]  TODO
   ; bvsmod
   (declare-const bvsmod
-    (-> (! Int :var m :syntax ⟨numeral⟩ :implicit :restrict (<= 0 m)) 
+    (-> (! Int :var m :syntax <.numeral.> :implicit :restrict (<= 0 m)) 
         (BitVec m) (BitVec m) (BitVec m)) 
    :builtin
    "- For all terms s, t of type (BitVec 0),
@@ -446,7 +456,7 @@
 
   ; bvult
   (declare-const bvult
-    (-> (! Int :var m :syntax ⟨numeral⟩ :implicit :restrict (<= 0 m)) 
+    (-> (! Int :var m :syntax <.numeral.> :implicit :restrict (<= 0 m)) 
         (BitVec m) (BitVec m) Bool) 
    :chainable
    :builtin
@@ -458,7 +468,7 @@
  
   ; bvule
   (define-const bvule
-    (-> (! Int :var m :syntax ⟨numeral⟩ :implicit :restrict (<= 0 m)) 
+    (-> (! Int :var m :syntax <.numeral.> :implicit :restrict (<= 0 m)) 
         (BitVec m) (BitVec m) Bool) 
     (lambda ((m Int :implicit :restrict (<= 0 m))
 	     (s (BitVec m)) (t (BitVec m))) 
@@ -467,18 +477,18 @@
 
   ; bvugt
   (define-const bvugt
-    (-> (! Int :var m :syntax ⟨numeral⟩ :implicit :restrict (<= 0 m)) 
+    (-> (! Int :var m :syntax <.numeral.> :implicit :restrict (<= 0 m)) 
         (BitVec m) (BitVec m) Bool) 
-    (lambda ((m Int :syntax ⟨numeral⟩ :implicit :restrict (<= 0 m))
+    (lambda ((m Int :syntax <.numeral.> :implicit :restrict (<= 0 m))
              (s (BitVec m)) (t (BitVec m))) 
       (bvult t s))
    )
 
   ; bvuge
   (define-const bvuge
-    (-> (! Int :var m :syntax ⟨numeral⟩ :implicit :restrict (<= 0 m)) 
+    (-> (! Int :var m :syntax <.numeral.> :implicit :restrict (<= 0 m)) 
         (BitVec m) (BitVec m) Bool) 
-    (lambda ((m Int :syntax ⟨numeral⟩ :implicit :restrict (<= 0 m))
+    (lambda ((m Int :syntax <.numeral.> :implicit :restrict (<= 0 m))
              (s (BitVec m)) (t (BitVec m))) 
       (bvule t s))
    )
@@ -489,7 +499,7 @@
 
   ; bvslt
   (declare-const bvslt
-    (-> (! Int :var m :syntax ⟨numeral⟩ :implicit :restrict (<= 0 m)) 
+    (-> (! Int :var m :syntax <.numeral.> :implicit :restrict (<= 0 m)) 
         (BitVec m) (BitVec m) Bool)
    :builtin
    "- For all terms s, t of type (BitVec 0),
@@ -504,7 +514,7 @@
 
   ; bvsle
   (declare-const bvsle
-    (-> (! Int :var m :syntax ⟨numeral⟩ :implicit :restrict (<= 0 m)) 
+    (-> (! Int :var m :syntax <.numeral.> :implicit :restrict (<= 0 m)) 
         (BitVec m) (BitVec m) Bool)
    :builtin
    "- For all terms s, t of type (BitVec 0),
@@ -519,18 +529,18 @@
 
   ; bvsgt
   (define-const bvsgt
-    (-> (! Int :var m :syntax ⟨numeral⟩ :implicit :restrict (<= 0 m)) 
+    (-> (! Int :var m :syntax <.numeral.> :implicit :restrict (<= 0 m)) 
         (BitVec m) (BitVec m) Bool) 
-    (lambda ((m Int :syntax ⟨numeral⟩ :implicit :restrict (<= 0 m))
+    (lambda ((m Int :syntax <.numeral.> :implicit :restrict (<= 0 m))
 	     (s (BitVec m)) (t (BitVec m))) 
       (bvslt t s))
    )
   
   ; bvsge
   (define-const bvsge
-    (-> (! Int :var m :syntax ⟨numeral⟩ :implicit :restrict (<= 0 m)) 
+    (-> (! Int :var m :syntax <.numeral.> :implicit :restrict (<= 0 m)) 
         (BitVec m) (BitVec m) Bool) 
-    (lambda ((m Int :syntax ⟨numeral⟩ :implicit :restrict (<= 0 m))
+    (lambda ((m Int :syntax <.numeral.> :implicit :restrict (<= 0 m))
              (s (BitVec m)) (t (BitVec m))) 
       (bvsle t s))
    )   
@@ -541,8 +551,8 @@
 
   ; bvshl
   (declare-const bvshl
-    (-> (! Int :var m :syntax ⟨numeral⟩ :implicit :restrict (<= 0 m)) 
-        (! Int :var n :syntax ⟨numeral⟩ :implicit :restrict (<= 0 n)) 
+    (-> (! Int :var m :syntax <.numeral.> :implicit :restrict (<= 0 m)) 
+        (! Int :var n :syntax <.numeral.> :implicit :restrict (<= 0 n)) 
         (BitVec m) (BitVec n) (BitVec m))
    :builtin
    "For all terms s and t of type (BitVec m) and (BitVec n), respectively,
@@ -551,8 +561,8 @@
  
   ; bvlshr  
   (declare-const bvlshr
-    (-> (! Int :var m :syntax ⟨numeral⟩ :implicit :restrict (<= 0 m)) 
-        (! Int :var n :syntax ⟨numeral⟩ :implicit :restrict (<= 0 n)) 
+    (-> (! Int :var m :syntax <.numeral.> :implicit :restrict (<= 0 m)) 
+        (! Int :var n :syntax <.numeral.> :implicit :restrict (<= 0 n)) 
     (BitVec m) (BitVec n) (BitVec m))
    :builtin
    "For all terms s and t of type (BitVec m) and (BitVec n), respectively,
@@ -565,9 +575,9 @@
 
   ; zero_extend
   (declare-const zero_extend
-    (-> (! Int :var i :syntax ⟨numeral⟩ :restrict (<= 0 i)) 
-        (! Int :var m :syntax ⟨numeral⟩ :implicit :restrict (<= 0 m)) 
-        (! Int :var n :syntax ⟨numeral⟩ :implicit :restrict (= n (+ m i))) 
+    (-> (! Int :var i :syntax <.numeral.> :restrict (<= 0 i)) 
+        (! Int :var m :syntax <.numeral.> :implicit :restrict (<= 0 m)) 
+        (! Int :var n :syntax <.numeral.> :implicit :restrict (= n (+ m i))) 
         (BitVec m) (BitVec n))
    :builtin
    "For all terms t of type (BitVec m),
@@ -577,9 +587,9 @@
 
   ; sign_extend
   (declare-const sign_extend
-    (-> (! Int :var i :syntax ⟨numeral⟩ :restrict (<= 0 i)) 
-        (! Int :var m :syntax ⟨numeral⟩ :implicit :restrict (<= 0 m)) 
-        (! Int :var n :syntax ⟨numeral⟩ :implicit :restrict (= n (+ m i))) 
+    (-> (! Int :var i :syntax <.numeral.> :restrict (<= 0 i)) 
+        (! Int :var m :syntax <.numeral.> :implicit :restrict (<= 0 m)) 
+        (! Int :var n :syntax <.numeral.> :implicit :restrict (= n (+ m i))) 
         (BitVec m) (BitVec n))
    :builtin
    "For all terms t of type (BitVec m),
@@ -589,8 +599,8 @@
 
   ; rotate_left
   (declare-const rotate_left
-    (-> (! Int :var i :syntax ⟨numeral⟩ :restrict (<= 0 i)) 
-        (! Int :var m :syntax ⟨numeral⟩ :implicit :restrict (<= 0 m)) 
+    (-> (! Int :var i :syntax <.numeral.> :restrict (<= 0 i)) 
+        (! Int :var m :syntax <.numeral.> :implicit :restrict (<= 0 m)) 
         (BitVec m) (BitVec m))
    :builtin
    "For all terms t of type (BitVec m),
@@ -599,8 +609,8 @@
  
   ; rotate_right
   (declare-const rotate_right
-    (-> (! Int :var i :syntax ⟨numeral⟩ :restrict (<= 0 i)) 
-        (! Int :var m :syntax ⟨numeral⟩ :implicit :restrict (<= 0 m)) 
+    (-> (! Int :var i :syntax <.numeral.> :restrict (<= 0 i)) 
+        (! Int :var m :syntax <.numeral.> :implicit :restrict (<= 0 m)) 
         (BitVec m) (BitVec m))
    :builtin
    "For all terms t of type (BitVec m),
@@ -609,7 +619,7 @@
  
   ; pop_count
   (declare-const pop_count
-    (-> (! Int :var m :syntax ⟨numeral⟩ :implicit :restrict (<= 0 m)) 
+    (-> (! Int :var m :syntax <.numeral.> :implicit :restrict (<= 0 m)) 
         (BitVec m) (BitVec m))
   :builtin
   "For all terms t of type (BitVec m),
@@ -619,7 +629,7 @@
    
   ; reduce_and
   (declare-const reduce_and
-    (-> (! Int :var m :syntax ⟨numeral⟩ :implicit :restrict (<= 0 m)) 
+    (-> (! Int :var m :syntax <.numeral.> :implicit :restrict (<= 0 m)) 
         (BitVec m) (BitVec 1))
   :builtin
   "For all terms t of type (BitVec m),
@@ -629,7 +639,7 @@
 
   ; reduce_or
   (declare-const reduce_or
-    (-> (! Int :var m :syntax ⟨numeral⟩ :implicit :restrict (<= 0 m)) 
+    (-> (! Int :var m :syntax <.numeral.> :implicit :restrict (<= 0 m)) 
         (BitVec m) (BitVec 1))
   :builtin
   "For all terms t of type (BitVec m),
@@ -639,7 +649,7 @@
 
   ; reduce_xor
   (declare-const reduce_xor
-    (-> (! Int :var m :syntax ⟨numeral⟩ :implicit :restrict (<= 0 m)) 
+    (-> (! Int :var m :syntax <.numeral.> :implicit :restrict (<= 0 m)) 
         (BitVec m) (BitVec 1))
   :builtin
   "For all terms t of type (BitVec m),
@@ -649,9 +659,9 @@
 
   ; bvite
   (define-const bvite
-    (-> (! Int :var m :syntax ⟨numeral⟩ :implicit :restrict (<= 0 m)) 
+    (-> (! Int :var m :syntax <.numeral.> :implicit :restrict (<= 0 m)) 
         (BitVec 1) (BitVec m) (BitVec m) (BitVec m)) 
-    (lambda ((m Int :syntax ⟨numeral⟩ :implicit :restrict (<= 0 m))
+    (lambda ((m Int :syntax <.numeral.> :implicit :restrict (<= 0 m))
              (x (BitVec 1)) (y (BitVec m)) (z (BitVec m))) 
       (ite (= x #b1) y z))
    )
@@ -659,7 +669,7 @@
 ; TODO:   A (BV 1) version of all comparison ops
 ; PF TODO fix all functions
   (declare-const bv1ult
-    (-> (! Int :var m :syntax ⟨numeral⟩ :implicit :restrict (<= 0 m)) 
+    (-> (! Int :var m :syntax <.numeral.> :implicit :restrict (<= 0 m)) 
       (BitVec m) (BitVec m) (BitVec 1))
     (lambda ((m Int :implicit :restrict (<= 0 m))
              (s (BitVec m)) (t (BitVec m)))
@@ -675,14 +685,13 @@
 
   (define-syntax 
     ; non-terminals
-    (⟨bitvector_value⟩) 
+    (<.bitvector_value.>) 
     ; production rules
-    ((⟨bitvector_value⟩ (bvempty ⟨binary⟩))))
+    ((<.bitvector_value.> (bvempty <.binary.>))))
 
   (define-values ((n Int :restrict (<= 0 n)))
     (BitVec n) 
-    (! ⟨bitvector_value⟩ 
-     :syntax-restrict 
+    (! <.bitvector_value.> 
+     :syntax 
      "bvemtpy when n = 0 and otherwise only binaries #bX with n digits"))
-				     
 ))
