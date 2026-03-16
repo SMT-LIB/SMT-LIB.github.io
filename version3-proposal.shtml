@@ -72,16 +72,17 @@ Released for free under a Creative Commons Attribution 3.0 License
 <div class="mainbar">
 
 <h2>SMT-LIB Version 3.0 - Preliminary Proposal</h2>
+<h4>by C. Barrett, P. Fontaine, and C. Tinelli</h4>
       
-<b>Last updated:</b> 2026-03-09
+<b>Last updated:</b> 2026-03-16
 
 <h3>Overview</h3>
 
 <p>This page contains a high-level proposal for SMT-LIB Version 3.
 While some aspects of the language are still being worked out, 
-this document is a fairly complete description of the new format.
-A reference document is under construction and will contain a description 
-of the proposal in full detail.
+this document is a fairly accurate description of the new format.
+A reference document is under construction and will contain 
+a description of the proposal in full detail.
 This page focuses on the most salient aspects of the proposal, 
 for a quicker overview.
 More content will be added with time as needed.    
@@ -108,24 +109,26 @@ and logics that rely on those features.
 of SMT-LIB to a higher-order logic with polymorphism and dependent types 
 but classical semantics.
 An important aspect of this change is that the new language for SMT-LIB 
-scripts strives to be as backward-compatible as possible to that of 
-Version 2.7.
+scripts strives to be as backward-compatible as possible to that 
+of Version 2.7.
 This is achieved in two ways: 
 <ol>
 <li>Giving new meaning to old syntax as needed.</li>
 <li>Defining the formal semantics so that it is essentially the same as 
   the old one over the old syntax.</li>
 </ol>
-For example, monomorphic sorts from SMT-LIB 2.7 are interpreted as simple types,
-with polymorphic sorts interpreted as polymorphic types;
-maps from Version 2.7 are identified with functions, 
-which are now first class and can be passed to and returned by other functions;
+For example, monomorphic sorts from SMT-LIB 2.7 are interpreted 
+as simple types, and polymorphic sorts are interpreted as polymorphic types;
+maps from Version 2.7 are identified with functions,  which are now 
+first class and can be passed to and returned by other functions;
 sorted constant and function symbols are interpreted as typed constants,
 with function symbols of arity .> 1 becoming higher-order constants, 
 Curry-style;
-index symbols, as in <code class="prettyprint lang-smt3">(_ extract i j)</code> 
-or <code class="prettyprint lang-smt3">(_ BitVec 4)</code>, are now seen 
-as syntactic sugar for symbols with a dependent type/kind.
+index symbols, as in 
+<code class="prettyprint lang-smt3">(_ extract i j)</code> 
+or
+<code class="prettyprint lang-smt3">(_ BitVec 4)</code>, 
+are now seen as syntactic sugar for symbols with a dependent type/kind.
 As in SMT-LIB 2, a number of additional syntactic restrictions on scripts 
 are imposed to obtain various fragments of interests or <em>logics</em>, 
 in SMT-LIB 2 terminology. 
@@ -146,8 +149,8 @@ However, as in SMT-LIB 2.7, type polymorphism is approximated
 by having global (i.e., top-level) type variables,
 as opposed to actual quantification over types, and so making 
 polymorphic constants actually families of overloaded symbols.
-In addition to being polymorphic, types can depend on values as 
-in dependently-typed logics.
+In addition to being polymorphic, and contrary to Version 2.7,
+types can now depend on values as in dependently-typed logics.
 </p>
 
      
@@ -161,15 +164,15 @@ the design and the formal foundations of the SMT-LIB standard.
 It obviates the need for most of the ad-hoc extensions to many-sorted 
 first-order logic we had to introduce in Version 2 while also providing 
 enough expressive power to define most theories formally, 
-as opposed to textually as is done in SMT-LIB 2, 
+as opposed to textually as is done in SMT-LIB 2.
 That includes theories that are not easily definable in Version 2 
 such as the theory of parametric bit vectors.
 </li>
 <li>It facilitates the definition of a <em>single</em> language 
 to define theories, logics, and benchmarks.
 </li>
-<li>It opens the possibility for SMT solvers to provide support 
-for some level of higher-order reasoning, facilitating their integration 
+<li>It extends the possibility for SMT solvers to provide support 
+for higher-order reasoning, facilitating their integration 
 as automated reasoning back ends into higher-order theorem provers
 <!--, such as 
 <a href="http://page.mi.fu-berlin.de/lex/leo3/">Leo III</a>,
@@ -185,7 +188,7 @@ and
 -->
 which are also based on a higher-order logic.
 Current integrations rely on complex encodings from the higher-order logics
-supported by these tools to the logic of SMT-LIB 2.7.
+supported by these tools to the many-sorted logic of SMT-LIB 2.
 Moving to a higher-order logic should dramatically simplify these encodings,
 improving the trustworthiness of the integration.
 Natively reasoning with higher-order constructs 
@@ -200,10 +203,10 @@ filter and so on, both to define common operations and to reason about them.
 </ol>
 </p>
 
-<p>We stress that the move to the new logic maintains backward compatibility
+<p>The move to the new logic maintains backward compatibility
 with SMT-LIB 2.7 to a very large extent. 
-In particular, it will affect SMT-LIB 2.7-compliant solvers in a minimal way 
-if their developers choose not to support the new features.
+In particular, it should minimally affect SMT-LIB 2.7-compliant solvers
+whose developers choose not to support the new features.
 </p>
 
 <h3>The core language</h3>
@@ -215,11 +218,24 @@ Terms in this logic are built out of variables, constants, applications,
 Π-abstractions, and λ-abstractions, as in the CIC calculus.
 There are three classes of (well-formed) terms in the language: 
 <ul>
-  <li>terms denoting <em>values</em>, such as <code class="prettyprint lang-smt3">3</code>, <code class="prettyprint lang-smt3">(+ x 3)</code>, <code class="prettyprint lang-smt3">(lambda ((x Int)) (+ x 3))</code>;</li>
-  <li>terms denoting <em>types</em>, such as <code class="prettyprint lang-smt3">Bool</code>,  <code class="prettyprint lang-smt3">Int</code>, <code class="prettyprint lang-smt3">(-.> Int Real)</code>, <code class="prettyprint lang-smt3">(Array Int Bool)</code>, <code class="prettyprint lang-smt3">(List Int)</code>, <code class="prettyprint lang-smt3">(BitVec 3)</code>; </li>
-  <li>terms denoting <em>kinds</em>,
-  such as <code class="prettyprint lang-smt3">Type</code>,  <code class="prettyprint lang-smt3">(-> Int Type)</code>. </li>
-  </ul>
+<li>terms denoting <em>values</em>, such as 
+<code class="prettyprint lang-smt3">3</code>, 
+<code class="prettyprint lang-smt3">(+ x 3)</code>, 
+<code class="prettyprint lang-smt3">(lambda ((x Int)) (+ x 3))</code>;
+</li>
+<li>terms denoting <em>types</em>, such as 
+<code class="prettyprint lang-smt3">Bool</code>,
+<code class="prettyprint lang-smt3">Int</code>,
+<code class="prettyprint lang-smt3">(-.> Int Real)</code>,
+<code class="prettyprint lang-smt3">(Array Int Bool)</code>,
+<code class="prettyprint lang-smt3">(List Int)</code>,
+<code class="prettyprint lang-smt3">(BitVec 3)</code>;
+</li>
+<li>terms denoting <em>kinds</em>, such as
+<code class="prettyprint lang-smt3">Type</code>,
+<code class="prettyprint lang-smt3">(-> Int Type)</code>.
+</li>
+</ul>
 
 Types classify values and kinds classify types.
 Except for <code class="prettyprint lang-smt3">Type</code>, 
@@ -240,10 +256,30 @@ Well-formed value terms have an associated type term (or, simply, type).
 Well-formed type terms have an associated kind term (or, simply, kind).
 For instance, 
 <ul>
-<li><code class="prettyprint lang-smt3">3</code> is a constant of type <code class="prettyprint lang-smt3">Int</code>, which has kind <code class="prettyprint lang-smt3">Type</code>;</li>
-<li><code class="prettyprint lang-smt3">not</code> is a constant of type <code class="prettyprint lang-smt3">(→ Bool Bool)</code>, which has kind <code class="prettyprint lang-smt3">Type</code>;</li>
-<li><code class="prettyprint lang-smt3">List</code> is a type constant of kind <code class="prettyprint lang-smt3">(→ Type Type)</code>;</li>
-<li><code class="prettyprint lang-smt3">BitVec</code> is a type constant of kind <code class="prettyprint lang-smt3">(→ Int Type)</code>.</li>
+<li>
+<code class="prettyprint lang-smt3">3</code>
+is a constant of type 
+<code class="prettyprint lang-smt3">Int</code>, 
+which has kind 
+<code class="prettyprint lang-smt3">Type</code>;
+</li>
+<li>
+<code class="prettyprint lang-smt3">not</code>
+is a constant of type
+<code class="prettyprint lang-smt3">(→ Bool Bool)</code>, 
+which has kind
+<code class="prettyprint lang-smt3">Type</code>;
+</li>
+<li>
+<code class="prettyprint lang-smt3">List</code>
+is a type constant of kind
+<code class="prettyprint lang-smt3">(→ Type Type)</code>;
+</li>
+<li>
+<code class="prettyprint lang-smt3">BitVec</code>
+is a type constant of kind
+<code class="prettyprint lang-smt3">(→ Int Type)</code>.
+</li>
 </ul>
 
 Note that <code class="prettyprint lang-smt3">→</code> is both a type and 
@@ -268,7 +304,7 @@ in Version 2.7 become constants of type
 <code class="prettyprint lang-smt3">(→ τ₁ ⋅⋅⋅ τᵢ)</code>
 in Version 3.
 This means that function symbols with more than one argument become
-higher-order functions in Version 3. 
+higher-order in Version 3. 
 For instance, the integer addition operator 
 <code class="prettyprint lang-smt3">+</code> 
 now has type 
@@ -277,7 +313,8 @@ that is,
 <code class="prettyprint lang-smt3">(→ Int (→ Int Int))</code>.
 </p>
 
-<h4>Name Spaces and Shadowing</h4>
+<h4>Name Spaces, overloading and Shadowing</h4>
+
 <p>
 There is a single name space for identifiers, regardless of whether 
 they are used as value constants, type constants, or variables. 
@@ -285,7 +322,113 @@ Within this name space, bound variables, that is, variables local
 to a specific binder, can shadow any identifier with the same name, 
 including other variables, in accordance with the standard 
 lexical scoping discipline.
+Note that this policy is more flexible than in Version 2,
+where bound variables cannot have the same name as, and so cannot shadow,
+theory symbols.
 </p>
+
+<p>
+Type constants cannot be overloaded.
+In contrast, value constants can be overloaded arbitrarily, that is,
+they can be <em>introduced</em> (i.e., declared or defined) 
+with different <em>principal</em> types, where a type is principal 
+for a constant <i>f</i> if it is not  an instance of another type 
+already assigned to <i>f</i>. 
+In applications of such constants, the type of the provided arguments 
+is used to disambiguate.
+If that is not enough, the principal type most recently assigned 
+to the constant is chosen by default.
+Defaults can be overriden by using the operator 
+<code class="prettyprint lang-smt3">as</code>.
+
+<pre class="prettyprint lang-smt3"><code>
+  (declare-type-var X)
+  (declare-constant f (→ (List X) X))    ; variant 1, polymorphic
+  (declare-constant f (→ Int Real Int))  ; variant 2
+  (declare-constant f (→ Int Int))       ; variant 3
+  (declare-constant f (→ Int Real))      ; variant 4
+  (declare-constant p (→ X Bool))
+
+  (assert (f 3 4.3))  ; no ambiguity, variant 2 inferred here
+  (assert (f 3))      ; ambiguity resolved in favor of variant 4
+  (assert (p f))      ; ambiguity resolved in favor of variant 4
+</code></pre>
+
+Constant 
+<code class="prettyprint lang-smt3">f</code>
+in the script fragment above is both polymorphic (see later) and overloaded. 
+In the first assertion, the 
+<code class="prettyprint lang-smt3">f</code>
+in question is variant 2, the only one with an integer and a real input.
+In contrast, the application
+<code class="prettyprint lang-smt3">(f 3)</code>
+in the second assertion cannot be disambiguated among variants 2, 3 and 4.
+(For variant 32, note that its actual type is 
+<code class="prettyprint lang-smt3">(→ Int (→ Int Int))</code>
+and partial applications are permitted.)
+In this case, variant 4, the most recent, is the default.
+If variant 3, say, was meant, the application should have been written as
+<code class="prettyprint lang-smt3">((as f (→ Int Int)) 3)</code>.
+In the last assertion, where 
+<code class="prettyprint lang-smt3">f</code>
+is not applied but is passed as an argument,
+the ambiguity is resolved again in favor of variant 4;
+the use of 
+<code class="prettyprint lang-smt3">as</code>
+is necessary to pass a different variant.
+</p>
+
+<p>Note that 
+<code class="prettyprint lang-smt3">as</code> 
+stands now for the standard ascription operator.
+This is different with the use of 
+<code class="prettyprint lang-smt3">as</code>
+in Version 2, which provides only the return type of the function.
+This one of the very few cases that breaks backward-compatibility.
+</p>
+
+<p>In extensions of the script above with later commands,
+<code class="prettyprint lang-smt3">f</code>
+cannot be reintroduced with type
+<code class="prettyprint lang-smt3">(→ Int Int)</code>,
+<code class="prettyprint lang-smt3">(→ Int Real)</code>,
+or
+<code class="prettyprint lang-smt3">(→ (List τ) τ)</code>.
+for any types τ, since such types would all be instances of a type
+already assigned to 
+<code class="prettyprint lang-smt3">f</code>.
+</p>
+
+<p>
+With the shift to seeing funtion symbols as constants of
+<code class="prettyprint lang-smt3">→</code>
+type, the command 
+<code class="prettyprint lang-smt3">declare-const</code> 
+becomes primitive, and 
+<code class="prettyprint lang-smt3">declare-fun</code>
+and
+<code class="prettyprint lang-smt3">define-fun</code>
+are now derived from it. 
+
+For example, following commands
+<pre class="prettyprint lang-smt3"><code>
+  (declare-fun h (Int Real) Real)
+  (define-fun avg ((x Real) (y Real)) Real (/ (+ x y) 2))
+</code></pre>
+are defined as having the same effect as 
+<pre class="prettyprint lang-smt3"><code>
+  (declare-const h (→ Int Real Real))
+  (define-const avg (→ Real Real Real)
+    (lambda ((x Real) (y Real)) (/ (+ x y) 2)))
+</code></pre>
+
+
+For similar reasons,
+<code class="prettyprint lang-smt3">define-fun-rec</code>
+is now defined in terms of the new primitive command
+<code class="prettyprint lang-smt3">define-const-rec</code>.
+</p>
+
 
 <h4>Dependent Types</h4>
 <p>
@@ -296,7 +439,9 @@ of the bit vector.
 For conciseness and backward compatibility, however, 
 such arguments are declared as <em>implicit</em> 
 any time they can be inferred from later arguments. 
+</p>
 
+<p>
 Concretely, dependent function types are expressed with the syntax 
 illustrated in this example:
 
@@ -330,14 +475,15 @@ is a bound variable whose scope is
 <code class="prettyprint lang-smt3">τ₂</code>.
 An alternative syntax, more reminiscent of that of dependently type logics,
 might have been:
+</p>
 
-<pre class="prettyprint lang-smt3"><code>
-  (Pi (<i>x</i> <i>A</i>) <i>B</i>)
-</code></pre>
+<p style="text-align: center;">
+<code class="prettyprint lang-smt3">(Pi (<i>x</i> <i>τ₁</i>) <i>τ₂</i>)
+</code>
 or
-<pre class="prettyprint lang-smt3"><code>
-  (Forall (<i>x</i> <i>A</i>) <i>B</i>)
-</code></pre>
+<code class="prettyprint lang-smt3">(Forall (<i>x</i> <i>τ₁</i>) <i>τ₂</i>)
+</code>
+</p>
 
 which perhaps makes it clearer that 
 <code class="prettyprint lang-smt3"><i>x</i></code> 
@@ -346,8 +492,8 @@ is a variable bound by the binder
 or
 <code class="prettyprint lang-smt3">Forall</code> 
 in the scope 
-<code class="prettyprint lang-smt3"><i>B</i></code>.
-However, the annotation based syntax is possibly more legible and, 
+<code class="prettyprint lang-smt3"><i>τ₂</i></code>.
+However, the annotation-based syntax is possibly more legible and, 
 more importantly, more flexible because it allows the annotation 
 of function inputs with further attributes. 
 In particular, it allows one to declare an input argument as implicit.
@@ -364,7 +510,8 @@ makes the first argument implicit &mdash; in the sense that
 it is not needed in applications of functions of that type. 
 This is sensible since the value of the first argument can be inferred 
 from the type of the second argument.
-A further attribute, 
+</p>
+<p>A further attribute, 
 <code class="prettyprint lang-smt3">:restrict</code>,
 permits the imposition of semantic restrictions on input and output values 
 of a function, something that, in its full generality, effectively allows 
@@ -483,19 +630,20 @@ of monomorphic type, one for each monomorphic instance of
 <code class="prettyprint lang-smt3">(→ (Array I E) I E)</code>.
 This effectively allows <em></em>only prenex</em> polymorphism, 
 in contrast to the unrestricted polymorphism of logics like CIC. 
-In fact, it does not even offer let-polymorphism as the 
+In fact, it does not even allow (ML-style) let-polymorphism
+since the 
 <code class="prettyprint lang-smt3">let</code>
-binder does not locally bind type variable. 
+binder does not locally bind type variables. 
 
 
 <h4>Terms</h4>
 
 <p>
-As a consequence of identifying functions and maps from Version 2.7
-is that 
+A consequence of identifying functions and maps from Version 2.7
+is that the
 <code class="prettyprint lang-smt3">lambda</code>
 binder of Version 2.7 can now be used to construct
-the usual lamba abstractions of the lambda calculus.
+the lamba abstractions for all types, not just map types.
 Its general form is now
 <pre class="prettyprint lang-smt3"><code>
   (lambda ((<i>x</i> <i>τ₁</i>)) <i>t</i>)
@@ -535,7 +683,7 @@ Version 2.7 allows the application of maps via the <em>apply</em> operator
 as in 
 <code class="prettyprint lang-smt3">(@ f a)</code>.
 This syntax is maintained but is now extended to all functions,
-given that maps are now identified with functions.
+because of identification of maps with functions.
 </p>
 
 
@@ -1747,7 +1895,9 @@ to refer to each other's symbols.
 This cannot be done with imports because it would create 
 a circular dependency.
 <!-- This would force one to define two theories together as one single module. -->
-To address this issue while keeping theories in separate modules the language allows the definition of <em>external</em> types and constants in a module.
+To address this issue while keeping theories in separate modules 
+the language allows the definition of <em>external</em> types and constants 
+in a module.
 </p>
 
 <p>
