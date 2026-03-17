@@ -32,7 +32,7 @@ PR['registerLangHandler'](
       null
      ],
      [PR['PR_PUNCTUATION'], /^::/], 
-     [PR['PR_KEYWORD'], /^(?:choose|exists|forall|lambda|let|match|sat|Type|unknown|unsat|unsupported|_|!|=|->)\b/, 
+     [PR['PR_KEYWORD'], /^(?:choose|exists|forall|is|lambda|let|match|sat|Type|unknown|unsat|unsupported|_|!|=|->)\b/, 
       null
      ],
      [PR['PR_LITERAL'], /^[+\-]?(?:[0#]x[0-9a-f]+|\d+\/\d+|(?:\.\d+|\d+(?:\.\d*)?)(?:[ed][+\-]?\d+)?)/i],

@@ -19,14 +19,9 @@
   ; Booleans
   (declare-datatype Bool ((true) (false)))
 
-  ; Arrow types
-  (declare-type -> (Type) 
-   :right-assoc
-   :builtin "Function type constructor.")
-
   ; Equality  
   (declare-const = (-> A A Bool)
-   :chainable 
+   :pairwise 
    :builtin 
    "= denotes the identity function, which returns true iff 
     its two arguments are identical.")

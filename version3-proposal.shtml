@@ -924,7 +924,12 @@ now becomes an alternative syntax for
   (define-type <i>S</i> ((<i>u</i>₁ Type) ⋅⋅⋅ (<i>u</i>ᵢ Type)) σ)
 </pre>
 
-Note that <code class="prettyprint lang-smt3">declare-type</code> and <code class="prettyprint lang-smt3">define-type</code> are more general than their Version 2 counterparts because they can introduce (value) dependent types as well, as in
+Note that 
+<code class="prettyprint lang-smt3">declare-type</code> 
+and 
+<code class="prettyprint lang-smt3">define-type</code>
+are more general than their Version 2 counterparts 
+because they can introduce (value) dependent types as well.
 
 <pre class="prettyprint lang-smt3">
   (declare-type Vector (Type (! Int :var m :restrict (>= m 0)))
@@ -932,6 +937,35 @@ Note that <code class="prettyprint lang-smt3">declare-type</code> and <code clas
   (define-type RealVector8 () (RealVector 8))
 </pre>
 </p>
+
+<h4>Command attributes</h4>
+
+The syntax of commands is extended with the addition 
+of optional attributes which can inserted in arbitrary order
+after the commands argument.
+This is most useful for 
+<code class="prettyprint lang-smt3">declare-const</code>
+and similar commands as it allows the incorporation 
+of Version 2 attributes for the theory definition sublanguage,
+as well as new ones.
+
+<pre class="prettyprint lang-smt3">
+  (declare-type-var A)
+  ...
+  (declare-const = (-> A A Bool)
+   :pairwise 
+   :builtin 
+   "= denotes the identity function, which returns true iff 
+    its two arguments are identical.") 
+
+  (define-fun or ((b1 Bool) (b2 Bool)) Bool
+    (ite b1 true b2) 
+   :left-assoc)
+</pre>
+
+The full list of attributes per command will be provided
+in the reference document.
+More examples are in the sample theory modules below.
 
 <h3>Binders</h3>
 
@@ -1388,6 +1422,11 @@ The same policy applies to
 <code class="prettyprint lang-smt3">:type-vars</code>
 and
 <code class="prettyprint lang-smt3">:consts</code>.
+When a datatype constant (e.g.,
+<code class="prettyprint lang-smt3">List</code>)
+is exported, the datatype's recursor and all of its 
+constructors, selectors, and testers are exported
+by default.
 </p>
 
 <p>
@@ -1950,7 +1989,8 @@ include the following:
   ; List reverse
   (define-fun reverse ((l (List A))) (List A)
     (reduce (as nil (List A)) 
-      (lambda ((a A) (t (List A)) (r (List A))) (append r (cons a (as nil (List A))))) l)
+      (lambda ((a A) (t (List A)) (r (List A)))
+        (append r (cons a (as nil (List A))))) l)
   )
   ; List of elements of input list that satisfy input predicate
   (define-fun filter ((p (-> A Bool)) (l (List A))) (List A)
@@ -1991,11 +2031,18 @@ attribute which connects them to symbols exported by another module.
 </p>
 
 <p>
+Suppose a module
+<code class="prettyprint lang-smt3">Ints</code>
+defines the integer theory with its usual operators and
+a unary operator 
+<code class="prettyprint lang-smt3">+1</code> 
+for the integer successor function.
+A module for the theory of lists may be defined as follows.
+
 <pre class="prettyprint lang-smt3">
 (define-module Lists (
   (declare-datatype List (par (X)
-    ((nil) (cons (head X) (tail (List X)))))
-  )
+    ((nil) (cons (head X) (tail (List X))))))
   ...
   (declare-type Int () :extern Ints::Int)
   (declare-const 0 Int :extern Ints::0)
@@ -2005,8 +2052,8 @@ attribute which connects them to symbols exported by another module.
   ...
   )
   :type-vars ( E )
-  :types ( (List E) )
-  :consts ( (len (→ (List E) Ints::Int) )
+  :types ( (List Type) )
+  :consts ( ... (len (→ (List E) Ints::Int) )
 )
 </pre>
 
@@ -2118,14 +2165,9 @@ the semantics of the old ones in any meaningful way.
   ; Booleans
   (declare-datatype Bool ((true) (false)))
 
-  ; Arrow types
-  (declare-type -> (Type) 
-   :right-assoc
-   :builtin "Function type constructor.")
-
   ; Equality  
   (declare-const = (-> A A Bool)
-   :chainable 
+   :pairwise 
    :builtin 
    "= denotes the identity function, which returns true iff 
     its two arguments are identical.")
@@ -2808,8 +2850,9 @@ Also note that
 <code class="prettyprint lang-smt3">*</code>
 is (intentionally) not given a 
 <code class="prettyprint lang-smt3">:left-assoc</code>
-designation as that would have allowed non-linear terms like
-<code class="prettyprint lang-smt3">(* 3 x y)</code>.
+designation as terms like
+<code class="prettyprint lang-smt3">(* 3 x y)</code>
+would not satisfy the linearity restrictions.
 </p>
 </div>
 </div>
