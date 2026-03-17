@@ -694,7 +694,7 @@ the type
 </code>
 is both polymorphic (in 
 <code class="prettyprint lang-smt3">X</code>), 
-and dependent, (on 
+and dependent (on 
 <code class="prettyprint lang-smt3">n</code>).
 </p>
 
@@ -759,7 +759,7 @@ or, equivalently
 <pre class="prettyprint lang-smt3">
   (declare-fun f ((m1 Int :restrict (> m1 0)) (m2 Int :restrict (> m2 m1)))
     (! Int :var n :restrict (exists ((x Int)) (= n (* 2 x))))
-)
+  )
 </pre>
 
 Both command introduce a function 
@@ -768,6 +768,14 @@ that takes two integers as input and returns an integer.
 The semantic restrictions indicate that the function is not arbitrary:
 whenever the first argument is greater than 0 and the second argument is
 greater than the first, the returned value is an even integer.
+Note how in the case of
+<code class="prettyprint lang-smt3">declare-fun</code>
+the 
+<code class="prettyprint lang-smt3">:restrict</code>
+attribute is added directly to the declaration of each named input.
+Moreover, the 
+<code class="prettyprint lang-smt3">:var</code>
+attribute is unnecessary.
 </p>
 
 <p>
