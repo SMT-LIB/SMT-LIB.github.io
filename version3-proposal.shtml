@@ -325,25 +325,25 @@ and
 are now derived from it. 
 
 For example, following commands
-<pre class="prettyprint lang-smt3"><code>
+<pre class="prettyprint lang-smt3">
   (declare-fun h (Int Real) Real)
   (define-fun avg ((x Real) (y Real)) Real (/ (+ x y) 2))
-</code></pre>
+</pre>
 are defined as having the same effect as 
-<pre class="prettyprint lang-smt3"><code>
+<pre class="prettyprint lang-smt3">
   (declare-const h (→ Int Real Real))
   (define-const avg (→ Real Real Real)
     (lambda ((x Real) (y Real)) (/ (+ x y) 2)))
-</code></pre>
-
+</pre>
 
 For similar reasons,
 <code class="prettyprint lang-smt3">define-fun-rec</code>
 is now defined in terms of the new primitive command
 <code class="prettyprint lang-smt3">define-const-rec</code>.
+(See the Commands section for more details on commands.)
 </p>
 
-<h4>Name Spaces, overloading and Shadowing</h4>
+<h4>Name Space and Shadowing</h4>
 
 <p>
 There is a single name space for identifiers, regardless of whether 
@@ -355,83 +355,6 @@ lexical scoping discipline.
 Note that this policy is more flexible than in Version 2,
 where bound variables cannot have the same name as, and so cannot shadow,
 theory symbols.
-</p>
-
-<p>
-Type constants cannot be overloaded.
-In contrast, value constants can be overloaded arbitrarily, that is,
-they can be <em>introduced</em> (i.e., declared or defined) 
-with different <em>principal</em> types, where a type is principal 
-for a constant <i>f</i> if it is not  an instance of another type 
-already assigned to <i>f</i>. 
-In applications of such constants, the type of the provided arguments 
-is used to disambiguate.
-If that is not enough, the principal type most recently assigned 
-to the constant is chosen by default.
-Defaults can be overriden by using the operator 
-<code class="prettyprint lang-smt3">as</code>.
-
-<pre class="prettyprint lang-smt3"><code>
-  (declare-type-var X)
-  (declare-const f (→ (List X) X))    ; variant 1, polymorphic
-  (declare-const f (→ Int Real Int))  ; variant 2
-  (declare-const f (→ Int Int))       ; variant 3
-  (declare-const f (→ Int Real))      ; variant 4
-  (declare-const p (→ X Bool))
-
-  (assert (f 5 4.3))  ; no ambiguity, variant 2 inferred here
-  (assert (f 8))      ; ambiguity resolved in favor of variant 4, the most recent
-  (assert (p f))      ; ambiguity resolved in favor of variant 4, the most recent
-</code></pre>
-
-Constant 
-<code class="prettyprint lang-smt3">f</code>
-in the script fragment above is both polymorphic (see later) and overloaded. 
-In the first assertion, the 
-<code class="prettyprint lang-smt3">f</code>
-in question is variant 2, the only one with an
-<code class="prettyprint lang-smt3">Int</code>
-and a 
-<code class="prettyprint lang-smt3">Real</code>
-input.
-In contrast, the application
-<code class="prettyprint lang-smt3">(f 5)</code>
-in the second assertion cannot be disambiguated among variants 2, 3 and 4.
-(For variant 2, note that its actual type is 
-<code class="prettyprint lang-smt3">(→ Int (→ Real Int))</code>
-and partial applications are permitted.)
-In this case, variant 4, the most recent, is the default.
-If variant 3, say, was meant, the application should have been written as
-<code class="prettyprint lang-smt3">((as f (→ Int Int)) 8)</code>.
-In the last assertion, where 
-<code class="prettyprint lang-smt3">f</code>
-is not applied but is passed as an argument,
-the ambiguity is resolved again in favor of variant 4;
-the use of 
-<code class="prettyprint lang-smt3">as</code>
-is necessary to pass a different variant.
-</p>
-
-<p>Note that 
-<code class="prettyprint lang-smt3">as</code> 
-stands now for the standard ascription operator.
-This is different with the use of 
-<code class="prettyprint lang-smt3">as</code>
-in Version 2, which provides only the return type of the function.
-This one of the very few cases that breaks backward-compatibility.
-</p>
-
-<p>In extensions of the script above with later commands,
-<code class="prettyprint lang-smt3">f</code>
-cannot be reintroduced with type
-<code class="prettyprint lang-smt3">(→ Int Real Int)</code>,
-<code class="prettyprint lang-smt3">(→ Int Int)</code>,
-<code class="prettyprint lang-smt3">(→ Int Real)</code>,
-or
-<code class="prettyprint lang-smt3">(→ (List τ) τ)</code>
-for any type τ, since such types would all be instances of a type
-already assigned to 
-<code class="prettyprint lang-smt3">f</code>.
 </p>
 
 
@@ -451,9 +374,9 @@ any time they can be inferred from later arguments.
 Concretely, dependent function types are expressed with the syntax 
 illustrated in this example:
 
-<pre class="prettyprint lang-smt3"><code>
+<pre class="prettyprint lang-smt3">
   (→ (! Int :var n) (BitVec n) (BitVec (+ n 1)))
-</code></pre>
+</pre>
 
 This expression denotes the type of a function that takes as input 
 an integer 
@@ -473,8 +396,9 @@ in this case provides a name
 (<code class="prettyprint lang-smt3">n</code>)
 for the first input. 
 The general syntax for dependent types is 
-<pre class="prettyprint lang-smt3"><code>
-  (→ (! <i>τ₁</i> :var <i>x</i>) <i>τ₂</i>) </code></pre>
+<pre class="prettyprint lang-smt3">
+  (→ (! <i>τ₁</i> :var <i>x</i>) <i>τ₂</i>) 
+</pre>
 where 
 <code class="prettyprint lang-smt3"><i>x</i></code>
 is a bound variable whose scope is 
@@ -508,9 +432,9 @@ This is done with the new valueless attribute
 that can be associated to a function argument.
 For example,
 
-<pre class="prettyprint lang-smt3"><code>
+<pre class="prettyprint lang-smt3">
   (→ (! Int :var n :implicit) (BitVec n) (BitVec n))
-</code></pre>
+</pre>
 
 makes the first argument implicit &mdash; in the sense that 
 it is not needed in applications of functions of that type. 
@@ -524,34 +448,34 @@ of a function, something that, in its full generality, effectively allows
 the definition of PVS-style predicate subtypes (aka, refinement types). 
 For instance, in type
 
-<pre class="prettyprint lang-smt3"><code>
+<pre class="prettyprint lang-smt3">
   (→ (! Int :var n :implicit :restrict (> n 0)) (BitVec n) (BitVec n))
-</code></pre>
+</pre>
 
 the implicit argument
 <code class="prettyprint lang-smt3">n</code>
 is required to be a positive integer.
 In PVS syntax, this would be the dependent type 
-<pre class="prettyprint lang-smt3"><code>
+<pre class="prettyprint lang-smt3">
   [n: {m : Int | m > 0} → BitVec(n) → BitVec(n)]
-</code></pre>
+</pre>
 This notation can also express relational constraints on the input and 
 output types, as for instance, in
 
-<pre class="prettyprint lang-smt3"><code>
+<pre class="prettyprint lang-smt3">
   (→ (! Int :var m :implicit :restrict (> m 0)) 
      (! Int :var n :implicit :restrict (> n m)) 
      (BitVec m) (BitVec n) (BitVec (- n m)))
-</code></pre>
+</pre>
 
 Yet another attribute, 
 <code class="prettyprint lang-smt3">:syntax</code>, 
 allows the introduction of <em>syntactic restrictions</em> on input terms:
 
-<pre class="prettyprint lang-smt3"><code>
+<pre class="prettyprint lang-smt3">
   (→ (! Int :var n :implicit :restrict (> n 0) :syntax <.numeral.>) 
      (BitVec n) (BitVec n))
-</code></pre>
+</pre>
 
 The additional restriction 
 <code class="prettyprint lang-smt3">:syntax <.numeral.></code>
@@ -607,9 +531,9 @@ to polymorphism in logics like CIC, where polymorphic functions take types
 as input.
 For example, the array <code class="prettyprint lang-smt3">select</code> function in <b>does not</b> have type:
 
-<pre class="prettyprint lang-smt3"><code>
+<pre class="prettyprint lang-smt3">
   (→ (! Type :var I :implicit) (! Type :var E :implicit) (Array I E) I E) 
-</code></pre>
+</pre>
 
 where the first two, implicit arguments
 <code class="prettyprint lang-smt3">I</code>
@@ -618,9 +542,9 @@ and
 are types.
 In contrast, and in full analogy with SMT-LIB 2.7, it has type
 
-<pre class="prettyprint lang-smt3"><code>
+<pre class="prettyprint lang-smt3">
   (→ (Array I E) I E) 
-</code></pre>
+</pre>
 
 where
 <code class="prettyprint lang-smt3">I</code>
@@ -651,18 +575,22 @@ is that the
 binder of Version 2.7 can now be used to construct
 the lamba abstractions for all types, not just map types.
 Its general form is now
-<pre class="prettyprint lang-smt3"><code>
+
+<pre class="prettyprint lang-smt3">
   (lambda ((<i>x</i> <i>τ₁</i>)) <i>t</i>)
-</code></pre>
+</pre>
+
 where <i>t</i> is a value term and <i>x</i> is a bound variable of type
 <i>τ₁</i> with scope <i>t</i>.
 As usual, the abstraction has type 
 <code class="prettyprint lang-smt3">(→ τ₁ τ₂)</code>
 if <i>t</i> has type τ₂ in the typing context that assigns type τ₁ to <i>x</i>.
 For instance, this allows the construction of lambda abstractions such as
-<pre class="prettyprint lang-smt3"><code>
+
+<pre class="prettyprint lang-smt3">
   (lambda ((x A)) (lambda ((y A)) (not (= x y))))
-</code></pre>
+</pre>
+
 or, more concisely,
 <code class="prettyprint lang-smt3">(lambda ((x A) (y A)) (not (= x y))</code>,
 of type 
@@ -720,11 +648,10 @@ Predefined constants include
 where <i>α</i> is a type variable.
 </p>
 
-<p>A core language of commands allows one to declare new type variables, type constants, and value constants, 
-and to assert formulas.
+<p>A core language of commands allows one to declare new type variables, 
+type constants, and value constants, and to assert formulas.
 
-<pre class="prettyprint lang-smt3"><code>
-  ; Example
+<pre class="prettyprint lang-smt3">
   (declare-type-var X)  ; declares a new type variable 
   (declare-type A ())   ; declares a new simple type (a nullary type constant) 
   (declare-type B ()) 
@@ -738,20 +665,18 @@ and to assert formulas.
   (assert (= f g))                                   ; higher-order assertion
   (assert (= p (lambda ((x A) (y B)) (= (g x) y))))  ; higher-order assertion
   (assert (forall ((x X)) (= x (id x))))             ; polymorphic assertion
-</code></pre>
-</p>
+</pre>
 
-<p>
 Constants for polymorphic/dependent types can be declared 
 as in the examples below:
-<pre class="prettyprint lang-smt3"><code>
+<pre class="prettyprint lang-smt3">
   (declare-type Collection (Type))
   (declare-type Pair (Type Type)) 
   (declare-type BitVec (Int)) 
   (declare-type Vector (Type Int)) 
-</code></pre>
+</pre>
 
-All these constants type types and/or values as input and construct a type.
+All these constants take types and/or values as input and construct a type.
 This means that type constant <code class="prettyprint lang-smt3">Collection</code> 
 has kind 
 <code class="prettyprint lang-smt3">(→ Type Type)</code>.
@@ -763,9 +688,10 @@ has kind <code class="prettyprint lang-smt3">(→ Int Type)</code>.
 Type constant <code class="prettyprint lang-smt3">Vector</code> 
 has kind <code class="prettyprint lang-smt3">(→ Type Int Type)</code>.
 If <code class="prettyprint lang-smt3">X</code> is a type variable,
-the type <pre class="prettyprint lang-smt3"><code>
+the type 
+<code class="prettyprint lang-smt3">
   (→ (! Int :var n) (Vector X n))
-</code></pre>
+</code>
 is both polymorphic (in 
 <code class="prettyprint lang-smt3">X</code>), 
 and dependent, (on 
@@ -801,9 +727,11 @@ more informative messages in case of scripts that use
 partial functions outside of their domain of definition.
 As an example, the integer division operator in Version 3 is defined 
 as follows
-<pre class="prettyprint lang-smt3"><code>
+
+<pre class="prettyprint lang-smt3">
   (declare-const div (→ Int (! Int :var n :restrict (distinct n 0)) Int) 
-</code></pre>
+</pre>
+
 A solver could use the knowledge of the <em>official</em> restriction above
 for instance to issue a warning when it returns a model that gives value 0 
 to a term that occurs as the second argument of a
@@ -820,19 +748,19 @@ Semantic restrictions can be introduced in function declarations and
 definitions, and can apply also to the returned value,
 as shown in the following example.
 
-<pre class="prettyprint lang-smt3"><code>
+<pre class="prettyprint lang-smt3">
   (declare-const f 
     (-> (! Int :var m1 :restrict (> m1 0)) 
         (! Int :var m2 :restrict (> m2 m1)) 
         (! Int :var n :restrict (exists ((x Int)) (= n (* 2 x)))))
   )
-</code></pre>
+</pre>
 or, equivalently
-<pre class="prettyprint lang-smt3"><code>
+<pre class="prettyprint lang-smt3">
   (declare-fun f ((m1 Int :restrict (> m1 0)) (m2 Int :restrict (> m2 m1)))
     (! Int :var n :restrict (exists ((x Int)) (= n (* 2 x))))
 )
-</code></pre>
+</pre>
 
 Both command introduce a function 
 <code class="prettyprint lang-smt3">f</code> 
@@ -845,9 +773,11 @@ greater than the first, the returned value is an even integer.
 <p>
 As another example, the actual bit vector type 
 in the Version 3 bit vector theory is defined as follows:
-<pre class="prettyprint lang-smt3"><code>
+
+<pre class="prettyprint lang-smt3">
   (declare-type BitVec ((! Int :var m :restrict (>= m 0)))
-</code></pre>
+</pre>
+
 Since the parameter
 <code class="prettyprint lang-smt3">m</code>
 expresses the size of the vector, the added restriction limits the value of 
@@ -871,9 +801,9 @@ is further constrained  to be a numeral, as opposed to an arbitrary
 <code class="prettyprint lang-smt3">Int</code>
 integer term, as follows:
 
-<pre class="prettyprint lang-smt3"><code>
+<pre class="prettyprint lang-smt3">
   (declare-type BitVec ((! Int :var m :restrict (>= m 0) :syntax <.numeral.>)))
-</code></pre>
+</pre>
 
 This means that, in those logics, the 
 <code class="prettyprint lang-smt3">BitVec</code> 
@@ -885,13 +815,13 @@ to linear multiplications.
 For instance, in linear integer arithmetic, multiplication could be defined 
 as follows (the actual definition is more elaborate):
 
-<pre class="prettyprint lang-smt3"><code>
+<pre class="prettyprint lang-smt3">
   (define-fun-rec * ((x Int :syntax <.signed numeral.>) (y Int)) 
     (ite (= x 0) 0
       (ite (< x 0) (* (- x) y) 
         (+ x (* ((- x 1) y)))))
    :left-assoc)
-</code></pre>
+</pre>
 
 where  
 <code class="prettyprint lang-smt3"><.signed numeral.></code>
@@ -930,29 +860,36 @@ is now a core command while
 <code class="prettyprint lang-smt3">declare-fun</code> 
 is not.
 The SMT-LIB 2.7 expression 
-<pre class="prettyprint lang-smt3"><code>
+
+<pre class="prettyprint lang-smt3">
   (declare-fun <i>f</i> (τ₁ ⋅⋅⋅ τᵢ) τ)
-</code></pre> 
+</pre>
+
 with i > 0 is now an abbreviation of 
-<pre class="prettyprint lang-smt3"><code>
+
+<pre class="prettyprint lang-smt3">
   (declare-const <i>f</i> (→ τ₁ ⋅⋅⋅ τᵢ τ))
-</code></pre>
+</pre>
+
 Similarly,
-<pre class="prettyprint lang-smt3"><code>
+<pre class="prettyprint lang-smt3">
   (define-fun <i>f</i> ((<i>x₁</i> τ₁) ⋅⋅⋅ ((<i>xᵢ</i> τᵢ)) τ <i>t</i>)
-</code></pre>
+</pre>
 and
-<pre class="prettyprint lang-smt3"><code>
+<pre class="prettyprint lang-smt3">
   (define-fun-rec <i>f</i> ((<i>x₁</i> τ₁) ⋅⋅⋅ ((<i>xᵢ</i> τᵢ)) τ <i>t</i>)
-</code></pre> 
+</pre> 
 are now respective abbreviations of 
-<pre class="prettyprint lang-smt3"><code>
+
+<pre class="prettyprint lang-smt3">
   (define-const <i>f</i> (→ τ₁ ⋅⋅⋅ τᵢ τ) (lambda ((<i>x₁</i> τ₁) ⋅⋅⋅ ((<i>xᵢ</i> τᵢ)) <i>t</i>))
-</code></pre>
+</pre>
+
 and
-<pre class="prettyprint lang-smt3"><code>
+
+<pre class="prettyprint lang-smt3">
   (define-const-rec <i>f</i> (→ τ₁ ⋅⋅⋅ τᵢ τ) (lambda ((<i>x₁</i> τ₁) ⋅⋅⋅ ((<i>xᵢ</i> τᵢ)) <i>t</i>))
-</code></pre>
+</pre>
 where 
 <code class="prettyprint lang-smt3">define-const-rec</code> 
 is a new core command.
@@ -964,31 +901,36 @@ Correspondingly,
 is now a special case of the new core command 
 <code class="prettyprint lang-smt3">declare-type</code>.
 For instance, 
-<pre class="prettyprint lang-smt3"><code>
+
+<pre class="prettyprint lang-smt3">
   (declare-sort <i>S</i> <i>n</i>)
-</code></pre>
+</pre>
+
 with <i>n</i> ≥ 0 now becomes an alternative syntax for 
-<pre class="prettyprint lang-smt3"><code>
+
+<pre class="prettyprint lang-smt3">
   (declare-type <i>S</i> (Type ⋅⋅⋅ Type))
-</code></pre>
+</pre>
+
 with <i>n</i> occurrences of <code class="prettyprint lang-smt3">Type</code>.
 Similarly, 
-<pre class="prettyprint lang-smt3"><code>
+
+<pre class="prettyprint lang-smt3">
   (define-sort <i>S</i> (<i>u</i>₁ ⋅⋅⋅ <i>u</i>ᵢ) σ)
-</code></pre>
+</pre>
+
 now becomes an alternative syntax for 
-<pre class="prettyprint lang-smt3"><code>
+<pre class="prettyprint lang-smt3">
   (define-type <i>S</i> ((<i>u</i>₁ Type) ⋅⋅⋅ (<i>u</i>ᵢ Type)) σ)
-</code></pre>
+</pre>
 
 Note that <code class="prettyprint lang-smt3">declare-type</code> and <code class="prettyprint lang-smt3">define-type</code> are more general than their Version 2 counterparts because they can introduce (value) dependent types as well, as in
 
-<pre class="prettyprint lang-smt3"><code>
+<pre class="prettyprint lang-smt3">
   (declare-type Vector (Type (! Int :var m :restrict (>= m 0)))
   (define-type NonEmptyRealVector ((n Int :restrict (> n 0))) (Vector Real n))
   (define-type RealVector8 () (RealVector 8))
-</code></pre>
-
+</pre>
 </p>
 
 <h3>Binders</h3>
@@ -1051,21 +993,27 @@ The binder syntax is now syntactic sugar for terms based on
 For instance, 
 <code class="prettyprint lang-smt3">forall</code>
 is now defined as the polymorphic function
-<pre class="prettyprint lang-smt3"><code>
+
+<pre class="prettyprint lang-smt3">
   (lambda ((p (→ A bool))) (= p (lambda ((x A)) true)))))
-</code></pre>
+</pre>
+
 of type
 <code class="prettyprint lang-smt3">(→ (→ A Bool) Bool)</code>
 where 
 <code class="prettyprint lang-smt3">A</code> is a type-variable.
 The binder syntax, with expressions of the form 
-<pre class="prettyprint lang-smt3"><code>
+
+<pre class="prettyprint lang-smt3">
   (forall ((x₁ τ₁) ⋅⋅⋅ (xᵢ τᵢ)) φ) 
-</code></pre>
+</pre>
+
 is maintained but it is understood as an abbreviation of
-<pre class="prettyprint lang-smt3"><code>
+
+<pre class="prettyprint lang-smt3">
   (forall (lambda ((x₁ τ₁) ⋅⋅⋅ (xᵢ τᵢ)) φ)) 
-</code></pre>
+</pre>
+
 The 
 <code class="prettyprint lang-smt3">exists</code>
 binder is defined similarly.
@@ -1074,13 +1022,16 @@ The
 binder, for the Hilbert choice operator ε, is new.
 It too is a second-order function that can be used with a binder syntax.
 The expression
-<pre class="prettyprint lang-smt3"><code>
+
+<pre class="prettyprint lang-smt3">
   (choose (x τ) φ)
-</code></pre>
+</pre>
+
 abbreviates
-<pre class="prettyprint lang-smt3"><code>
-  (choose (lambda ((x τ)) φ))</code></pre>
-</p>
+
+<pre class="prettyprint lang-smt3">
+  (choose (lambda ((x τ)) φ))
+</pre>
 where the function
 <code class="prettyprint lang-smt3">choose</code>
 has the polymorphic type
@@ -1088,6 +1039,7 @@ has the polymorphic type
 The function is defined axiomatically in terms of 
 <code class="prettyprint lang-smt3">exists</code>, 
 as usual.
+</p>
 
 
 <h3>Polymorphism in declarations, definitions and assertions</h3>
@@ -1100,7 +1052,7 @@ In contrast, it is possible to make polymorphic assertions.
 This is illustrated by the following example,
 where we (illegally) name the type variable α for emphasis:
 
-<pre class="prettyprint lang-smt3"><code>
+<pre class="prettyprint lang-smt3">
   (declare-type-var α)
   (declare-const f (→ α α))
 
@@ -1114,10 +1066,8 @@ where we (illegally) name the type variable α for emphasis:
       (= 1 (id 1))
     )
   )
-</code></pre>
-</p>
+</pre>
 
-<p>
 Function
 <code class="prettyprint lang-smt3">f</code>
 is polymorphic.
@@ -1165,7 +1115,7 @@ Only globally defined symbols can be polymorphic.
 
 <h3>Overloading</h3>
 
-
+<p>
 Within an SMT-LIB 3 script, some symbols can be <em>overloaded</em> 
 by redeclaring them, others cannot. 
 Specifically, type constants and type variables cannot be overloaded.
@@ -1175,12 +1125,13 @@ In contrast, value constants can always be redeclared.
 We say that a constant <i>f</i> has a, possibly polymorphic, 
 <em>principal type</em> τ in a script if the script contains 
 a declaration or definition of <i>f</i> with type τ. 
-A constant has more than one principal type in a context if and only if 
+A constant has more than one principal type in a script if and only if 
 it is overloaded.
 
 As in previous versions, Version 3 enforces a type discipline 
-that allows simple bottom-up typing. If a constant <i>f</i> is overloaded, 
-the type of each occurrence of <i>f</i> in a term is determined as follows:
+that allows simple bottom-up typing.
+If a constant <i>f</i> is overloaded, the type of each occurrence 
+of <i>f</i> in a term is determined as follows:
 
 <ol>
 <li> 
@@ -1193,7 +1144,9 @@ If <i>f</i> occurs as an argument, as in (<i>t₁ ··· f ··· tₙ</i>),
 its type is the one in the most recent declaration of <i>f</i>.
 </li>
 </ol>
+</p>
 
+<p>
 This disambiguation policy can be overridden by explicitly ascribing 
 to <i>f</i> one of its types using the
 <code class="prettyprint lang-smt3">as</code>
@@ -1205,11 +1158,80 @@ Specifically, the <i>f</i> selected by
 <code class="prettyprint lang-smt3">(as <i>f</i> τ)</code>
 is be the most recently declared <i>f</i> whose type has τ as an instance.
 
-[More]
+<pre class="prettyprint lang-smt3">
+  (declare-type-var X)
+  (declare-const f (→ (List X) X))    ; variant 1, polymorphic
+  (declare-const f (→ Int Real Int))  ; variant 2
+  (declare-const f (→ Int Int))       ; variant 3
+  (declare-const f (→ Int Real))      ; variant 4
+  (declare-const p (→ X Bool))
 
-The different use of <code class="prettyprint lang-smt3">as</code> in Version 3 represents one of the few changes that are not backward compatible with Version 2.7.
-However, this is not a serious concern since <code class="prettyprint lang-smt3">as</code> has been used mostly for 0-arity constants where difference between the new and the old use disappears.
+  (assert (f 5 4.3))  ; no ambiguity, variant 2 of f inferred here
+  (assert (f 8))      ; ambiguity resolved in favor of variant 4, the most recent
+  (assert (p f))      ; ambiguity resolved in favor of variant 4, the most recent
+</pre>
+
+Constant 
+<code class="prettyprint lang-smt3">f</code>
+in the script fragment above is both polymorphic and overloaded. 
+In the first assertion, the 
+<code class="prettyprint lang-smt3">f</code>
+in question is variant 2, the only one with an
+<code class="prettyprint lang-smt3">Int</code>
+and a 
+<code class="prettyprint lang-smt3">Real</code>
+input.
+In contrast, the application
+<code class="prettyprint lang-smt3">(f 5)</code>
+in the second assertion cannot be disambiguated among variants 2, 3 and 4.
+(For variant 2, note that its actual type is 
+<code class="prettyprint lang-smt3">(→ Int (→ Real Int))</code>
+and partial applications are permitted.)
+In this case, variant 4, the most recent, is the default.
+If variant 3, say, was meant, the application should have been written as
+<code class="prettyprint lang-smt3">((as f (→ Int Int)) 8)</code>.
+In the last assertion, where 
+<code class="prettyprint lang-smt3">f</code>
+is not applied but is passed as an argument,
+the ambiguity is resolved again in favor of variant 4;
+the use of 
+<code class="prettyprint lang-smt3">as</code>
+is necessary to pass a different variant.
 </p>
+
+<p>Note that 
+<code class="prettyprint lang-smt3">as</code> 
+stands now for the standard ascription operator.
+This is different with the use of 
+<code class="prettyprint lang-smt3">as</code>
+in Version 2, which provides only the return type of the function.
+This one of the very few cases that breaks backward-compatibility.
+</p>
+
+<p>
+In extensions of the script above with later commands,
+<code class="prettyprint lang-smt3">f</code>
+cannot be reintroduced with type
+<code class="prettyprint lang-smt3">(→ Int Real Int)</code>,
+<code class="prettyprint lang-smt3">(→ Int Int)</code>,
+<code class="prettyprint lang-smt3">(→ Int Real)</code>,
+or
+<code class="prettyprint lang-smt3">(→ (List τ) τ)</code>
+for any type τ, since such types would all be instances of a type
+already assigned to 
+<code class="prettyprint lang-smt3">f</code>.
+
+The different use of
+<code class="prettyprint lang-smt3">as</code> 
+in SMT-LIB 3 versus Version 2 represents one of the few changes 
+that are not backward compatible with Version 2.7.
+However, this is not a serious concern since
+<code class="prettyprint lang-smt3">as</code>
+has been used mostly for 0-arity constants (like the 
+<code class="prettyprint lang-smt3">nil</code> 
+list constructor) where the new and the old use coincide.
+</p>
+
 
 <h3>New language constructs</h3>
 
@@ -1231,7 +1253,7 @@ The hope, however, is that with time they will be supported by SMT solvers
 and so will eventually be available to regular users.
 For now, they will be used only to define SMT-LIB theories and logics. 
 
-<pre class="prettyprint lang-smt3"><code>
+<pre class="prettyprint lang-smt3">
 (define-module M (
   (declare-type-var A)
   (declare-type ping ()) 
@@ -1243,7 +1265,7 @@ For now, they will be used only to define SMT-LIB theories and logics.
   )
 )
 ; A, ping, pong, a, and f are not accessible here
-</code></pre>
+</pre>
 
 A module is introduced by the 
 <code class="prettyprint lang-smt3">define-module</code>
@@ -1263,6 +1285,7 @@ in the module’s interface and only with a qualified name of the form
 <.module name.>::<.symbol.> (e.g., 
 <code class="prettyprint lang-smt3">M::a</code>).
 </p>
+
 
 <h4>Module Interfaces</h4>
 
@@ -1288,7 +1311,8 @@ does not need to be exported because it a primitive symbol
 of the underlying logic.)
 </p>
 
-<pre class="prettyprint lang-smt3"><code>
+<p>
+<pre class="prettyprint lang-smt3">
   (define-module M
    (
     (declare-type-var X)   (declare-type-var Y)
@@ -1305,9 +1329,8 @@ of the underlying logic.)
    :types ( A B (Pair (Type Type)) )
    :consts ( (a A) (f (→ A B)) (h (→ A A)) (d (→ X X X)))
   )
-</code></pre>
+</pre>
 
-<p>
 In the example above, only one of the type variables,
 three of the type constants and four of the constants are exported.
 The list of exported type constants contain a constant directly
@@ -1330,9 +1353,11 @@ Also note that any relationship among the exported constants established
 in the module through non-exported constants (or through assertions) is 
 maintained when the module is imported. 
 For example, the formula 
-<pre class="prettyprint lang-smt3"><code>
+
+<pre class="prettyprint lang-smt3">
   (forall ((x1 A) (x2 A)) (=> (= (f x1) (f x2)) (= (h x1) (h x2))))
-</code></pre>
+</pre>
+
 is valid not just in the module 
 <code class="prettyprint lang-smt3">M</code> 
 above but also in any module that imports 
@@ -1365,23 +1390,26 @@ a more restricted type than the one they have in the module.
 For instance, the array 
 <code class="prettyprint lang-smt3">select</code>
 function, which has type
-<pre class="prettyprint lang-smt3"><code>
+
+<pre class="prettyprint lang-smt3">
   (→ (Array I E) I E) 
-</code></pre>
+</pre>
+
 in the module declaring it, where 
 <code class="prettyprint lang-smt3">I</code>
 and
 <code class="prettyprint lang-smt3">E</code>
 are type variables, could be exported as follows: 
 
-<pre class="prettyprint lang-smt3"><code>
+<pre class="prettyprint lang-smt3">
   :type-varss ( I E ) 
   :types ( Bool Int (Array (Type Type)) ... ) 
   :consts ( (select (→ (Array Int E) Int E))
             (select (→ (Array I Bool) I Bool))
             ... ; constants other than select 
           )
-</code></pre>
+</pre>
+
 This would limit the application of 
 <code class="prettyprint lang-smt3">select</code> 
 only to values of the listed types.
@@ -1405,12 +1433,14 @@ of kind:
   (→ (! Int :var n :restrict (>= n 0)) Type Type)
 </code>
 could export it as follows:
-<pre class="prettyprint lang-smt3"><code>
+
+<pre class="prettyprint lang-smt3">
   :types 
   ( (Seq (! Int :var n :syntax <.numeral.> :restrict (even n)) Type)
     ... 
   )
-</code></pre>
+</pre>
+
 which (cumulatively) restricts the application of 
 <code class="prettyprint lang-smt3">Seq</code>
 only to even numerals.
@@ -1428,7 +1458,8 @@ by instantiating type parameters.
 This can be done indirectly in module interfaces by defining 
 a new type constant as an instance of some polymorphic type, and 
 then exporting the new constant.
-<pre class="prettyprint lang-smt3"><code>
+
+<pre class="prettyprint lang-smt3">
   (define-module M (
   ...
   (define-type IntArray ((A Type)) (Array Int A))
@@ -1437,10 +1468,9 @@ then exporting the new constant.
  :types ( (IntArray (Type)) )
  :consts ( ... )
 )
-</code></pre>
+</pre>
+
 disallow any array other than two dimensional arrays with integer indices. 
-
-
 </p>
 
 <p>A natural question is why add restrictions on an exported symbol 
@@ -1456,13 +1486,14 @@ For instance, a linear integer arithmetic module would import
 the arithmetic symbols from the module defining the integers and export 
 the multiplication symbol with the additional restriction 
 that at least one of its arguments is a (concrete) integer value:
-<pre class="prettyprint lang-smt3"><code>
+
+<pre class="prettyprint lang-smt3">
   :consts 
   ( (* (→ (! Int :syntax <.int_value.>) Int Int))
     (* (→ Int (! Int :syntax <.int_value.>) Int)
     ... 
   )
-</code></pre>
+</pre>
 </p>
 
 
@@ -1473,7 +1504,6 @@ in an SMT-LIB 3 script with the new command
 <code class="prettyprint lang-smt3">import-modules</code>
 which lists all the modules to be imported.
 
-
 At most one import command is allowed in a module. 
 Moreover, the command has to occur before any command that modifies 
 the context (declarations, assertions, ...).
@@ -1482,13 +1512,13 @@ with
 <code class="prettyprint lang-smt3">reset</code>
 commands.
 
-<pre class="prettyprint lang-smt3"><code>
+<pre class="prettyprint lang-smt3">
   (import-modules (M1 M2)) 
   ...
   (reset)
   (import-modules (M3)) 
   ...
-</code></pre>
+</pre>
 </p>
 
 <h4>Qualified names</h4>
@@ -1505,20 +1535,20 @@ because
 <code class="prettyprint lang-smt3">::</code> 
 is not allowed in Version 2.7 identifiers.
 
-<pre class="prettyprint lang-smt3"><code>
+<pre class="prettyprint lang-smt3">
   (import-modules (Ints Reals))
 
   (declare-const n Ints::Int)
   (declare-const x Reals::Real)
   (define-const i Ints::Int (Ints::+ n Ints::2))
   (define-const y Reals::Real (Reals::+ x Reals::4.3))
-</code></pre>   
+</pre>   
 
 <!--
 The <code class="prettyprint lang-smt3">import</code> command allows also the introduction of an alias for each imported module.
 In that case, qualified names can be constructing using the alias as the prefix instead of the original name.
 
-<pre class="prettyprint lang-smt3"><code>
+<pre class="prettyprint lang-smt3">
   ; Example
   (import (FixedSizeBitVectors :as BVs))
   ; Can use BVs::xxx instead of FixedSizeBitVectors::xxx
@@ -1531,9 +1561,9 @@ In that case, qualified names can be constructing using the alias as the prefix 
 <code class="prettyprint lang-smt3">open-module</code> can be used 
 to allow unqualified names for the (exported) symbols of an imported module.
 
-<pre class="prettyprint lang-smt3"><code>
-  ; Example 1
-  (define-module M1 (
+<pre class="prettyprint lang-smt3">
+;; Example 1
+(define-module M1 (
   (declare-type A ())
   (declare-type B ())
   (declare-type C ()) 
@@ -1545,31 +1575,35 @@ to allow unqualified names for the (exported) symbols of an imported module.
  :types (A B)
  :consts ((a A) (f (→ A B)))
 )
+
 (import-modules (M1))
 ; all exported symbols of M1 are now visible with their fully qualified name
 ; all assertions in M1 are now in the assertion context.
+
 (declare-const a1 M1::A) ; declares a1 in the top-level namespace
 (assert (= a1 M1::a))    ; adds this equality to the assertion context
 (open-module M1) 
+
 ; now all symbols of M1 can be used without qualification
 (declare-const b2 B) 
 (assert (= b2 (f a))) ; B, f and a are from M1
-</code></pre>
+</pre>
 
 <p>The effect of opening a module <i>M</i> is to create a local alias 
 for each symbol exported by <i>M</i>. 
 In Example 1 above, 
 <code class="prettyprint lang-smt3">(open-module M1)</code> 
 can be understood as an abbreviation of 
-</p>
 
-<pre class="prettyprint lang-smt3"><code>
+<pre class="prettyprint lang-smt3">
   (define-type A () M1::A)
   (define-type B () M1::B)
   (define-const a A M1::a)
   (define-const f (→ A B) M1::f)
-</code></pre>
+</pre>
+</p>
 
+<p>
 Opening one of more modules creates the possibility of overloading 
 at the level of the importing module, as in the example below.
 That overloading is resolved with the same policy as 
@@ -1578,16 +1612,17 @@ Since the policy is based on the order in which two constants
 with the same name are introduced,
 the order in which two modules are open is then meaningful. 
 
-<pre class="prettyprint lang-smt3"><code>
-  ; Example 2
-  (import-modules (Ints Reals))
-  (open-module Ints)
-  (open-module Reals)
-  (declare-const n Int)           ; Int is an alias of Ints::Int
-  (declare-const x Real)          ; Real is an alias of Reals::Real
-  (define-const i Int (+ n 2))    ; + and 2 are aliases of Ints::+ and Ints::2
-  (define-const y Real (+ x 4.3)) ; + and 4.3 are aliases of Reals::+ and Reals::4.3
-</code></pre>
+<pre class="prettyprint lang-smt3">
+; Example 2
+(import-modules (Ints Reals))
+(open-module Ints)
+(open-module Reals)
+(declare-const n Int)           ; Int is an alias of Ints::Int
+(declare-const x Real)          ; Real is an alias of Reals::Real
+(define-const i Int (+ n 2))    ; + and 2 are aliases of Ints::+ and Ints::2
+(define-const y Real (+ x 4.3)) ; + and 4.3 are aliases of Reals::+ and Reals::4.3
+</pre>
+</p>
 
 <p>A module <i>M</i> importing a module <i>N</i> can export the symbols
 exported by <i>N</i> as if they were its own. 
@@ -1621,60 +1656,82 @@ at the top level.)
 
 <h4>Import Graph</h4>
 
-<p> Considering the top level as an implicit (special) module, let us say that a module <i>N</i> is imported <em>directly</em> by a module <i>M</i> if <i>N</i> appears explicitly in an import command in <i>M</i>. 
-We say that <i>N</i> is imported <em>indirectly</em> by <i>M</i> if <i>N</i> is imported, directly or indirectly, by a module imported by <i>M</i>.
-Circular import dependencies are disallowed, that is, a module cannot import itself, directly or indirectly. 
-In other words, the "directly imports" relation always defines a direct acyclic graph over modules.
+<p>
+Considering the top level as an implicit (special) module, let's say that 
+a module <i>N</i> is imported <em>directly</em> by a module <i>M</i> 
+if <i>N</i> appears explicitly in an import command in <i>M</i>. 
+We say that <i>N</i> is imported <em>indirectly</em> by <i>M</i> 
+if <i>N</i> is imported, directly or indirectly, by a module imported 
+by <i>M</i>.
+Circular import dependencies are disallowed, that is, a module cannot 
+import itself, directly or indirectly. 
+In other words, the "directly imports" relation always defines 
+a direct acyclic graph over modules.
 </p>
 
 <p>
 Without interleaving calls to the 
 <code class="prettyprint lang-smt3">reset</code> 
-command, a module <i>N</i> can be imported directly at most once but can be imported indirectly many times as a result of importing several modules that in turn import <i>N</i>.
+command, a module <i>N</i> can be imported directly at most once 
+but can be imported indirectly many times as a result of importing 
+several modules that in turn import <i>N</i>.
 
-Another consequence on the import structure is that a module's symbol can be imported in a module multiple times and with different restrictions.
+Another consequence on the import structure is that a module's symbol can be
+imported in a module multiple times and with different restrictions.
 The effect of two imports of symbols from the same module is additive: 
-symbols imported with the second import that had not already been imported with the first are added to the top level;
+symbols imported with the second import that had not already been imported
+with the first are added to the top level;
 however, no already imported symbols are removed.
 </p>
 
 <p>
-If the same dependent constant <i>c</i> is imported once with a (restricted) type <code class="prettyprint lang-smt3">τ₁</code> and then with a (restricted) type <code class="prettyprint lang-smt3">τ₂</code> then it can be used with either type.
-(Note that <i>c</i> is not overloaded in this case because type <code class="prettyprint lang-smt3">τ₁</code> and <code class="prettyprint lang-smt3">τ₂</code> both are restrictions of the same principal type that <i>c</i> has in the module it originally was introduced in.) 
+If the same dependent constant <i>c</i> is imported once 
+with a (restricted) type
+<code class="prettyprint lang-smt3">τ₁</code>
+and then with a (restricted) type
+<code class="prettyprint lang-smt3">τ₂</code>
+then it can be used with either type.
+(Note that <i>c</i> is not overloaded in this case because type
+<code class="prettyprint lang-smt3">τ₁</code>
+and 
+<code class="prettyprint lang-smt3">τ₂</code> 
+both are restrictions of the same principal type that <i>c</i> has 
+in the module it originally was introduced in.) 
 </p>
 
 <p>
-<pre class="prettyprint lang-smt3"><code>
+<pre class="prettyprint lang-smt3">
 (define-module M0 (
   (declare-type-var X)
   (declare-type-var Y)
   (declare-const p (→ X Y Bool))
   ; X, Y and p are exported in full generality
+  )
 )
-
 (define-module M1 (
   (import-modules (M0))
   (open-module M0)
   (declare-type A ())
   :type-vars (Y)
   :consts (p (→ A Y Bool))
+  )
 )
-
 (define-module M2 (
   (import-modules (M0))
   (open-module M0)
   (declare-type B ())
   :type-vars (X)
   :consts (p (→ X B Bool))
+  )
 )
-
 (define-module M3 (
   (import-modules (M1 M2))
   (open-module M1)
   (open-module M2)
   ...
+  )
 )
-</code></pre>   
+</pre>   
 
 Module 
 <code class="prettyprint lang-smt3">M3</code>
@@ -1697,28 +1754,29 @@ and
 Algebraic data types in SMT-LIB 3 are unchanged from version 2.7,
 both in syntax and semantics.
 
-<pre class="prettyprint lang-smt3"><code>
-  (declare-datatypes ((Size 0) (Option 1) (List 1) (Pair 2))
-    ( ; Size
-      ((small) (medium) (large))
-      ; Option
-      (par (V) ((none) (some (val V)) ))
-      ; List
-      (par (E) ((nil) (cons (head E) (tail (List E)))))
-      ; Pair
-      (par (A B) ((pair (first A) (second B))))
+<pre class="prettyprint lang-smt3">
+  (declare-datatypes ((Size 0) (Option 1) (List 1) (Pair 2)) ()
+    ; Size
+    ((small) (medium) (large))
+    ; Option
+    (par (V) ((none) (some (val V)) ))
+    ; List
+    (par (E) ((nil) (cons (head E) (tail (List E)))))
+    ; Pair
+    (par (A B) ((pair (first A) (second B))))
     )
   )
 
   (declare-datatype BinTree (par (X)
-      ((leaf) (node (left (BinTree X) (val X) (right (BinTree X)))
+    ((leaf) (node (left (BinTree X) (val X) (right (BinTree X)))))
   )
-</code></pre>
+</pre>
 
-In the commands above only difference is that now we refer to the local symbols introduced by the 
+In the commands above, the only difference is that now we refer 
+to the local symbols introduced by the 
 <code class="prettyprint lang-smt3">par</code>
-binder 
-(such as <code class="prettyprint lang-smt3">V</code>),
+binder (such as 
+<code class="prettyprint lang-smt3">V</code>),
 as <em>type variables</em> instead of sort parameters.
 </p>
 
@@ -1728,6 +1786,13 @@ while algebraic datatypes can be polymorphic, they cannot be dependent
 (on values).
 This restriction is intentional but could be lifted in future releases
 of Version 3.
+Another restriction is that constructors of arity greater than 1,
+which are now higher-order functions, <em>can be applied only in full</em>.
+For example, a term like
+<code class="prettyprint lang-smt3">(node leaf)</code>
+is not well-formed, whereas one like 
+<code class="prettyprint lang-smt3">(node leaf 4 leaf)</code>
+is.
 </p>
 
 <!-- 
@@ -1738,9 +1803,9 @@ For instance, for the constant the <code class="prettyprint lang-smt3">Pair</cod
 
 Short names can be used after <em>opening</em> the type, as with modules, with the <code class="prettyprint lang-smt3">open</code> command:
 
-<pre class="prettyprint lang-smt3"><code>
+<pre class="prettyprint lang-smt3">
   (open Pair)
-</code></pre>
+</code>
 
 The same rule on overloading apply as for modules.
 </p>
@@ -1749,16 +1814,17 @@ The same rule on overloading apply as for modules.
 <h5>Testers and recursors</h5>
 
 <p>
-Every inductive type definition induces an implicit definition of <em>testers</em> for each constant as well as general <em>recursor</em> 
-for the type.
+Every inductive type definition induces an implicit definition 
+of <em>testers</em> for each constant as well as general
+<em>recursor</em>  for the type.
 For example, for the 
 <code class="prettyprint lang-smt3">List</code>
 type defined above there would be the following tester functions 
 
-<pre class="prettyprint lang-smt3"><code>
+<pre class="prettyprint lang-smt3">
   (is-nil (→ (List E) Bool))
   (is-cons (→ (List E) Bool))
-</code></pre>
+</pre>
 
 where
 <code class="prettyprint lang-smt3">E</code>
@@ -1772,7 +1838,9 @@ and
 respectively.
 The indexed-name form is still allowed as syntactic sugar
 for backward compatibility but is deprecated.
+</p>
 
+<p>
 Recursors are a new feature in SMT-LIB 3.
 Using again as an example the 
 <code class="prettyprint lang-smt3">List</code>
@@ -1791,7 +1859,7 @@ The
 <code class="prettyprint lang-smt3">List</code>
 recursor behaves as if it had been directly defined as follows
 
-<pre class="prettyprint lang-smt3"><code>
+<pre class="prettyprint lang-smt3">
   (declare-type-var X)
   (declare-type-var Y)
   (define-fun-rec reduce 
@@ -1803,7 +1871,7 @@ recursor behaves as if it had been directly defined as follows
       )
     ) 
   )
-</code></pre>
+</pre>
 
 The recursor above reduces any list
 <code class="prettyprint lang-smt3">l</code> of type 
@@ -1830,17 +1898,16 @@ and the (recursively computed) reduction of
 Analogously, the recursor for the 
 <code class="prettyprint lang-smt3">BinTree</code>
 datatype defined above would defined as follow
-<pre class="prettyprint lang-smt3"><code>
+<pre class="prettyprint lang-smt3">
   (define-fun-rec reduce 
-    ( (y0 Y) (comb (→ (BinTree X) X (BinTree X) Y Y Y)) (t (Tree X)) )
-    Y
+    ( (y0 Y) (comb (→ (BinTree X) X (BinTree X) Y Y Y)) (t (Tree X)) ) Y
     (match t ( 
       (leaf y0)
       ((node t1 v t2) (comb t1 v t2 (reduce y0 comb t1) (reduce y0 comb t2)))
       )
     )
   )
-</code></pre>
+</pre>
 </p>
 
 <p>
@@ -1860,7 +1927,7 @@ datatype, the functions that can be defined with
 <code class="prettyprint lang-smt3">reduce</code>
 include the following:
 
-<pre class="prettyprint lang-smt3"><code>
+<pre class="prettyprint lang-smt3">
   ; Sum over the elements of an Int list
   (define-const sum ((l (List Int))) Int
     (reduce 0 (lambda ((n Int) (t (List Int)) (s Int)) (+ n s)) l) 
@@ -1890,7 +1957,7 @@ include the following:
     (reduce (as nil (List A)) 
       (lambda ((a A) (t (List A)) (r (List B))) (cons (f a) r)) l)
   )
-</code></pre>
+</pre>
 </p>
 
 
@@ -1917,7 +1984,8 @@ Types constants and constants in module can be declared as external with an
 attribute which connects them to symbols exported by another module. 
 </p>
 
-<pre class="prettyprint lang-smt3"><code>
+<p>
+<pre class="prettyprint lang-smt3">
   (define-module Lists (
     (declare-datatype BinTree (par (X)
         ((nil) (cons (head X) (tail (List X))))
@@ -1937,9 +2005,9 @@ attribute which connects them to symbols exported by another module.
    :consts ((len (→ (List E) Ints::Int)) 
    ...
   )
-</code></pre>
+</pre>
 
-<p>Using the 
+Using the 
 <code class="prettyprint lang-smt3">:extern</code> 
 attribute, the type 
 <code class="prettyprint lang-smt3">Int</code> 
@@ -1957,32 +2025,44 @@ are introduced similarly.
 <p>In general, symbols declared as
 <code class="prettyprint lang-smt3">:extern</code>
 in a module <i>M</i> <em>cannot</em> be exported by <i>M</i>.
-This entails that if <i>M</i> exports a symbol <i>s</i> that depends on
-external symbols from a module <i>N</i>, a module importing <i>M</i> 
-can use <i>s</i> in a command only if it imports <i>N</i> too.
+This entails that if <i>M</i> exports a symbol <i>s</i> that depends 
+on external symbols from a module <i>N</i>, a module importing 
+<i>M</i> can use <i>s</i> in a command only if it imports <i>N</i> 
+too.
 [To do: define precisely what it means for a symbol to depend 
 on external ones.]
 </p>
 
 <p>
-In the example above, since <code class="prettyprint lang-smt3">Lists</code> exports a function whose type and definition depend on external symbols from module <code class="prettyprint lang-smt3">Ints</code>, any module importing <code class="prettyprint lang-smt3">Lists</code> must also import <code class="prettyprint lang-smt3">Ints</code> so that the reference to the external symbols in <code class="prettyprint lang-smt3">Lists</code> can be resolved.
+In the example above, since 
+<code class="prettyprint lang-smt3">Lists</code>
+exports a function whose type and definition depend on external symbols 
+from module 
+<code class="prettyprint lang-smt3">Ints</code>, 
+any module importing
+<code class="prettyprint lang-smt3">Lists</code>
+must also import
+<code class="prettyprint lang-smt3">Ints</code>
+so that the reference to the external symbols in
+<code class="prettyprint lang-smt3">Lists</code>
+can be resolved.
 
-<pre class="prettyprint lang-smt3"><code>
+<pre class="prettyprint lang-smt3">
   ; Example 1
   (import-modules (Lists))
   ; Illegal import since Lists::len depends on Ints.
   ...
-</code></pre>
+</pre>
 
-<pre class="prettyprint lang-smt3"><code>
+<pre class="prettyprint lang-smt3">
   ; Example 2
   (import-modules (Ints Lists))
   ; Lists::len can be used here
   ...
-</code></pre>
+</pre>
 </p>
 
-<h3>Syntactic categories for <code class="prettyprint lang-smt3">:syntax</code> restrictions</h3>
+<h3>Syntactic categories for syntax restrictions</h3>
 
 <p>[To do: definition of <.int_value.> <.pos_numeral.> and 
 so on via an attribute grammar.
@@ -2004,7 +2084,8 @@ Any restriction on theory signature and language is left to modules
 that define restricted logics.  
 </p>
 
-<p>In the current formalization, the theories below are essentially
+<p>
+In the current formalization, the theories below are essentially
 conservative extensions of the corresponding SMT-LIB 2.7 theories,
 that is, they have more symbols and richer types but do not change 
 the semantics of the old ones in any meaningful way.
@@ -2012,7 +2093,7 @@ the semantics of the old ones in any meaningful way.
 
 <button type="button" class="collapsible">Core</button>
 <div class="coll_content">
- <pre class="prettyprint lang-smt3"><code>
+<pre class="prettyprint lang-smt3">
 ; Core SMT-LIB theory
 (define-module Core ( 
   (set-info :smt-lib-version 3.0)
@@ -2165,13 +2246,13 @@ the semantics of the old ones in any meaningful way.
    "The import attribute :no-new-functions disallows the declaration 
     of constants of arrow type.")
 ))
-</code></pre>
-(<a href="Version3/Ints.smt3">raw file</a>)
+</pre>
+(<a href="Version3/Core.smt3">raw file</a>)
 </div>
 
 <button type="button" class="collapsible">Ints</button>
 <div class="coll_content">
-  <pre class="prettyprint lang-smt3"><code>
+<pre class="prettyprint lang-smt3">
 (define-module Ints (
   (set-info :smt-lib-version 3.0)
   (set-info :smt-lib-release "2026-XX-XX")
@@ -2323,14 +2404,13 @@ the semantics of the old ones in any meaningful way.
     to its integer part, that is, to the largest integer n 
     that satisfies (<= (to_real n) r).")
 ))
-</code></pre>
-
+</pre>
 (<a href="Version3/Ints.smt3">raw file</a>)
 </div>
 
 <button type="button" class="collapsible">Reals</button>
 <div class="coll_content">
-  <pre class="prettyprint lang-smt3"><code>
+<pre class="prettyprint lang-smt3">
 (define-module Reals (
   (set-info :smt-lib-version 3.0)
   (set-info :smt-lib-release "2026-XX-XX")
@@ -2541,26 +2621,25 @@ the semantics of the old ones in any meaningful way.
     2) PlanetMath, http://planetmath.org/encyclopedia/RealClosedFields.html
   ")
 ))
-</code></pre>
+</pre>
  (<a href="Version3/Reals.smt3">raw file</a>)
 </div>
 
 <button type="button" class="collapsible">Bit Vectors</button>
 <div class="coll_content">
-<pre class="prettyprint lang-smt3"><code>
+<pre class="prettyprint lang-smt3">
 [Coming soon.]
-</code></pre>
+</pre>
 <!-- (<a href="Version3/FixedSizeBitVectors.smt3">raw file</a>) -->
 </div>
 
 <button type="button" class="collapsible">Unicode Strings</button>
 <div class="coll_content">
-<pre class="prettyprint lang-smt3"><code>
+<pre class="prettyprint lang-smt3">
 [Coming soon.]
-</code></pre>
+</pre>
  <!-- (<a href="Version3/UnicodeStrings.smt3">raw file</a>) -->
 </div>
-<br>
 
 
 <h3>SMT-LIB 3 Logics</h3>
@@ -2573,10 +2652,10 @@ with the right restrictions at the beginning of an SMT-LIB script.
 </p>
 
 <p>
-With some limitations, modules, interfaces and imports provide a suitable mechanism 
-for indicating to an SMT solver a specific fragment in which to reason,
-allowing the solver to apply the best reasoning techniques at its disposal 
-for that fragment, or recognize it as unsupported.
+With some limitations, modules, interfaces and imports provide 
+a suitable mechanism for indicating to an SMT solver a specific fragment 
+in which to reason, allowing the solver to apply the best reasoning techniques
+at its disposal for that fragment, or recognize it as unsupported.
 </p>
   
 <p>
@@ -2599,7 +2678,8 @@ For example,
 (set-logic QF_UF)
 </code>   
 could become an abbreviation of
-<pre class="prettyprint lang-smt3"><code>
+
+<pre class="prettyprint lang-smt3">
 (define-module QF_UF (
   (import (Core))
   (open Core) 
@@ -2626,11 +2706,14 @@ could become an abbreviation of
 (import (QF_UF))
 (open QF_UF)
 ...
-</code></pre>
-The command <code class="prettyprint lang-smt3">(set-info :FOL)</code> is a (imperfect) solution of the problem of capturing the Version 2.7 restriction 
-for terms to be in the <em>applicative fragment</em>
-where all function symbols (i.e., non-nullary constants of type (→ τ₁ ⋅⋅⋅ τᵢ)) 
-are fully applied (i,e., applied to exactly i arguments).
+</pre>
+
+The command
+<code class="prettyprint lang-smt3">(set-info :FOL)</code>
+is a (imperfect) solution of the problem of capturing the Version 2.7 
+restriction for terms to be in the <em>applicative fragment</em>
+where all function symbols (i.e., non-nullary constants of type 
+(→ τ₁ ⋅⋅⋅ τᵢ)) are fully applied (i,e., applied to exactly i arguments).
 
 <!--
 So, we might need to introduce some labels to capture restriction 
@@ -2653,7 +2736,7 @@ This way,
 (set-logic QF_UF)
 </code>   
 would be and abbreviation of
-<pre class="prettyprint lang-smt3"><code>
+<pre class="prettyprint lang-smt3">
   (import (Core) 
  :except-consts ( 
   ; no quantifiers
@@ -2668,8 +2751,12 @@ would be and abbreviation of
 -->
 </p>
 
-Similarly, for the logic LIA <code class="prettyprint lang-smt3">(set-logic LIA)</code> would be and abbreviation of
-<pre class="prettyprint lang-smt3"><code>
+<p>
+Similarly, for the logic LIA 
+<code class="prettyprint lang-smt3">(set-logic LIA)</code>
+would be and abbreviation of
+
+<pre class="prettyprint lang-smt3">
 (define-module LIA (
   (import (Core Ints))
   (open Core)
@@ -2720,8 +2807,7 @@ is (intentionally) not given a
 <code class="prettyprint lang-smt3">:left-assoc</code>
 designation as that would have allowed non-linear terms like
 <code class="prettyprint lang-smt3">(* 3 x y)</code>.
-<br><br>
-
+</p>
 </div>
 </div>
 
