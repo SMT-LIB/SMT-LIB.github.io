@@ -942,7 +942,7 @@ because they can introduce (value) dependent types as well.
 <pre class="prettyprint lang-smt3">
   (declare-type Vector (Type (! Int :var m :restrict (>= m 0)))
   (define-type NonEmptyRealVector ((n Int :restrict (> n 0))) (Vector Real n))
-  (define-type RealVector8 () (RealVector 8))
+  (define-type RealVector8 () (NonEmptyRealVector 8))
 </pre>
 </p>
 
