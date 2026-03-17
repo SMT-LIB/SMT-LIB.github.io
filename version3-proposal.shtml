@@ -816,7 +816,7 @@ For instance, in linear integer arithmetic, multiplication could be defined
 as follows (the actual definition is more elaborate):
 
 <pre class="prettyprint lang-smt3">
-  (define-fun-rec * ((x Int :syntax <.signed numeral.>) (y Int)) 
+  (define-fun-rec * ((x Int :syntax <.signed_numeral.>) (y Int)) 
     (ite (= x 0) 0
       (ite (< x 0) (* (- x) y) 
         (+ x (* ((- x 1) y)))))
@@ -951,7 +951,8 @@ for function (λ) abstraction
 
 The 
 <code class="prettyprint lang-smt3">let</code> 
-binder is the same as in Version 2 with the addition that now it can be used to define higher-order variables. 
+binder is the same as in Version 2 with the addition that now it can be used 
+to define higher-order variables. 
 The <code class="prettyprint lang-smt3">lambda</code> 
 binder is an extension to functions of the corresponding binder of Version 2.7.
 </p>
@@ -1008,7 +1009,7 @@ The binder syntax, with expressions of the form
   (forall ((x₁ τ₁) ⋅⋅⋅ (xᵢ τᵢ)) φ) 
 </pre>
 
-is maintained but it is understood as an abbreviation of
+is understood as an abbreviation of
 
 <pre class="prettyprint lang-smt3">
   (forall (lambda ((x₁ τ₁) ⋅⋅⋅ (xᵢ τᵢ)) φ)) 
@@ -1032,6 +1033,7 @@ abbreviates
 <pre class="prettyprint lang-smt3">
   (choose (lambda ((x τ)) φ))
 </pre>
+
 where the function
 <code class="prettyprint lang-smt3">choose</code>
 has the polymorphic type
@@ -1050,7 +1052,7 @@ It is not possible to have (let-introduced) polymorphic variables
 or to pass polymorphic functions as argument to other functions.
 In contrast, it is possible to make polymorphic assertions.
 This is illustrated by the following example,
-where we (illegally) name the type variable α for emphasis:
+where we (illegally) name the type variable α, for emphasis:
 
 <pre class="prettyprint lang-smt3">
   (declare-type-var α)
@@ -1264,7 +1266,7 @@ For now, they will be used only to define SMT-LIB theories and logics.
   ; A, ping, pong, a, and f is limited to module M
   )
 )
-; A, ping, pong, a, and f are not accessible here
+; A, ping, pong, a, and f are not directly accessible here
 </pre>
 
 A module is introduced by the 
@@ -1281,9 +1283,9 @@ and all the commands that introduce new types and constants.
 The scope, that is, the visibility, of symbols introduced in a module 
 is limited to the module. 
 Such symbols can be accessed outside the module only if they are exported 
-in the module’s interface and only with a qualified name of the form 
+by the module’s interface and only with a qualified name of the form 
 <.module name.>::<.symbol.> (e.g., 
-<code class="prettyprint lang-smt3">M::a</code>).
+<code class="prettyprint lang-smt3">M::ping</code>).
 </p>
 
 
@@ -1313,22 +1315,27 @@ of the underlying logic.)
 
 <p>
 <pre class="prettyprint lang-smt3">
-  (define-module M
-   (
-    (declare-type-var X)   (declare-type-var Y)
-    (declare-type A ())    (declare-type B ())     (declare-type C ()) 
-    (declare-type Pair (Type Type))    
-    (declare-const a A)    (declare-const b B)
-    (declare-const f (→ A B))
-    (declare-const g (→ B A)) 
-    (define-const  h (→ A A) (lambda ((x A)) (g (f x))))
-    (declare-const c (→ A C))
-    (declare-const d (→ X Y X))
-   )
-   :type-vars (X)
-   :types ( A B (Pair (Type Type)) )
-   :consts ( (a A) (f (→ A B)) (h (→ A A)) (d (→ X X X)))
+(define-module M (
+  (declare-type-var X)
+  (declare-type-var Y)
+  (declare-type A ())
+  (declare-type B ())
+  (declare-type C ()) 
+  (declare-type Pair (Type Type))   
+
+  (declare-const a A)
+  (declare-const b B)
+  (declare-const f (→ A B))
+  (declare-const g (→ B A)) 
+  (declare-const c (→ A C))
+  (declare-const d (→ X Y X))
+
+  (define-const  h (→ A A) (lambda ((x A)) (g (f x))))
   )
+ :type-vars ( X )
+ :types ( A B (Pair (Type Type)) )
+ :consts ( (a A) (f (→ A B)) (h (→ A A)) (d (→ X X X)) )
+)
 </pre>
 
 In the example above, only one of the type variables,
@@ -1339,19 +1346,19 @@ if it is nullary (as in the case of
 and
 <code class="prettyprint lang-smt3">B</code>), 
 otherwise it contains a pair consisting of the constant 
-and they list of kind or types of its inputs
+and the list of kinds/types of its inputs
 (as in the case of
 <code class="prettyprint lang-smt3">Pair</code>).
 
 Note that the types of the exported constants must be constructible 
-from the exported type variables and constants for the interface 
+from the exported type variables and type constants for the interface 
 to be well formed.
-However, these types can be restricted to be instances of 
-the constant's principal type.
+However, these types can be restricted to be instances
+of the constant's principal type.
 
-Also note that any relationship among the exported constants established
-in the module through non-exported constants (or through assertions) is 
-maintained when the module is imported. 
+Also note that any relationship among the exported constants 
+established in the module through non-exported constants 
+(or through assertions) is maintained when the module is imported. 
 For example, the formula 
 
 <pre class="prettyprint lang-smt3">
@@ -1402,7 +1409,7 @@ and
 are type variables, could be exported as follows: 
 
 <pre class="prettyprint lang-smt3">
-  :type-varss ( I E ) 
+  :type-vars ( I E ) 
   :types ( Bool Int (Array (Type Type)) ... ) 
   :consts ( (select (→ (Array Int E) Int E))
             (select (→ (Array I Bool) I Bool))
@@ -1453,24 +1460,29 @@ The meaning of multiple semantic restrictions is the conjunction
 of the individual restrictions.
 </p>
 
-<p>For polymorphic types, additional restrictions are expressible 
-by instantiating type parameters. 
-This can be done indirectly in module interfaces by defining 
-a new type constant as an instance of some polymorphic type, and 
-then exporting the new constant.
+<p>
+For polymorphic types, it is possible to impose instantiation 
+restrictions on the type parameters, using a similar syntax using 
+a (limited) language of constraints over types.
 
 <pre class="prettyprint lang-smt3">
-  (define-module M (
+(define-module M2 (
   ...
-  (define-type IntArray ((A Type)) (Array Int A))
+  (declare-type Array (Type Type))
   ...
   )
- :types ( (IntArray (Type)) )
+ :types ( ... (Array (! I Type :restrict (= I Int)) Type) ... )
  :consts ( ... )
 )
 </pre>
 
-disallow any array other than two dimensional arrays with integer indices. 
+Module
+<code class="prettyprint lang-smt3">M2</code>
+restricts the exported 
+<code class="prettyprint lang-smt3">Array</code>
+type constant to take only type
+<code class="prettyprint lang-smt3">Int</code>
+as its first input.
 </p>
 
 <p>A natural question is why add restrictions on an exported symbol 
@@ -1705,24 +1717,24 @@ in the module it originally was introduced in.)
   (declare-type-var X)
   (declare-type-var Y)
   (declare-const p (→ X Y Bool))
-  ; X, Y and p are exported in full generality
   )
+ ; X, Y and p are exported in full generality
 )
 (define-module M1 (
   (import-modules (M0))
   (open-module M0)
   (declare-type A ())
-  :type-vars (Y)
-  :consts (p (→ A Y Bool))
   )
+ :type-vars (Y)
+ :consts (p (→ A Y Bool))
 )
 (define-module M2 (
   (import-modules (M0))
   (open-module M0)
   (declare-type B ())
-  :type-vars (X)
-  :consts (p (→ X B Bool))
   )
+ :type-vars (X)
+ :consts (p (→ X B Bool))
 )
 (define-module M3 (
   (import-modules (M1 M2))
@@ -1865,12 +1877,9 @@ recursor behaves as if it had been directly defined as follows
   (define-fun-rec reduce 
     ( (y0 Y) (comb (→ X (List X) Y Y)) (l (List X)) ) ; input vars
     Y                                                 ; output type
-    (match l 
-      ( (nil y0)
-        ((cons h t) (comb h t (reduce y0 comb t)))
-      )
-    ) 
-  )
+    (match l ( 
+      (nil y0)
+      ((cons h t) (comb h t (reduce y0 comb t))))))
 </pre>
 
 The recursor above reduces any list
@@ -1903,10 +1912,7 @@ datatype defined above would defined as follow
     ( (y0 Y) (comb (→ (BinTree X) X (BinTree X) Y Y Y)) (t (Tree X)) ) Y
     (match t ( 
       (leaf y0)
-      ((node t1 v t2) (comb t1 v t2 (reduce y0 comb t1) (reduce y0 comb t2)))
-      )
-    )
-  )
+      ((node t1 v t2) (comb t1 v t2 (reduce y0 comb t1) (reduce y0 comb t2))))))
 </pre>
 </p>
 
@@ -1986,25 +1992,22 @@ attribute which connects them to symbols exported by another module.
 
 <p>
 <pre class="prettyprint lang-smt3">
-  (define-module Lists (
-    (declare-datatype BinTree (par (X)
-        ((nil) (cons (head X) (tail (List X))))
-      )
-    )
-    ...
-    (declare-type Int () :extern Ints::Int)
-    (declare-const 0 Int :extern Ints::0)
-    (declare-const +1 (→ Int Int) :extern Ints::+1)
-    (define-fun len ((l (List A))) Int
-      (reduce 0 (lambda ((a A) (t (List A)) (n Int)) (+1 n)) l)
-    )
-    ...
-   )
-   :type-vars (E)
-   :types ((List E))
-   :consts ((len (→ (List E) Ints::Int)) 
-   ...
+(define-module Lists (
+  (declare-datatype List (par (X)
+    ((nil) (cons (head X) (tail (List X)))))
   )
+  ...
+  (declare-type Int () :extern Ints::Int)
+  (declare-const 0 Int :extern Ints::0)
+  (declare-const +1 (→ Int Int) :extern Ints::+1)
+  (define-fun len ((l (List A))) Int
+    (reduce 0 (lambda ((a A) (t (List A)) (n Int)) (+1 n)) l))
+  ...
+  )
+  :type-vars ( E )
+  :types ( (List E) )
+  :consts ( (len (→ (List E) Ints::Int) )
+)
 </pre>
 
 Using the 
