@@ -83,7 +83,7 @@ Released for free under a Creative Commons Attribution 3.0 License
         </a>
        </dt>
        <dd>
-        Closed formulas over the theory of linear integer arithmetic and arrays
+        Formulas over the theory of linear integer arithmetic and arrays
         extended with free sort and function symbols
         but restricted to arrays with integer indices and values.
        </dd>
@@ -95,8 +95,9 @@ Released for free under a Creative Commons Attribution 3.0 License
         </a>
        </dt>
        <dd>
-        Closed linear formulas with free sort and function symbols
-        over one- and two-dimentional arrays of integer index and real value.
+        Linear formulas over the theory of linear integer arithmetic 
+        with free sort and function symbols
+        and one- and two-dimentional arrays of integer index and real value.
        </dd>
        <dt><a name="AUFNIRA" />
         <a href="logics-all.shtml#AUFNIRA">
@@ -106,8 +107,9 @@ Released for free under a Creative Commons Attribution 3.0 License
         </a>
        </dt>
        <dd>
-        Closed formulas with free function and predicate symbols
-        over a theory of arrays of arrays of integer index and real value.
+        Formulas over the theory of integer arithmetic 
+        without exponentiation but with arrays, and free function 
+        and predicate symbols.
        </dd>
        <dt><a name="LIA" />
         <a href="logics-all.shtml#LIA">
@@ -117,7 +119,7 @@ Released for free under a Creative Commons Attribution 3.0 License
         </a>
        </dt>
        <dd>
-        Closed linear formulas over linear integer arithmetic.
+        Linear formulas over linear integer arithmetic.
        </dd>
        <dt><a name="LRA" />
         <a href="logics-all.shtml#LRA">
@@ -127,7 +129,7 @@ Released for free under a Creative Commons Attribution 3.0 License
         </a>
        </dt>
        <dd>
-        Closed linear formulas in linear real arithmetic.
+        Linear formulas in linear real arithmetic.
        </dd>
        <dt><a name="QF_ABV" />
         <a href="logics-all.shtml#QF_ABV">
@@ -137,7 +139,7 @@ Released for free under a Creative Commons Attribution 3.0 License
         </a>
        </dt>
        <dd>
-        Closed quantifier-free formulas over the theory of bitvectors and bitvector arrays.
+        Quantifier-free formulas over the theory of bitvectors and bitvector arrays.
        </dd>
        <dt><a name="QF_AUFBV" />
         <a href="logics-all.shtml#QF_AUFBV">
@@ -147,7 +149,7 @@ Released for free under a Creative Commons Attribution 3.0 License
         </a>
        </dt>
        <dd>
-        Closed quantifier-free formulas over the theory of bitvectors and bitvector arrays extended with free sort and function symbols.
+        Quantifier-free formulas over the theory of bitvectors and bitvector arrays extended with free sort and function symbols.
        </dd>
        <dt><a name="QF_AUFLIA" />
         <a href="logics-all.shtml#QF_AUFLIA">
@@ -157,7 +159,7 @@ Released for free under a Creative Commons Attribution 3.0 License
         </a>
        </dt>
        <dd>
-        Closed quantifier-free linear formulas over the theory of integer arrays
+        Quantifier-free linear formulas over the theory of integer arrays
         extended with free sort and function symbols.
        </dd>
        <dt><a name="QF_AX" />
@@ -168,7 +170,7 @@ Released for free under a Creative Commons Attribution 3.0 License
         </a>
        </dt>
        <dd>
-        Closed quantifier-free formulas over the theory of arrays with extensionality.
+        Quantifier-free formulas over the theory of arrays with extensionality.
        </dd>
        <dt><a name="QF_BV" />
         <a href="logics-all.shtml#QF_BV">
@@ -178,7 +180,17 @@ Released for free under a Creative Commons Attribution 3.0 License
         </a>
        </dt>
        <dd>
-        Closed quantifier-free formulas over the theory of fixed-size bitvectors.
+        Quantifier-free formulas over the theory of fixed-size bitvectors.
+       </dd>
+        <dt><a name="QF_EIA" />
+        <a href="logics-all.shtml#QF_EIA">
+         <b>
+          QF_EIA:
+         </b>
+        </a>
+       </dt>
+       <dd>
+        Quantifier-free formulas over the theory of integer arithmetic with exponentiation.
        </dd>
        <dt><a name="QF_IDL" />
         <a href="logics-all.shtml#QF_IDL">
@@ -227,7 +239,7 @@ Released for free under a Creative Commons Attribution 3.0 License
         </a>
        </dt>
        <dd>
-        Quantifier-free integer arithmetic.
+        Quantifier-free integer arithmetic without exponentiation.
        </dd>
        <dt><a name="QF_NRA" />
         <a href="logics-all.shtml#QF_NRA">
