@@ -11,9 +11,9 @@
    "
     )
   (set-info :notes
-   "This theory declaration defines a core theory for fixed-size bitvectors 
-    where the operations of concatenation and extraction of bitvectors as well 
-    as the usual logical and arithmetic operations are overloaded.
+   "This theory declaration defines a core theory of bit vectors.
+    The bit vector type is dependent on a positive integer indicating 
+    its width.
    ")
  
    (import (Core))
@@ -40,30 +40,43 @@
   ; Types
   ;---------------
 
-  ; Integer intervals [lo, hi-1]. The elements of (Range 0 3) are 0, 1, 2.  
+  ; Integer intervals [lo, hi-1]
   (define-type Range! ((lo Int) (hi Int :restrict (< lo hi))) 
     (! Int :var n :restrict (<= lo n (-1 hi)))
    :private)
 
-  ; Bits
+  ; Bits. The elements of Bit! are 0, 1.
   (define-type Bit! () (Range! 0 2)
    :private)
 
-  ; type is abstract, definition is not exported
+  ; Bit-vector type 
   (define-type BitVec ((m Pos!)) 
     (-> (Range! 0 m) Bit!)
-   :abstract)
-  
-  ; alternative
-  (define-type BitVec () (-> (! Pos! :var m) (-> (Range! 0 m) Bit!))
-
+   :abstract
+   :note 
+   "Type being abstract means that its definition is not exported.")
 
   (set-info :notes 
-   "(BitVec m) denotes the set of all bitvectors of size m > 0.
+   "BitVec(m) denotes the set of all bitvectors of size m > 0.
    More precisely, it denotes the set of finite functions whose
    definition domain is the initial segment [0, m) of the naturals, 
    starting at 0 (included) and ending at m (excluded), and 
    whose co-domain is [0, 1].")
+
+  (define-const axiom_1 Bool 
+    (forall ((m Pos!) (bv (BitVec m)) (i Int))
+      (and (=> (<  0 i) (= (bv i) 0))
+           (=> (<= m i) (= (bv i) 0))))
+   :private)
+  ; Forcing bitvectors to be 0 outside the definition range
+  (assert axiom_1)
+
+  (set-info :notes 
+   "Asserting axiom_1 ensures that bit vectors cannot be distinguished 
+    by what they return outside their definition range. This way, 
+    the equality relation for bit-vectors of size m coincides 
+    with the identity relation over (-> (Range! 0 m) Bit!)
+    (since equality over function is extensional).")
 
   ;---------------------
   ; Auxiliary functions
@@ -83,19 +96,8 @@
     
   (set-info :notes
    "The following holds:
-    (forall ((x Nat!) (y Pos!)) (= x (+ (* (div x y) y) (rem x y))))")
+    forall x: Nat!, y: Pos!. x = (x div y) * y + (x rem y)")
   
-  ;----------
-  ; Equality
-  ;----------
-
-  (define-fun equal ((m Pos! : implicit)
-                     (bv1 (BitVec m))
-                     (bv2 (BitVec m))
-                     (i (Range! 0 m)))
-                    (Bool)
-    (ite (= i 0) ))
-
   ;-------------------
   ; Constant literals
   ;-------------------
@@ -106,7 +108,7 @@
          :restrict "m is the number of binary digits in the constant") 
         (BitVec m))
    :builtin
-   "The constant symbols #b0 and #b1 of sort (BitVec 1) are defined as follows
+   "The constant symbols #b0 and #b1 of sort BitVec(1) are defined as follows
 
     ⟦#b0⟧ := λx:[0, 1). 0
     ⟦#b1⟧ := λx:[0, 1). 1
@@ -153,7 +155,7 @@
   ; to_bv from Nat!
   (declare-const to_bv (-> (! Pos! :var m) Nat! (BitVec m))
    :built-in 
-   "Int to (BitVec m) conversion mapping each non-negative integer n 
+   "Int to BitVec(m) conversion mapping each non-negative integer n 
     to the 2's complement representation of (n modulo m).
     Takes an m > 0 and an n >= 0 and returns the (unique) 
      bitvector b: [0, m) → {0, 1} such that
@@ -169,25 +171,17 @@
   ;--------------------
 
   ; concat
-  (declare-const concat 
-    (-> (! Int :var i :implicit :restrict (<= 0 i)) 
-        (! Int :var j :implicit :restrict (<= 0 j)) 
-        (BitVec i) (BitVec j)
-        (BitVec (+ i j)))
-   :builtin "
-    - For all terms s and t of type (BitVec i) and (BitVec j) with i > 0,
-      ⟦(concat s t)⟧ := λx:[0, i+j). (if (x < j) then ⟦t⟧(x) else ⟦s⟧(x - j))
- ")
-
-  ; concat
- (define-fun concat ((i Pos! :implicit) 
-                     (j Pos! :implicit) 
-                     (k Pos! :implicit :restrict (= k (+ i j))) 
-                     (bv1 (BitVec i))
-                     (bv2 (BitVec j))) 
-                    (BitVec k)
+  (define-fun concat ((i Pos! :implicit) 
+                      (j Pos! :implicit) 
+                      (k Pos! :implicit :restrict (= k (+ i j))) 
+                      (bv1 (BitVec i))
+                      (bv2 (BitVec j))) 
+                     (BitVec k)
     (lambda ((p (Range! 0 k)))
-      (ite (< p j) (bv1 p) (bv2 (- p j)))))
+      (ite (< p j) (bv1 p) (bv2 (- p j))))
+   :note 
+   "For all bv1 and bv2 of type BitVec(i) and BitVec(j),
+    (concat bv1 bv2) := λx:[0, i+j). (if (x < j) then bv1(x) else bv2(x - j))")
 
   ; extract
   (define-fun extract ((m Pos! :implicit) 
@@ -199,7 +193,7 @@
     (lambda ((p (Range! 0 k)))
       (bv (+ j p)))
    :note
-   "For all terms bv of type (BitVec m),
+   "For all terms bv of type BitVec(m),
     (extract i j t) := λx:[0, k). bv(j + x)")
 
   ; repeat
@@ -208,7 +202,7 @@
                           (m Pos! :implicit) 
                           (n Int :implicit :restrict (= n (* m i))) 
                           (bv (BitVec m)))
-                        (BitVec n)
+                         (BitVec n)
     (ite (= i 1) bv (concat bv (repeat (-1 i) n)))
    :decreases ((i >)))
 
@@ -217,22 +211,22 @@
   ;-------------------- 
 
   ; bvnot
-  (declare-fun bvnot ((m Pos! :implicit) (bv (BitVec m))) (BitVec m)
+  (define-fun bvnot ((m Pos! :implicit) (bv (BitVec m))) (BitVec m)
     (lambda ((p (Range! 0 m)))
       (ite (= (bv p) 0) 1 else 0)))
 
   ; bvand
-  (declare-const bvand ((m Pos! :implicit)
-                        (bv1 (BitVec m)) (bv2 (BitVec m)))
-                       (BitVec m)
+  (define-fun bvand ((m Pos! :implicit)
+                     (bv1 (BitVec m)) (bv2 (BitVec m)))
+                    (BitVec m)
     (lambda ((p (Range! 0 m)))
       (ite (= (bv1 p) 0) 0 (bv2 p)))
    :left-assoc)
 
   ; bvor
-  (declare-const bvand ((m Pos! :implicit)
-                        (bv1 (BitVec m)) (bv2 (BitVec m)))
-                       (BitVec m)
+  (define-fun bvor ((m Pos! :implicit)
+                    (bv1 (BitVec m)) (bv2 (BitVec m)))
+                   (BitVec m)
     (lambda ((p (Range! 0 m)))
       (ite (= (bv1 p) 1) 1 (bv2 p)))
    :left-assoc)
@@ -265,37 +259,37 @@
           (bvand (bvnot bv1) (bvnot bv2))))
 
   ;bvcomp
-  (declare-const bvcomp
-    (-> (! Int :var m :implicit :restrict (<= 0 m)) 
-        (BitVec m) (BitVec m) (BitVec 1))
-    (lambda ((m Int :var m :implicit :restrict (<= 0 m))
-             (s (BitVec m)) (t (BitVec m)))
-      (to_bv (= s t)))
-  )
-;   :builtin
-;   "For all terms s, t of type (BitVec m),
-;    (bvcomp s t) is equivalent to 
-;     - (bvxnor s t) 
-;       if m = 1
-;     - (bvand (bvxnor ((extract |m-1| |m-1|) s) ((extract |m-1| |m-1|) t))
-;         (bvcomp ((extract |m-2| 0) s) ((extract |m-2| 0) t))) 
-;       otherwise
-;   ")
+  (define-fun-rec bvcomp ((m Pos! :implicit) 
+                          (bv1 (BitVec m)) (bv2 (BitVec m)))
+                         (BitVec 1)
+    (ite (= m 1) (bvxnor bv1 bv2)
+      (let ((m1 (- m 1)) (m2 (- m 2)))
+        (bvand
+          (bvxnor (extract m1 m1 bv1) (extract m1 m1 bv2))
+          (bvcomp (extract m2  0 bv1) (extract m2  0 bv2)))))
+   :note
+   "For all bv1, bv2 of type BitVec(m), (bv1 bvcomp bv2) is equivalent to 
+    - bv1 bvxnor bv2
+      if m = 1
+    - (extract(m - 1, m - 1, bv1) bvxnor extract(m - 1, m - 1, bv2))
+      bvand 
+      (extract(m - 2, m - 2, bv1) bvxnor extract(m - 2, m - 2, bv2))
+      otherwise")
 
   ;----------------------
   ; Arithmetic operators
   ;----------------------
 
   ; bvneg
-  (declare-const bvneg
-    (-> (! Int :var m :implicit :restrict (<= 0 m)) 
-        (BitVec m) (BitVec m))
-   :builtin
-   "- For all terms s of type (BitVec 0),
-      ⟦(bvneg s)⟧ := ⟦bvempty⟧
-    - For all terms s of type (BitVec m),
-      ⟦(bvneg s)⟧ := nat2bv[m](2ᵐ - bv2nat(⟦s⟧))
+  (define-fun bvneg ((m Pos! :implicit) (BitVec m)) (BitVec m)
+    (to_bv m (- (exp2 m) (to_int bv)))
+   :note
+   "For all bv of type BitVec(m),
+    bvneg s := to_bv(m, 2ᵐ - to_int(m, bv))
    ")
+
+
+;;; To be revised from here on
 
   ; bvadd
   (declare-const bvadd
