@@ -25,6 +25,21 @@
       <div class="article">
        <h2>News</h2>
        <!------------------------------------------------------------------------>
+       <a name="2026-03-18"></a>
+       <small>March 18, 2026</small>
+       <p>
+         Extended theory Ints with an exponentiation operator and added logic QF_EIA.
+       </p>
+       <a name="2025-07-07"></a>
+       <small>July 7, 2025</small>
+       <p>
+         Added several clarifications and fixed typos and minor errors.
+       </p>
+       <a name="2025-04-09"></a>
+       <small>April 9, 2025</small>
+       <p>
+         Replaced _ with @ as the map application operator in theory HO-Core.
+       </p>
        <a name="2025-02-05"></a>
        <small>February 5, 2025</small>
        <p>
