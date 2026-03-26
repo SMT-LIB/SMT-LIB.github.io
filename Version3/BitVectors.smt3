@@ -1,5 +1,6 @@
 ; [to be completed]
 
+
 (define-module FixedSizeBitVectors (
   (set-info :smt-lib-version 3.0)
   (set-info :smt-lib-release "2026-XX-XX")
@@ -49,8 +50,8 @@
   (define-type Bit! () (Range! 0 2)
    :private)
 
-  ; Predicate defining the bit-vector restriction. The intended meaning of (BV i m b) is that if i is in the range [0, m-1], then b is either 0 or 1, and if i is outside that range, then b is 0.
-  (define-fun BV ((i Int) (m Int) (b Int)) Bool
+  ; Predicate defining the bit-vector restriction. The intended meaning of (v i m b) is that if i is in the range [0, m-1], then b is either 0 or 1, and if i is outside that range, then b is 0.
+  (define-fun isBV ((i Int) (m Int) (b Int)) Bool
     (ite (<= 0 i (-1 m)) (<= 0 b 1) 
       (= b 0))
    :private)
@@ -58,7 +59,7 @@
   ; Bit-vector type 
   ; The intended meaning of (BitVec m) is the set of all bit-vectors of size m > 0, i.e., the set of all functions from [0, m) to {0, 1} that return 0 outside of their definition domain.
   (define-type BitVec ((m Pos!)) 
-    (-> (! Int :var i) (! Int :var b :restrict (BV i m b)))
+    (-> (! Int :var i) (! Int :var b :restrict (isBV i m b)))
    :opaque
    :note 
    "Type being opaque means that its definition is not exported.")
@@ -72,9 +73,9 @@
    of their definition domain.")
 
 ;; TO DO: Verify that the following holds:
-    ; (forall ((m Pos!) (bv (BitVec m)) (i Int))
-    ;   (and (=> (<  0 i) (= (bv i) 0))
-    ;        (=> (<= m i) (= (bv i) 0))))
+    ; (forall ((m Pos!) (v (BitVec m)) (i Int))
+    ;   (and (=> (<  0 i) (= (v i) 0))
+    ;        (=> (<= m i) (= (v i) 0))))
 
   (set-info :notes 
    "Asserting axiom_1 ensures that bit vectors cannot be distinguished 
@@ -152,18 +153,18 @@
   ;--------------------
 
   (define-fun-rec to_int_aux ((m Pos! :implicit) 
-                              (bv (BitVec m)) (i (Range! 0 m))) 
-                             (Range! 0 (exp2 i))
-    (ite (= i 0) (bv 0) 
-      (+ (* (bv i) (exp2 i)) 
-         (to_int_aux bv (-1 i))))
+                              (v (BitVec m)) (i (Range! 0 m))) 
+                             (Range! 0 (exp2 (+1 i)))
+    (ite (= i 0) (v 0)
+        (+ (* (v i) (exp2 i)) 
+          (to_int_aux v (- i 1))))
    :decreases ((i >))
    :private)
 
   ;  to_int
-  (define-fun to_int ((m Pos! :implicit) (bv (BitVec m)))
+  (define-fun to_int ((m Pos! :implicit) (v (BitVec m)))
                      (Range! 0 (exp2 m))
-    (to_int_aux bv (-1 m))
+    (to_int_aux v (-1 m))
    :notes
    "to_int takes a bitvector b: [0, m) → {0, 1}
     with 0 < m, and returns an integer in the range [0, 2ᵐ),
@@ -206,13 +207,13 @@
      (hi Int :restrict (> m hi)) 
      (lo Int :restrict (>= hi lo 0))
      (n Int :implicit :restrict (= n (+1 (- hi lo))))
-     (bv (BitVec m))) 
+     (v (BitVec m))) 
     (BitVec n)
     (lambda ((p Int))
-      (ite (> n > p >= 0) (bv (+ p lo))
+      (ite (> n > p >= 0) (v (+ p lo))
         0))
    :note
-   "For all terms bv of type BitVec(m),
+   "For all terms v of type BitVec(m),
     (extract i j t) := λx:[0, k). bv(j + x)")
 
   ; repeat
@@ -220,9 +221,9 @@
   (define-fun-rec repeat ((i Pos!) 
                           (m Pos! :implicit) 
                           (n Int :implicit :restrict (= n (* m i))) 
-                          (bv (BitVec m)))
+                          (v (BitVec m)))
                          (BitVec n)
-    (ite (= i 1) bv (concat bv (repeat (-1 i) n)))
+    (ite (= i 1) v (concat v (repeat (-1 i) bv)))
    :decreases ((i >)))
 
   ;-------------------- 
@@ -230,10 +231,10 @@
   ;-------------------- 
 
   ; bvnot
-  (define-fun bvnot ((m Pos! :implicit) (bv (BitVec m))) (BitVec m)
+  (define-fun bvnot ((m Pos! :implicit) (v (BitVec m))) (BitVec m)
     (lambda ((i Int))
       (ite (not (<= 0 i (-1 m))) 0
-        (ite (= (bv i) 0) 1 else 0))))
+        (ite (= (v i) 0) 1 else 0))))
 
   ; bvand
   (define-fun bvand ((m Pos! :implicit)
@@ -301,10 +302,10 @@
   ;----------------------
 
   ; bvneg
-  (define-fun bvneg ((m Pos! :implicit) (BitVec m)) (BitVec m)
+  (define-fun bvneg ((m Pos! :implicit) (v (BitVec m))) (BitVec m)
     (to_bv m (- (exp2 m) (to_int bv)))
    :note
-   "For all bv of type BitVec(m),
+   "For all v of type BitVec(m),
     bvneg s := to_bv(m, 2ᵐ - to_int(m, bv))
    ")
 
@@ -659,7 +660,7 @@
       (ite (= x #b1) y z))
    )
 
-; TODO:   A (BV 1) version of all comparison ops
+; TODO:   A (v 1) version of all comparison ops
 ; PF TODO fix all functions
   (declare-const v1ult
     (-> (! Int :var m :implicit :restrict (<= 0 m)) 
