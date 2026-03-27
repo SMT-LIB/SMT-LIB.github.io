@@ -42,7 +42,11 @@
        <p>
          A new release of Version 2.7 of the SMT-LIB reference document
          is now available.  Changes comprise several clarifications and fixed typos and minor errors.
-       </p>        
+       <a name="2025-04-09"></a>
+       <small>April 9, 2025</small>
+       <p>
+         Replaced _ with @ as the map application operator in theory HO-Core.
+       </p>
        <a name="2025-02-05"></a>
        <small>February 5, 2025</small>
        <p>

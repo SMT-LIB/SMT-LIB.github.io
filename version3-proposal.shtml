@@ -74,7 +74,7 @@ Released for free under a Creative Commons Attribution 3.0 License
 <h2>SMT-LIB Version 3.0 - Preliminary Proposal</h2>
 <h4>by C. Barrett, P. Fontaine, and C. Tinelli</h4>
       
-<b>Last updated:</b> 2026-03-16
+<b>Last updated:</b> 2026-03-26
 
 <h3>Overview</h3>
 
@@ -122,7 +122,7 @@ as simple types, and polymorphic sorts are interpreted as polymorphic types;
 maps from Version 2.7 are identified with functions,  which are now 
 first class and can be passed to and returned by other functions;
 sorted constant and function symbols are interpreted as typed constants,
-with function symbols of arity .> 1 becoming higher-order constants, 
+with function symbols of arity > 1 becoming higher-order constants, 
 Curry-style;
 index symbols, as in 
 <code class="prettyprint lang-smt3">(_ extract i j)</code> 
@@ -226,7 +226,7 @@ There are three classes of (well-formed) terms in the language:
 <li>terms denoting <em>types</em>, such as 
 <code class="prettyprint lang-smt3">Bool</code>,
 <code class="prettyprint lang-smt3">Int</code>,
-<code class="prettyprint lang-smt3">(-.> Int Real)</code>,
+<code class="prettyprint lang-smt3">(-> Int Real)</code>,
 <code class="prettyprint lang-smt3">(Array Int Bool)</code>,
 <code class="prettyprint lang-smt3">(List Int)</code>,
 <code class="prettyprint lang-smt3">(BitVec 3)</code>;
@@ -243,7 +243,7 @@ the kind of all types, kinds are actually not directly expressible
 in the concrete syntax of SMT-LIB 3, as that is not necessary.
 They appear only in abtract syntax where they are used to specify 
 the logic's type system.
-The symbol <code class="prettyprint lang-smt3">-.></code>,
+The symbol <code class="prettyprint lang-smt3">-></code>,
 which in Version 2.7 denotes the constructor of the map sort,
 now denotes the function type/kind constructor 
 (as maps and functions are idenfitied in Version 3).
@@ -327,20 +327,20 @@ are now derived from it.
 For example, following commands
 <pre class="prettyprint lang-smt3">
   (declare-fun h (Int Real) Real)
-  (define-fun avg ((x Real) (y Real)) Real (/ (+ x y) 2))
+  (define-fun avg ((x Real) (y Real)) Real (/ (+ x y) 2.0))
 </pre>
 are defined as having the same effect as 
 <pre class="prettyprint lang-smt3">
   (declare-const h (→ Int Real Real))
   (define-const avg (→ Real Real Real)
-    (lambda ((x Real) (y Real)) (/ (+ x y) 2)))
+    (lambda ((x Real) (y Real)) (/ (+ x y) 2.0)))
 </pre>
 
 For similar reasons,
 <code class="prettyprint lang-smt3">define-fun-rec</code>
 is now defined in terms of the new primitive command
 <code class="prettyprint lang-smt3">define-const-rec</code>.
-(See the Commands section for more details on commands.)
+(See the Commands section below for more details on commands.)
 </p>
 
 <h4>Name Space and Shadowing</h4>
@@ -387,7 +387,8 @@ and returns a bit vector of size
 <code class="prettyprint lang-smt3">n + 1</code>.
 Note that 
 <code class="prettyprint lang-smt3">(! Int :var n)</code> 
-uses the same term annotation syntax as in Version 2 but now applied to types. 
+uses the same term annotation syntax as in Version 2 
+but extended to type terms as well.
 The new predefined 
 <code class="prettyprint lang-smt3">:var</code> 
 attribute annotating 
@@ -617,7 +618,7 @@ Version 2.7 allows the application of maps via the <em>apply</em> operator
 as in 
 <code class="prettyprint lang-smt3">(@ f a)</code>.
 This syntax is maintained but is now extended to all functions,
-because of identification of maps with functions.
+because of the identification of maps with functions.
 </p>
 
 
@@ -734,7 +735,7 @@ as follows
 
 A solver could use the knowledge of the <em>official</em> restriction above
 for instance to issue a warning when it returns a model that gives value 0 
-to a term that occurs as the second argument of a
+to a term occurring as the second argument of a
 <code class="prettyprint lang-smt3">div</code>
 application in an assertion. 
 Alternatively, it could try to determine statically, 
@@ -744,7 +745,7 @@ issue a warning otherwise.
 </p>
 
 <p>
-Semantic restrictions can be introduced in function declarations and
+Semantic restrictions can be introduced in declarations and
 definitions, and can apply also to the returned value,
 as shown in the following example.
 
@@ -762,7 +763,7 @@ or, equivalently
   )
 </pre>
 
-Both command introduce a function 
+Both commands introduce a function 
 <code class="prettyprint lang-smt3">f</code> 
 that takes two integers as input and returns an integer.
 The semantic restrictions indicate that the function is not arbitrary:
@@ -772,15 +773,15 @@ Note how in the case of
 <code class="prettyprint lang-smt3">declare-fun</code>
 the 
 <code class="prettyprint lang-smt3">:restrict</code>
-attribute is added directly to the declaration of each named input.
-Moreover, the 
+attribute is added directly to the declaration of each named input, 
+making the 
 <code class="prettyprint lang-smt3">:var</code>
 attribute is unnecessary.
 </p>
 
 <p>
-As another example, the actual bit vector type 
-in the Version 3 bit vector theory is defined as follows:
+As another example, the bit vector type 
+in the theory of bit vectors could be defined as follows:
 
 <pre class="prettyprint lang-smt3">
   (declare-type BitVec ((! Int :var m :restrict (>= m 0)))
@@ -950,11 +951,11 @@ because they can introduce (value) dependent types as well.
 
 The syntax of commands is extended with the addition 
 of optional attributes which can inserted in arbitrary order
-after the commands argument.
+after the command's arguments.
 This is most useful for 
 <code class="prettyprint lang-smt3">declare-const</code>
 and similar commands as it allows the incorporation 
-of Version 2 attributes for the theory definition sublanguage,
+of Version 2 attributes from the theory definition sublanguage,
 as well as new ones.
 
 <pre class="prettyprint lang-smt3">
@@ -973,7 +974,7 @@ as well as new ones.
 
 The full list of attributes per command will be provided
 in the reference document.
-More examples are in the sample theory modules below.
+More examples can be found in the sample theory modules below.
 
 <h3>Binders</h3>
 
@@ -1016,13 +1017,13 @@ the existential quantifier;
 </li>
 <li>
 <code class="prettyprint lang-smt3">choose</code>, 
-the choise operator.
+the Hilbert choice operator ε.
 </li>
 </ul>
 They are non-primitive as they can be defined in terms of the primitive ones.
 The
 <code class="prettyprint lang-smt3">match</code> 
-has the same syntax as in Version 2.7 and is defined in terms of
+binder has the same syntax as in Version 2.7 and is defined in terms of
 <code class="prettyprint lang-smt3">let</code>, 
 also as in Version 2.7.
 The
@@ -1031,7 +1032,7 @@ and
 <code class="prettyprint lang-smt3">exists</code> 
 quantifiers have the same syntax as in Version 2, however,
 they are not primitive anymore and are instead defined as higher-order functions.
-The binder syntax is now syntactic sugar for terms based on 
+Their binder syntax is now syntactic sugar for terms based on 
 <code class="prettyprint lang-smt3">lambda</code>.
 For instance, 
 <code class="prettyprint lang-smt3">forall</code>
@@ -1062,7 +1063,7 @@ The
 binder is defined similarly.
 The
 <code class="prettyprint lang-smt3">choose</code>
-binder, for the Hilbert choice operator ε, is new.
+binder is new.
 It too is a second-order function that can be used with a binder syntax.
 The expression
 
@@ -1102,12 +1103,12 @@ where we (illegally) name the type variable α, for emphasis:
 
   (assert (forall ((a α)) (= (f a) a)))
 
-  (define-fun g1 ((a α) (p (→ α Bool))) Bool (h a)) 
-  (define-fun g2 ((a α) (p (→ α Bool))) Bool (h 1)) 
+  (define-fun g1 ((a α) (p (→ α Bool))) Bool (p a)) 
+  (define-fun g2 ((a α) (p (→ α Bool))) Bool (p 6)) ; ill typed
 
   (assert 
     (let ((id (lambda ((x α)) x)))
-      (= 1 (id 1))
+      (= 1 (id 1))                                  ; ill typed
     )
   )
 </pre>
@@ -1117,7 +1118,7 @@ Function
 is polymorphic.
 Its type, in math notation, is ∀α.(α → α).
 So it stands for the family of all functions
-whose type is a monomorphic instance of (α → α)
+whose type is a monomorphic instance of α → α
 (<code class="prettyprint lang-smt3">(→ Bool Bool)</code>,
 <code class="prettyprint lang-smt3">(→ Int Int)</code>, 
 ...).
@@ -1130,16 +1131,15 @@ one for each monomorphic instance of (α → α).
 Function
 <code class="prettyprint lang-smt3">g1</code> 
 is also polymorphic, with type ∀α.(α → (α → Bool) → Bool).
-However, its input predicate
+However, note that its input predicate
 <code class="prettyprint lang-smt3">p</code> 
-is not polymorphic.
-For each monomorphic instance of 
+is not polymorphic: for each monomorphic instance of 
 <code class="prettyprint lang-smt3">g1</code> 
 of type (τ → (τ → Bool) → Bool),
 the input function 
-<code class="prettyprint lang-smt3">h</code> 
+<code class="prettyprint lang-smt3">p</code> 
 is of type τ → Bool, not ∀α.(α → Bool).
-This means, that function
+This means that function
 <code class="prettyprint lang-smt3">g2</code>
 has in fact an ill-typed body 
 since its instance of type (String → (String → Bool) → Bool),
@@ -1147,7 +1147,7 @@ say, applies its input function to a value whose type is not String.
 </p>
 
 <p>
-The last assert is ill-typed in a similar way, 
+The argument of the last assert is ill-typed in a similar way, 
 since the variable 
 <code class="prettyprint lang-smt3">id</code>
 has type α → α, not ∀α.(α → α).
@@ -1173,7 +1173,7 @@ A constant has more than one principal type in a script if and only if
 it is overloaded.
 
 As in previous versions, Version 3 enforces a type discipline 
-that allows simple bottom-up typing.
+that allows simple bottom-up typing, with no need for type inference.
 If a constant <i>f</i> is overloaded, the type of each occurrence 
 of <i>f</i> in a term is determined as follows:
 
@@ -1200,7 +1200,7 @@ where τ is the intended type of that occurrence, that is,
 an instance of a principal type of <i>f</i>. 
 Specifically, the <i>f</i> selected by 
 <code class="prettyprint lang-smt3">(as <i>f</i> τ)</code>
-is be the most recently declared <i>f</i> whose type has τ as an instance.
+is the most recently declared <i>f</i> whose type has τ as an instance.
 
 <pre class="prettyprint lang-smt3">
   (declare-type-var X)
@@ -1243,17 +1243,7 @@ the use of
 is necessary to pass a different variant.
 </p>
 
-<p>Note that 
-<code class="prettyprint lang-smt3">as</code> 
-stands now for the standard ascription operator.
-This is different with the use of 
-<code class="prettyprint lang-smt3">as</code>
-in Version 2, which provides only the return type of the function.
-This one of the very few cases that breaks backward-compatibility.
-</p>
-
-<p>
-In extensions of the script above with later commands,
+<p>In extensions of the script above with later commands,
 <code class="prettyprint lang-smt3">f</code>
 cannot be reintroduced with type
 <code class="prettyprint lang-smt3">(→ Int Real Int)</code>,
@@ -1264,11 +1254,18 @@ or
 for any type τ, since such types would all be instances of a type
 already assigned to 
 <code class="prettyprint lang-smt3">f</code>.
+</p>
 
+<p>Note that 
+<code class="prettyprint lang-smt3">as</code> 
+is now the standard ascription operator (:).
+It is replaces the 
+<code class="prettyprint lang-smt3">as</code>
+from Version 2, which provides only the return type of the function.
 The different use of
 <code class="prettyprint lang-smt3">as</code> 
 in SMT-LIB 3 versus Version 2 represents one of the few changes 
-that are not backward compatible with Version 2.7.
+that break backward compatibility with Version 2.7.
 However, this is not a serious concern since
 <code class="prettyprint lang-smt3">as</code>
 has been used mostly for 0-arity constants (like the 
@@ -1322,7 +1319,7 @@ and all the commands that introduce new types and constants.
 </p>
 
 <p>
-The scope, that is, the visibility, of symbols introduced in a module 
+The scope (that is, the visibility), of symbols introduced in a module 
 is limited to the module. 
 Such symbols can be accessed outside the module only if they are exported 
 by the module’s interface and only with a qualified name of the form 
@@ -1334,9 +1331,14 @@ by the module’s interface and only with a qualified name of the form
 <h4>Module Interfaces</h4>
 
 <p>
-By default, all the symbols (i.e., constants and type constants) declared and defined in a module <em>M</em> are <em>public</em>, i.e., visible by modules importing <em>M</em>.
-Optionally, however, it is possible to specify explicitly an <em>interface</em> for the module, which selects the symbols that are <em>exported</em>, that is, made visible. 
-Interfaces are used to construct modules that correspond to logics in the sense of SMT-LIB 2.
+By default, all the symbols (i.e., constants and type constants) declared or
+defined in a module <em>M</em> are <em>public</em>, i.e., visible by modules
+importing <em>M</em>.
+Optionally, however, it is possible to specify explicitly 
+an <em>interface</em> for the module, which selects the symbols 
+that are <em>exported</em>, that is, made visible. 
+Interfaces are used to construct modules that correspond to logics 
+in the sense of SMT-LIB 2.
 
 The interface is specified with two attributes in a module definition:  
 <ul>
@@ -1392,7 +1394,7 @@ and the list of kinds/types of its inputs
 (as in the case of
 <code class="prettyprint lang-smt3">Pair</code>).
 
-Note that the types of the exported constants must be constructible 
+Note that the types of the exported value constants must be constructible 
 from the exported type variables and type constants for the interface 
 to be well formed.
 However, these types can be restricted to be instances
@@ -1412,7 +1414,7 @@ is valid not just in the module
 above but also in any module that imports 
 <code class="prettyprint lang-smt3">M</code>.
 Concretely, this means that importing a module has always the effect 
-of declaring and asserting <em>everything</em> in the module. 
+of executing <em>every</em> command in the module. 
 The only effect of the interface is to prohibit in the importing module 
 any direct reference to non-exported symbols.
 </p>
@@ -1870,7 +1872,7 @@ The same rule on overloading apply as for modules.
 </p>
 -->
 
-<h5>Testers and recursors</h5>
+<h5>Testers</h5>
 
 <p>
 Every inductive type definition induces an implicit definition 
@@ -1899,12 +1901,14 @@ The indexed-name form is still allowed as syntactic sugar
 for backward compatibility but is deprecated.
 </p>
 
+<h5>Recursors</h5>
+
 <p>
 Recursors are a new feature in SMT-LIB 3.
 Using again as an example the 
 <code class="prettyprint lang-smt3">List</code>
 datatype introduced above,
-its definition also defines automatically
+its definition also automatically defines
 the recursor 
 <code class="prettyprint lang-smt3">reduce</code>
 of type 
@@ -1971,7 +1975,7 @@ is that a wealth of functions over a recursive datatype can be defined,
 non-recursively, by the user in terms of 
 <code class="prettyprint lang-smt3">reduce</code>.
 This in principle should facilitate reasoning about functions 
-over datatypes as the solver can concentrate on reasoning about 
+over datatypes since the solver can concentrate on reasoning about 
 <code class="prettyprint lang-smt3">reduce</code>.
 
 For the 
@@ -2438,7 +2442,7 @@ the semantics of the old ones in any meaningful way.
   ;  - all terms of the form (- n) where n is a numeral other than 0.
   (define-syntax 
     ; non-terminals
-    (<.int_value.> <.pos_numeral.>.>) 
+    (<.int_value.> <.pos_numeral.>) 
     ; production rules
     ((<.int_value.> (<.numeral.> ("(" "-" <.pos_numeral.> ")")))
      (<.pos_numeral.> ((! <.numeral.> :syntax "numeral other than 0")))))
