@@ -65,12 +65,12 @@
 
   - ** as the exponentiation function if the second argument is non-negative.
     That is (** m n) is m to the power of n.  In particular, (= (** 0 0) 1) holds.
-    If n is strictly smaller than 0, then ** is defined so as to satisfy the formula
+    If n is strictly smaller than 0 then (= (** 0 n) 0). For any m different than 0,
+    ** is defined so as to satisfy the formula
 
     (= (** m n) (div 1 (** m (- n))))
 
-    So the following holds for all integers n < 0:
-    - (= (** 0 n) (div 1 0))
+    So the following holds for all integers n < 0 and m != 0:
     - (= (** m n) (** m (- n))) if (= (abs m) 1)
     - (= (** m n) 0)            if (> (abs m) 1)
 
