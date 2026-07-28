@@ -152,6 +152,7 @@
   ; Bridging functions
   ;--------------------
 
+  ; to_int_aux  
   (define-fun-rec to_int_aux ((m Pos! :implicit) 
                               (v (BitVec m)) (i (Range! 0 m))) 
                              (Range! 0 (exp2 (+1 i)))
@@ -190,7 +191,7 @@
   ; Sequence operators
   ;--------------------
 
-  ; concat
+  ; concat 
   (define-fun concat ((m2 Pos! :implicit) (m1 Pos! :implicit) 
                       (v2 (BitVec m2)) (v1 (BitVec m1)))
                      (BitVec (+ m1 m2))
@@ -302,12 +303,13 @@
   ;----------------------
 
   ; bvneg
-  (define-fun bvneg ((m Pos! :implicit) (v (BitVec m))) (BitVec m)
+  (define-fun bvneg ((m Pos! :implicit) (v (BitVec m))) 
+                    (BitVec m)
     (to_bv m (- (exp2 m) (to_int bv)))
-   :note
-   "For all v of type BitVec(m),
+  :note
+  "For all v of type BitVec(m),
     bvneg s := to_bv(m, 2ᵐ - to_int(m, bv))
-   ")
+  ")
 
 ;;;----------------------------
 ;;; To be revised from here on

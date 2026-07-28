@@ -1,4 +1,6 @@
 
+
+
 (define-module Arrays (
   (set-info :smt-lib-version 3.0)
   (set-info :smt-lib-release "2020-XX-XX")
@@ -14,37 +16,85 @@
   (import (Core))
   (open Core)
 
-  (declare-type Array (Type Type))
+  (declare-type-var I)
+  (declare-type-var E)
 
-  (declare-const make_const_array
-    (-> (! Type :var I) ; this type must be provided explicitly
-        (! Type :var E :implicit) 
-        E (Array I E)))
+  ; Arrays are defined internally as functions
+  (define-type Array ((I Type) (E Type)) (-> I E)
+   :opaque
+   :note 
+   "Type being opaque means that its definition is not exported.")
 
-  (declare-const select
-    (-> (! Type :var I :implicit) 
-        (! Type :var E :implicit) 
-        (Array I E) I E))
 
-  (declare-const store
-    (-> (! Type :var I :implicit) 
-        (! Type :var E :implicit)
-        (Array I E) I E (Array I E)))
+  (define-fun make_const_array ((e E)) (Array I E)
+    (lambda ((i I)) e) 
+   :note
+   "This constant is ambiguous (in the index type) and can only be applied
+    with `as`. E.g., ((as make_array (Array Int Real) 4.0))"
+  )
 
-  ; Axiomatization
-  ; make_const_array
-  (assert (forall ((I Type) (E Type) (i I) (e E))
-	    (= (select (make_const_array I e) i) e)))
+  (declare-const is_almost_const 
+    (-> (Array I E) Bool))
 
+  (define-fun select ((a (Array I E)) (i I)) E
+    (a i)
+  )
+
+  (define-fun store ((a (Array I E)) (i I) (e E)) 
+                    (Array I E)
+    (lambda ((j I))
+      (ite (= j i) e (a j)))) 
+
+  ;---------------------------
+  ; make_array axiomatization
+  ;---------------------------
+
+  (declare-type-var X)
+
+  (define-fun stronger ((p1 (-> X Bool)) (p2 (-> X Bool))) Bool
+    (forall ((x X)) (=> (p1 x) (p2 x)))
+   :private)
+  
+  ; all constant arrays satisfies p
+  (define-fun property1 ((p (-> (Array I E) Bool)))
+    (forall ((e E))
+      (let ((a (as (make_const_array e) (Array I E))))
+        (p a)))
+   :private)
+
+  ; all updates of arrays that satisfy p also satisfy p
+  (define-fun property2 ((p (-> (Array I E) Bool)))
+    (forall ((a (Array I E)) (i I) (e E))
+      (=> (p a) (p (store i e a))))
+   :private)
+
+  ; constant arrays are almost constant
+  (assert (property1 is_almost_const))
+
+  ; updates of almost constant arrays are almost constant
+  (assert (property2 is_almost_const))
+
+  ; is_almost_const is the strongest predicate 
+  ; with property 1 and 2 (minimality)
+  (assert (forall (p (-> (Array I E) Bool))
+    (=> (and (axiom1 p) (axiom2 p))
+      (stronger is_almost_const p)))
+  )
+
+  ; Theorems
+
+  ; make_array
+  (check-valid (forall ((i I) (e E))
+	    (= (select (make_array I e) i) e)))
   ; select
-  (assert (forall ((I Type) (E Type) (a (Array I E)) (i I) (e E))
+  (check-valid (forall ((I Type) (E Type) (a (Array I E)) (i I) (e E))
 	    (= (select (store a i e) i) e)))
 
   ; store
-  (assert (forall ((I Type) (E Type) (a (Array I E)) (i I) (j I) (e E))
+  (check-valid (forall ((I Type) (E Type) (a (Array I E)) (i I) (j I) (e E))
 	    (=> (distinct i j) (= (select (store a i e) j) (select a j)))))
 			
-  (assert (forall ((I Type) (E Type) (a (Array I E)) (b (Array I E)))
+  (check-valid (forall ((I Type) (E Type) (a (Array I E)) (b (Array I E)))
 	    (=> (forall ((i I)) (= (select a i) (select b i))) (= a b))))
 
   ;--------------
