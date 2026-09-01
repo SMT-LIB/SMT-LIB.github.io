@@ -128,7 +128,7 @@ Released for free under a Creative Commons Attribution 3.0 License
     - (= (** m n) 0)            if (> (abs m) 1)
 
     In other words, since we follow the convention (= (** 0 0) 1),
-    (** m n) if m to the power of n, whenever it is an integer.
+    (** m n) is m to the power of n, whenever it is an integer.
     Otherwise it is 0.
 
   - the other function symbols of Ints as expected.
