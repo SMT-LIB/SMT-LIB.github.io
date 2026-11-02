@@ -50,11 +50,46 @@ Released for free under a Creative Commons Attribution 3.0 License
     <div class="content_resize">
      <div class="mainbar">
       <h2>Logics</h2>
-      <p>SMT-LIB 2 scripts, which includes all the benchmarks available from the <a href="benchmarks.shtml">Benchmarks</a> section, refer to one of the following sub-logics of the main SMT-LIB logic.
+      <p>SMT-LIB 2 scripts, which include all the benchmarks available from the <a href="benchmarks.shtml">Benchmarks</a> section, refer to one sub-logic of the main SMT-LIB logic.
        The reason to have a (sub-)logic is pragmatic: to identify fragment of the main logic where it may possible to apply specialized and more efficient satisfiability techniques.
        New logics are added to the standard opportunistically, once enough benchmarks are available for it.
       </p>
-      <p>Here is an overview of the logics listed below, ordered by inclusion. A link from a logic L1 to a logic L2 means that every formula of L1 is also a formula of L2. Click on the node to go to its description. Then, click on the logic's name to see its specification in SMT-LIB format.
+      <p>Each logic is named using letter groups that evoke the theories used by the logics and some major restriction in their language, with the following conventions:
+       <ul>
+        <li><b>QF_</b> (used as a prefix) for the restriction to quantifier free formulas
+        </li>
+        <li><b>HO_</b> (used as a prefix) for higher-order logic formulas as described in the HO-core base theory file.  Without this prefix, formulas are restricted to first-order logic
+        </li>
+        <li><b>A</b> or <b>AX</b> for the theory <a href="theories-ArraysEx.shtml">ArraysEx</a>
+        </li>
+        <li><b>UF</b> for the extension allowing free sort and function symbols
+        </li>
+        <li><b>BV</b> for the theory <a href="theories-FixedSizeBitVectors.shtml">FixedSizeBitVectors</a>
+        </li>
+        <li><b>FP</b> (forthcoming) for the theory <a href="theories-FloatingPoint.shtml">FloatingPoint</a>
+        </li>
+        <li><b>IA</b> for the theory <a href="theories-Ints.shtml">Ints</a> (Integer Arithmetic)
+        <li><b>RA</b> for the theory <a href="theories-Reals.shtml">Reals</a> (Real Arithmetic)
+        <li><b>IRA</b> for the theory <a href="theories-Reals_Ints.shtml">Reals_Ints</a> (mixed Integer Real Arithmetic)
+        </li>
+        </li>
+        <li><b>L</b> before <b>IA</b>, <b>RA</b>, or <b>IRA</b> for the linear fragment of those arithmetics
+        </li>
+        <li><b>N</b> before <b>IA</b>, <b>RA</b>, or <b>IRA</b> for the non-linear fragment of those arithmetics
+        </li>
+        <li><b>IDL</b> for Integer Difference Logic
+        </li>
+        <li><b>RDL</b> for Rational Difference Logic
+       </ul>
+       A logic name must be a concatenation of one or several letter groups above, in an order corresponding to the above list.  The reason for this, admittedly idiosyncratic, nomenclature is mostly historical.
+	
+       Also historical is the fact that some logics impose further restrictions on the language. For instance, in the *A*LIA logics the only array sort allowed is <code>(Array Int Int)</code>, whereas in some A*IRA logics the only array sort allowed are <code>(Array Int Real)</code> and <code>(Array Int (Array Int Real))</code>.
+       This is why, for instance, QF_AX is not a sublogic of QF_AUFLIA or QF_ABV.
+       Finally, benchmarks are typically classified by the smallest logic they belong to.
+       One consequence of this is that we do not have
+       a logic such as RA here, for instance, since an RA benchmark belongs to either LRA or NRA.
+      </p>
+      <p>Here is an overview of some logics listed below, ordered by inclusion. A link from a logic L1 to a logic L2 means that every formula of L1 is also a formula of L2. Click on the node to go to its description. Then, click on the logic's name to see its specification in SMT-LIB format.
        <center>
         <img border=0 src="Logics/logics.png" usemap="#logicsDag" />
         
@@ -87,41 +122,10 @@ Released for free under a Creative Commons Attribution 3.0 License
 
 
        </center>
-       The logics have been named using letter groups that evoke the theories used by the logics and some major restriction in their language, with the following conventions:
-       <ul>
-        <li><b>QF</b> for the restriction to quantifier free formulas
-        </li>
-        <li><b>A</b> or <b>AX</b> for the theory <a href="theories-ArraysEx.shtml">ArraysEx</a>
-        </li>
-        <li><b>BV</b> for the theory <a href="theories-FixedSizeBitVectors.shtml">FixedSizeBitVectors</a>
-        </li>
-        <li><b>FP</b> (forthcoming) for the theory <a href="theories-FloatingPoint.shtml">FloatingPoint</a>
-        </li>
-        <li><b>IA</b> for the theory <a href="theories-Ints.shtml">Ints</a> (Integer Arithmetic)
-        <li><b>RA</b> for the theory <a href="theories-Reals.shtml">Reals</a> (Real Arithmetic)
-        <li><b>IRA</b> for the theory <a href="theories-Reals_Ints.shtml">Reals_Ints</a> (mixed Integer Real Arithmetic)
-        </li>
-        <li><b>IDL</b> for Integer Difference Logic
-        </li>
-        <li><b>RDL</b> for Rational Difference Logic
-        </li>
-        <li><b>L</b> before <b>IA</b>, <b>RA</b>, or <b>IRA</b> for the linear fragment of those arithmetics
-        </li>
-        <li><b>N</b> before <b>IA</b>, <b>RA</b>, or <b>IRA</b> for the non-linear fragment of those arithmetics
-        </li>
-        <li><b>UF</b> for the extension allowing free sort and function symbols
-        </li>
-       </ul>
-       The reason for this, admittedly idiosyncratic, nomenclature is mostly historical.
-       Also historical is the fact that some logics impose further restrictions on the language. For instance, in the *A*LIA logics the only array sort allowed is <code>(Array Int Int)</code>, whereas in some A*IRA logics the only array sort allowed are <code>(Array Int Real)</code> and <code>(Array Int (Array Int Real))</code>.
-       This is why, for instance, QF_AX is not a sublogic of QF_AUFLIA or QF_ABV.
-       Finally, benchmarks are typically classified by the smallest logic they belong to.
-       One consequence of this is that we do not have
-       a logic such as RA here, for instance, since an RA benchmark belongs to either LRA or NRA.
       </p>
       <h3>Logic Descriptions</h3>
       <p>Click on the logic's name for a full description.</p>
-      <p><strong>Note:</strong>The listing below is currently incomplete. More will be added later.
+      <p><strong>Note:</strong>The listing below is incomplete.  Logics appearing in SMT-LIB benchmarks that are not explicitly in the list below are understood as having no particular restriction, besides the ones described by their name.
       </p>
       <p class="footnote">[Logic declarations for Version 1.2 of SMT-LIB, superseded by the ones below, are still available <a href="version1/logics.html">here</a> but their use is deprecated.]
       </p>
